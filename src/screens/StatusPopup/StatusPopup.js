@@ -15,6 +15,8 @@ const StatusPopup = ({
   title,
   message,
   onClose,
+  onCancel,
+  showCancel = false,
 }) => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -54,18 +56,27 @@ const StatusPopup = ({
             },
           ]}
         >
+          <View  style={styles.close}>
           <Icon
             name={iconConfig[type].name}
             size={60}
             color={iconConfig[type].color}
           />
-
+          {showCancel && (
+            <TouchableOpacity
+              onPress={onCancel}
+            >
+               <Text style={styles.closeBtn}>✖</Text>
+            </TouchableOpacity>
+          )}
+          </View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
-
+          
           <TouchableOpacity style={styles.button} onPress={onClose}>
             <Text style={styles.buttonText}>OK</Text>
           </TouchableOpacity>
+          
         </Animated.View>
       </View>
     </Modal>
@@ -98,6 +109,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     marginVertical: 10,
+  },
+  close:{
+    display:"flex",
+    flexDirection:"row",
+    justifyContent:"center"
+  },
+  closeBtn: {
+    color: "#FF4444",
+    fontSize: 18,
+    fontWeight: "bold",
+    right:-80,
+    marginTop:-10
   },
   button: {
     marginTop: 15,

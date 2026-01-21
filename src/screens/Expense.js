@@ -454,7 +454,7 @@ const Expense = () => {
             <LinearGradient
               colors={["#00213F", "#002C56"]}
               style={styles.modalContainer}
-            >
+            ><ScrollView style={styles.formContainer}>
               <View style={styles.modalHeader}>
                 <Text style={[GlobalFont.semiBold,styles.modalTitle]}>Enter the following details</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -542,6 +542,7 @@ const Expense = () => {
                   <Text style={[GlobalFont.CustomFont,styles.submitText]}>Submit</Text>
                 </TouchableOpacity>
               </View>
+              </ScrollView>
             </LinearGradient>
           </View>
         </Modal>

@@ -623,13 +623,13 @@ export default function LeaveManagementScreen() {
           </Modal>
 
         </View>
-
+                    
         <Text style={[GlobalFont.bold,styles.sectionTitle]}>Leave Status</Text>
 
         {loading && (
           <View style={styles.loaderOverlay}>
             <ActivityIndicator size="large" color="#fff" />
-            <Text style={[GlobalFont.CustomFont,{ color: "white", marginTop: 5 ,margin:"auto"}]}>Loading...</Text>
+            <Text style={[GlobalFont.CustomFont,{ color: "white", marginTop: 5 ,margin:"auto" }]}>Loading...</Text>
           </View>
         )}
         {!loading && statusData?.length === 0 && (
@@ -890,7 +890,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   centerBox: {
-    paddingVertical: 15,
+    paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
     color: "#ccc",
     fontSize: 15,
     margin: "auto",
-    marginBottom: 60
+    // marginBottom: 60
   },
 
   upcomingCard_status: {
@@ -1250,15 +1250,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  customSelect: {
-    borderWidth: 1,
-    borderColor: "#1f3b57",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginTop: 6,
-    backgroundColor: "#0B2A44",
-  },
+  // customSelect: {
+  //   borderWidth: 1,
+  //   borderColor: "#1f3b57",
+  //   borderRadius: 8,
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 14,
+  //   marginTop: 6,
+  //   backgroundColor: "#0B2A44",
+  // },
 
   card: {
     backgroundColor: "#0E2A3B",
@@ -1303,7 +1303,7 @@ const styles = StyleSheet.create({
     width: 90,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -60
+    marginTop: -105
   },
 
   circleText: {
@@ -1353,9 +1353,11 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   barchart: {
+    
     marginTop: -40,
     marginLeft: -10,
     // margin: -20,
+    height:170,
     paddingVertical: -20
   },
   leaveList: {

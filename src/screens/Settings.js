@@ -251,6 +251,8 @@ const Settings = ({ navigation }) => {
         title="Logout"
         message="Do you want to logout?"
         onClose={confirmLogout}
+        showCancel={true}
+        onCancel={() => setShowLogoutPopup(false)}
       />
       <BottomNavigation />
       {/* </View> */}
@@ -509,6 +511,7 @@ nameText: {
     padding: 12 * scale,
     borderRadius: 15,
     marginBottom: 12 * scale,
+    textAlign:"center",
     height: 158
   },
   card: {
