@@ -38,7 +38,7 @@ const Dashboard = () => {
   const loadToken = async () => {
     const t = await AsyncStorage.getItem("authToken");
     setToken(t);
-    console.log("TOKEN LOADED:", t);
+    // console.log("TOKEN LOADED:", t);
   };
 
   const fetchemployeedata = async () => {
@@ -65,7 +65,7 @@ const Dashboard = () => {
       // }
       if (res.data?.status === "success") {
         const employeeData = res.data.employee_data;
-        // console.log("employeeData",employeeData,"API_BASE_URL",API_BASE_URL);
+        console.log("API_BASE_URL",API_BASE_URL);
         // console.log("employeeData",employeeData[0].employee_details.employee_id,"API_BASE_URL",API_BASE_URL);
         await AsyncStorage.setItem("employee_id", employeeData[0].employee_details.employee_id);
         await AsyncStorage.setItem("employee_mongose_id", employeeData[0]._id);
@@ -78,18 +78,19 @@ const Dashboard = () => {
             JSON.stringify(bankDetails)
           );
         }
-        console.log("employeeData", employeeData, "API_BASE_URL", API_BASE_URL);
-        console.log("bankDetails", bankDetails);
+        // console.log("employeeData", employeeData, "API_BASE_URL", API_BASE_URL);
+        // console.log("bankDetails", bankDetails);
 
         setEmpData(employeeData);
 
         const profilePic = employeeData?.[0]?.profile_pic;
-        console.log("profilePic",profilePic);
+        // console.log("profilePic",profilePic);
         
         saveImageUrl(profilePic);
         const attendencePic = employeeData?.[0]?.attendence_pic;
         saveAttendenceImageUrl(attendencePic);
-
+        console.log("employeeData",employeeData);
+        
         const rightsData = employeeData?.[0]?.employee_details?.employment_hr_details?.emp_role_data?.rights;
         console.log("rightsData", rightsData);
 
@@ -97,7 +98,7 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      console.log("Advance list error:", error);
+      // console.log("Advance list error:", error);
     }
   };
 
@@ -132,7 +133,7 @@ const Dashboard = () => {
         attendance_year: String(now.getFullYear()),
         register_type: empData?.[0].employee_details?.template_data?.attendance_temp_data?.register_type,
       };
-      console.log("payload1234", payload);
+      // console.log("payload1234", payload);
 
       const res = await axios.post(`${API_BASE_URL}employee/employee-get-attendance-mobile`,
         payload,
@@ -143,7 +144,7 @@ const Dashboard = () => {
           },
         });
       if (res.data?.status === "success") {
-        console.log("res.data", res.data);
+        // console.log("res.data", res.data);
 
         setPresent(res.data?.attendance_summary.present)
         setAbsent(res.data?.attendance_summary.leave)
@@ -152,7 +153,7 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      console.log("Advance list error:", error);
+      // console.log("Advance list error:", error);
     }
   };
 
@@ -178,7 +179,7 @@ const Dashboard = () => {
       try {
         const userData = JSON.parse(await AsyncStorage.getItem("userData"));
         setUserData(userData);
-        console.log(userData, "userData1234", API_BASE_URL);
+        // console.log(userData, "userData1234", API_BASE_URL);
       } catch (error) {
         console.log("Error loading userData:", error);
       }

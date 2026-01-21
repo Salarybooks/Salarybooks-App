@@ -28,7 +28,7 @@ const Advance = ({ rights }) => {
     // console.log("rights22", rights);
 
     // if (!rights) return null;
-    const canApplyAttendance = rights?.apply?.includes("attendance");
+    const canApplyAttendance = rights?.apply?.includes("Attendance");
     const canApplyleave = rights?.apply?.includes("leave");
     const canApplyadvance = rights?.apply?.includes("advance");
     const canApplyreimburdement = rights?.apply?.includes("reimburdement");
@@ -50,13 +50,13 @@ const Advance = ({ rights }) => {
     const handlePress = (item) => {
 
         if (item === "Attendance Management") {
-            // if (!canApplyAttendance) {
-            //     Alert.alert(
-            //         "Permission Denied",
-            //         "you don't have This functionality"
-            //     );
-            //     return;
-            // }
+            if (!canApplyAttendance) {
+                Alert.alert(
+                    "Permission Denied",
+                    "you don't have This functionality"
+                );
+                return;
+            }
             // navigation.navigate("AttendanceScreen", { title: "Attendance" });
             navigation.navigate("Blank", { title: "Attendance" });
         }
@@ -206,7 +206,6 @@ const Advance = ({ rights }) => {
 
             </LinearGradient>
 
-            {/* Buttons Grid */}
             <LinearGradient
                 colors={["#122441ff", "#143f70ff"]}
                 start={{ x: 0, y: 0 }}
