@@ -59,7 +59,7 @@ export default function InstallmentHistoryScreen({ route }) {
           {/* EMI Box */}
           <View style={styles.emiBox}>
             <Text style={styles.emiText}>
-              EMI : ₹{data.advance_amount / data.no_of_instalments} / month
+              EMI : ₹{(data.advance_amount / data.no_of_instalments).toFixed(2)} / month
             </Text>
           </View>
 

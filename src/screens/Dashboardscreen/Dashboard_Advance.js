@@ -14,6 +14,7 @@ import { useCallback } from "react";
 import { API_BASE_URL } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import StatusPopup from "../StatusPopup/StatusPopup";
 const { width } = Dimensions.get("window");
 
 const Advance = ({ rights }) => {
@@ -24,12 +25,14 @@ const Advance = ({ rights }) => {
     const [totalOutstanding, setTotalOutstanding] = useState(0);
     const [percentage, setPercentage] = useState(0);
     const [progress, setProgress] = useState(0);
-
+    const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
     // console.log("rights22", rights);
 
     // if (!rights) return null;
     const canApplyAttendance = rights?.apply?.includes("Attendance");
     const canApplyleave = rights?.apply?.includes("leave");
+    const canApplyvault = rights?.apply?.includes("Documents Vault");
+    const canApplypayslip = rights?.apply?.includes("Payslip");
     const canApplyadvance = rights?.apply?.includes("advance");
     const canApplyreimburdement = rights?.apply?.includes("reimburdement");
     console.log("canApplyAttendance", canApplyAttendance);
@@ -47,51 +50,74 @@ const Advance = ({ rights }) => {
         }
     }, [token]);
 
+
+    const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+
     const handlePress = (item) => {
 
         if (item === "Attendance Management") {
             if (!canApplyAttendance) {
-                Alert.alert(
-                    "Permission Denied",
-                    "you don't have This functionality"
-                );
+                showPopup("error", "Permission Denied", "you don't have This functionality");
+                // Alert.alert(
+                //     "Permission Denied",
+                //     "you don't have This functionality"
+                // );
                 return;
             }
             // navigation.navigate("AttendanceScreen", { title: "Attendance" });
             navigation.navigate("Blank", { title: "Attendance" });
         }
         else if (item === "Payslips") {
+            if(!canApplypayslip){
+                showPopup("error", "Permission Denied", "you don't have This functionality");
+                return;
+            }
             navigation.navigate("Payslips", { title: item });
         }
         else if (item === "Expense Management") {
             if (!canApplyreimburdement) {
-                Alert.alert(
-                    "Permission Denied",
-                    "you don't have This functionality"
-                );
+                 showPopup("error", "Permission Denied", "you don't have This functionality");
+                // Alert.alert(
+                //     "Permission Denied",
+                //     "you don't have This functionality"
+                // );
                 return;
             }
             navigation.navigate("Expense", { title: item });
         }
         else if (item === "Advance Management") {
             if (!canApplyadvance) {
-                Alert.alert(
-                    "Permission Denied",
-                    "you don't have This functionality"
-                );
+                 showPopup("error", "Permission Denied", "you don't have This functionality");
+                // Alert.alert(
+                //     "Permission Denied",
+                //     "you don't have This functionality"
+                // );
                 return;
             }
             navigation.navigate("Advance", { title: item });
         }
         else if (item === "Document Vault") {
+            if(!canApplyvault){
+                showPopup("error", "Permission Denied", "you don't have This functionality");
+                return;
+            }
             navigation.navigate("document_vault", { title: item });
         }
         else if (item === "Leave Management") {
             if (!canApplyleave) {
-                Alert.alert(
-                    "Permission Denied",
-                    "you don't have This functionality"
-                );
+                 showPopup("error", "Permission Denied", "you don't have This functionality");
+                // Alert.alert(
+                //     "Permission Denied",
+                //     "you don't have This functionality"
+                // );
                 return;
             }
             navigation.navigate("Leave_Management", { title: item });
@@ -147,8 +173,8 @@ const Advance = ({ rights }) => {
 
                 await AsyncStorage.setItem("percentage", JSON.stringify(percent));
                 await AsyncStorage.setItem("progress", JSON.stringify(prog));
-                console.log("res.data.advance_data.docs1", JSON.stringify(percent));
-                console.log("res.data.advance_data.docs1", JSON.stringify(prog));
+                // console.log("res.data.advance_data.docs1", JSON.stringify(percent));
+                // console.log("res.data.advance_data.docs1", JSON.stringify(prog));
 
             }
         } catch (error) {
@@ -221,6 +247,15 @@ const Advance = ({ rights }) => {
                         )
                     )}
                 </View>
+                <StatusPopup
+                    visible={popupConfig.visible}
+                    type={popupConfig.type}
+                    title={popupConfig.title}
+                    message={popupConfig.message}
+                    onClose={() =>
+                        setPopupConfig(prev => ({ ...prev, visible: false }))
+                    }
+                />
             </LinearGradient>
         </View>
     );

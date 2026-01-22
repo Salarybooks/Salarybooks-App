@@ -242,10 +242,22 @@ const AdvanceManagement =() => {
       // Alert.alert("Error", "Failed to submit advance request");
     }
   };
+  const isFutureDate = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const targetDate = new Date(date);
+  targetDate.setHours(0, 0, 0, 0);
+
+  return targetDate > today;
+};
 
 
   const route = useRoute();
   const screenTitle = route.params?.title;
+  const upcomingList = advanceList.filter(item =>
+  isFutureDate(item.created_at)
+);
 
   return (
     <LinearGradient
@@ -263,7 +275,7 @@ const AdvanceManagement =() => {
             />
           <Navbar title={screenTitle} />
         </View>
-        <View style={styles.dropdownRow}>
+        {/* <View style={styles.dropdownRow}>
           <TouchableOpacity style={styles.dropdown}>
             <Text style={styles.dropdownText}>September</Text>
             <Icon name="chevron-down" color="#fff" />
@@ -272,7 +284,7 @@ const AdvanceManagement =() => {
             <Text style={styles.dropdownText}>2025</Text>
             <Icon name="chevron-down" color="#fff" />
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         <View style={styles.overviewHeader}>
           <Text style={styles.sectionTitle}>Advance Overview</Text>
@@ -467,7 +479,7 @@ const AdvanceManagement =() => {
 
           <Text style={[GlobalFont.CustomFont,styles.emiText]}>
             EMI: ₹
-            {currentAdvance ? (currentAdvance.advance_amount / currentAdvance.no_of_instalments).toFixed(0) : 0}
+            {currentAdvance ? (currentAdvance.advance_amount / currentAdvance.no_of_instalments).toFixed(2) : "0.00"}
             / month
           </Text>
 
@@ -476,12 +488,36 @@ const AdvanceManagement =() => {
 
         <View style={styles.section1}>
           <Text style={styles.sectionTitle1}>Upcoming Deduction</Text>
-          <View style={styles.card}>
-          <View style={styles.card_inner}>
-            <Text style={[GlobalFont.CustomFont,styles.cardDate]}>Oct 01</Text>
-            <Text style={[GlobalFont.CustomFont,styles.cardAmount1]}>₹2000 due</Text>
-          </View>
-          </View>
+            {upcomingList.length === 0 && (
+                <Text style={styles.noDataText}>No data found</Text>
+              )}
+          {upcomingList.map((item) => (
+            <TouchableOpacity
+              key={item._id}
+              onPress={() => navigation.navigate("AdvanceInstallmentScreen", { data: item })}
+              style={styles.card}
+            >
+             
+              <View style={styles.card_inner}>
+              <Text style={[GlobalFont.CustomFont,styles.cardDate]}>
+                {new Date(item.created_at).toDateString().slice(4, 10)}
+              </Text>
+              
+              <View style={styles.cardRight}>
+                <Text style={[GlobalFont.CustomFont,styles.cardAmount]}>₹{item.advance_amount}</Text>
+                <Text
+                  style={[GlobalFont.CustomFont,
+                    styles.status,
+                    { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
+                  ]}
+                >
+                  {item.status}
+                </Text>
+              </View>
+              </View>
+           
+            </TouchableOpacity>
+          ))}
         </View>
 
 
@@ -711,6 +747,13 @@ const styles = StyleSheet.create({
     fontFamily:"Outfit-SemiBold",
     marginBottom: 10,
   },
+  noDataText: {
+  color: "#9CA3AF",
+  textAlign: "center",
+  marginTop: 10,
+  fontSize: 14,
+  },
+
   card: {
     backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 10,
