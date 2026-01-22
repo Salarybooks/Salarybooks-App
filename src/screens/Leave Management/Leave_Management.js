@@ -9,7 +9,7 @@ import {
   Modal,
   Image,
   Alert,
-    Dimensions,
+  Dimensions,
   ActivityIndicator,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
@@ -48,7 +48,20 @@ export default function LeaveManagementScreen() {
   const [Leavedata, setLeavedata] = useState(null);
   const [employee_id, setemployee_id] = useState(null);
   const [loading, setloading] = useState(false);
-  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
+
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const currentDate = new Date();
+
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
 
 
   // useEffect(() => {
@@ -150,7 +163,7 @@ export default function LeaveManagementScreen() {
 
 
     if (!token) return;
-    console.log(API_BASE_URL, "API_BASE_URL");
+    console.log(API_BASE_URL, "API_BASE_URL11");
 
     try {
       const payload = {}
@@ -246,7 +259,7 @@ export default function LeaveManagementScreen() {
 
   const handleSubmit = async () => {
     // console.log("LOG");
-    
+
     if (!token || !selectedLeave) {
       showPopup("error", "Error", "Please select leave type");
       // Alert.alert("Error", "Please select leave type");
@@ -308,7 +321,7 @@ export default function LeaveManagementScreen() {
 
       if (response.data.success) {
         setLeavedata(response.data.data)
-        // console.log(response.data.data, "response.data1");
+        console.log(response.data.data, "response.data1");
 
       }
     } catch (error) {
@@ -317,6 +330,58 @@ export default function LeaveManagementScreen() {
       setloading(false);
     }
   }
+
+  // const filteredStatusData = Leavedata?.filter(item => {
+  //   const fromDate = new Date(item.leave_from_date);
+
+  //   return (
+  //     fromDate.getMonth() === selectedMonth &&
+  //     fromDate.getFullYear() === selectedYear
+  //   );
+  // });
+
+  // const filteredStatusData = Leavedata?.filter(item => {
+  //   const leaveStart = new Date(item.leave_from_date);
+  //   const leaveEnd = new Date(item.leave_to_date);
+
+  //   // start of selected month
+  //   const monthStart = new Date(selectedYear, selectedMonth, 1);
+  //   monthStart.setHours(0, 0, 0, 0);
+
+  //   // end of selected month
+  //   const monthEnd = new Date(selectedYear, selectedMonth + 1, 0);
+  //   monthEnd.setHours(23, 59, 59, 999);
+
+  //   return leaveStart <= monthEnd && leaveEnd >= monthStart;
+  // });
+  const filteredStatusData = Leavedata?.filter(item => {
+  const leaveStart = new Date(item.leave_from_date);
+  const leaveEnd = new Date(item.leave_to_date);
+
+  // today's start (ignore time)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // start of selected month
+  const monthStart = new Date(selectedYear, selectedMonth, 1);
+  monthStart.setHours(0, 0, 0, 0);
+
+  // end of selected month
+  const monthEnd = new Date(selectedYear, selectedMonth + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
+
+  return (
+    // ❌ exclude completed leaves
+    leaveEnd >= today &&
+
+    // ✅ show if overlapping selected month
+    leaveStart <= monthEnd &&
+    leaveEnd >= monthStart
+  );
+});
+
+
+
   const route = useRoute();
   const screenTitle = route.params?.title;
   const getUsedLeavePercentage = () => {
@@ -343,17 +408,63 @@ export default function LeaveManagementScreen() {
   };
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const historyData = Leavedata?.filter(item => {
-    const toDate = new Date(item.leave_to_date);
-    toDate.setHours(0, 0, 0, 0);
+  // const historyData = Leavedata?.filter(item => {
+  //   const toDate = new Date(item.leave_to_date);
+  //   toDate.setHours(0, 0, 0, 0);
 
-    return (
-      toDate < today &&
-      item.leave_approval_status !== "pending"
-    );
-  });
-  // console.log(historyData,"historyData");
+  //   return (
+  //     toDate < today &&
+  //     item.leave_approval_status !== "pending"
+  //   );
+  // });
+const today1 = new Date();
+today1.setHours(0, 0, 0, 0);
+
+const monthStart = new Date(selectedYear, selectedMonth, 1);
+monthStart.setHours(0, 0, 0, 0);
+
+const monthEnd = new Date(selectedYear, selectedMonth + 1, 0);
+monthEnd.setHours(23, 59, 59, 999);
+
+const historyData = Leavedata?.filter(item => {
+  const leaveStart = new Date(item.leave_from_date);
+  const leaveEnd = new Date(item.leave_to_date);
+
+  leaveStart.setHours(0, 0, 0, 0);
+  leaveEnd.setHours(0, 0, 0, 0);
+
+return (
+   
+    leaveEnd < today &&
+
   
+    leaveEnd.getMonth() === selectedMonth &&
+    leaveEnd.getFullYear() === selectedYear &&
+
+    item.leave_approval_status !== "pending"
+  );
+});
+
+
+  // console.log(historyData,"historyData");
+// const leaveStatusData = Leavedata?.filter(item => {
+//   const fromDate = new Date(item.leave_from_date);
+//   const toDate = new Date(item.leave_to_date);
+
+//   return (
+//     fromDate.getMonth() === selectedMonth &&
+//     fromDate.getFullYear() === selectedYear &&
+//     toDate >= today
+//   );
+// });
+const leaveStatusData = Leavedata?.filter(item => {
+  const fromDate = new Date(item.leave_from_date);
+  fromDate.setHours(0, 0, 0, 0);
+
+  return fromDate >= today;
+});
+
+
   const statusData = Leavedata?.filter(item => {
     const toDate = new Date(item.leave_to_date);
     toDate.setHours(0, 0, 0, 0);
@@ -363,6 +474,7 @@ export default function LeaveManagementScreen() {
       ((item.leave_approval_status === "approved" || item.leave_approval_status === "rejected" || item.leave_approval_status === "cancelled") && toDate >= today)
     );
   });
+
 
 
   return (
@@ -377,14 +489,14 @@ export default function LeaveManagementScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Image
-              source={require("../../assets/Leave_Management.png")}
-              style={styles.header_iconImage}
-            />
+            source={require("../../assets/Leave_Management.png")}
+            style={styles.header_iconImage}
+          />
           <Navbar title={screenTitle} />
         </View>
 
         {/* Month Selector */}
-        <View style={styles.dropdownRow}>
+        {/* <View style={styles.dropdownRow}>
           <TouchableOpacity style={styles.dropdown}>
             <Text style={styles.dropdownText}>September</Text>
             <Icon name="chevron-down" color="#fff" />
@@ -393,7 +505,62 @@ export default function LeaveManagementScreen() {
             <Text style={styles.dropdownText}>2025</Text>
             <Icon name="chevron-down" color="#fff" />
           </TouchableOpacity>
+        </View> */}
+
+        <View style={styles.dropdownRow}>
+
+          {/* Month Dropdown */}
+          <TouchableOpacity
+            style={styles.dropdown}
+            onPress={() => setShowMonthDropdown(!showMonthDropdown)}
+          >
+            <Text style={styles.dropdownText}>{months[selectedMonth]}</Text>
+            <Icon name="chevron-down" color="#fff" />
+          </TouchableOpacity>
+
+          {/* Year Dropdown */}
+          <TouchableOpacity
+            style={styles.dropdown}
+            onPress={() => setShowYearDropdown(!showYearDropdown)}
+          >
+            <Text style={styles.dropdownText}>{selectedYear}</Text>
+            <Icon name="chevron-down" color="#fff" />
+          </TouchableOpacity>
         </View>
+        {showMonthDropdown && (
+          <View style={styles.dropdownBox}>
+            {months.map((month, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownRow}
+                onPress={() => {
+                  setSelectedMonth(index);
+                  setShowMonthDropdown(false);
+                }}
+              >
+                <Text style={styles.dropdownText}>{month}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        {showYearDropdown && (
+          <View style={styles.dropdownBox}>
+            {[2023, 2024, 2025, 2026, 2027].map(year => (
+              <TouchableOpacity
+                key={year}
+                style={styles.dropdownRow}
+                onPress={() => {
+                  setSelectedYear(year);
+                  setShowYearDropdown(false);
+                }}
+              >
+                <Text style={styles.dropdownText}>{year}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+
 
         <LinearGradient
           colors={["#07162cff", "#23568fff"]}
@@ -404,13 +571,13 @@ export default function LeaveManagementScreen() {
 
           {/* Header */}
           <View style={styles.cardHeader}>
-            <Text style={[GlobalFont.semiBold,styles.cardTitle]}>Leave Summary</Text>
+            <Text style={[GlobalFont.semiBold, styles.cardTitle]}>Leave Summary</Text>
 
             <TouchableOpacity
               style={styles.leaveButton}
               onPress={() => setModalVisible(true)}
             >
-              <Text style={[GlobalFont.CustomFont,styles.leaveBtnText]}>+ Leave Request</Text>
+              <Text style={[GlobalFont.CustomFont, styles.leaveBtnText]}>+ Leave Request</Text>
             </TouchableOpacity>
           </View>
 
@@ -428,7 +595,7 @@ export default function LeaveManagementScreen() {
                 unfilledColor="#18384A"
                 strokeCap="round"
               />
-              <Text style={[GlobalFont.CustomFont,styles.circleText]}>{getUsedLeavePercentage()}%</Text>
+              <Text style={[GlobalFont.CustomFont, styles.circleText]}>{getUsedLeavePercentage()}%</Text>
             </View>
 
             {/* Bars + counts */}
@@ -443,11 +610,11 @@ export default function LeaveManagementScreen() {
               <View style={styles.leaveList}>
                 {LeaveList?.leave_type?.map((item) => (
                   <View style={styles.leaveCountRow} key={item._id}>
-                    <Text style={[GlobalFont.CustomFont,styles.leaveCountText]}>
+                    <Text style={[GlobalFont.CustomFont, styles.leaveCountText]}>
                       {item.abbreviation}
                     </Text>
 
-                    <Text style={[GlobalFont.CustomFont,styles.leaveCountValue]}>
+                    <Text style={[GlobalFont.CustomFont, styles.leaveCountValue]}>
                       {item.available} left
                     </Text>
                   </View>
@@ -472,7 +639,7 @@ export default function LeaveManagementScreen() {
                 style={styles.modalContainer}
               >
                 <View style={styles.modalHeader}>
-                  <Text style={[GlobalFont.semiBold,styles.modalTitle]}>Enter the following details</Text>
+                  <Text style={[GlobalFont.semiBold, styles.modalTitle]}>Enter the following details</Text>
                   <TouchableOpacity onPress={() => setModalVisible(false)}>
                     <Text style={styles.closeBtn}>✖</Text>
                   </TouchableOpacity>
@@ -482,13 +649,13 @@ export default function LeaveManagementScreen() {
 
 
                   <View style={styles.rowContainer}>
-                    <Text style={[GlobalFont.semiBold,styles.labelRow]}>Select Leave Type:</Text>
+                    <Text style={[GlobalFont.semiBold, styles.labelRow]}>Select Leave Type:</Text>
 
                     <TouchableOpacity
                       style={styles.customSelect}
                       onPress={() => setDropdownOpen(prev => !prev)}
                     >
-                      <Text style={[GlobalFont.CustomFont,styles.selectedText]}>
+                      <Text style={[GlobalFont.CustomFont, styles.selectedText]}>
                         {selectedLeave?.abbreviation || "Select Leave Type"}
                       </Text>
                     </TouchableOpacity>
@@ -513,8 +680,8 @@ export default function LeaveManagementScreen() {
                             }}
 
                           >
-                            <Text style={[GlobalFont.CustomFont,styles.dropdownAbbr]}>{item.abbreviation}</Text>
-                            <Text style={[GlobalFont.CustomFont,styles.dropdownValue]}>
+                            <Text style={[GlobalFont.CustomFont, styles.dropdownAbbr]}>{item.abbreviation}</Text>
+                            <Text style={[GlobalFont.CustomFont, styles.dropdownValue]}>
                               {item.available}/{item.quota}
                             </Text>
                           </TouchableOpacity>
@@ -525,12 +692,12 @@ export default function LeaveManagementScreen() {
 
                   <View style={styles.dateRow}>
                     <View style={styles.dateInputContainer}>
-                      <Text style={[GlobalFont.CustomFont,styles.labelColumn]}>From:</Text>
+                      <Text style={[GlobalFont.CustomFont, styles.labelColumn]}>From:</Text>
                       <TouchableOpacity
                         style={styles.dateInput}
                         onPress={() => setOpenFromDate(true)}
                       >
-                        <Text style={[GlobalFont.CustomFont,styles.dateTextDisplay]}>
+                        <Text style={[GlobalFont.CustomFont, styles.dateTextDisplay]}>
                           {formatDate(fromDate)}
                         </Text>
                         <Text style={styles.calendarIcon}>📅</Text>
@@ -538,12 +705,12 @@ export default function LeaveManagementScreen() {
                     </View>
 
                     <View style={styles.dateInputContainer}>
-                      <Text style={[GlobalFont.CustomFont,styles.labelColumn]}>To:</Text>
+                      <Text style={[GlobalFont.CustomFont, styles.labelColumn]}>To:</Text>
                       <TouchableOpacity
                         style={styles.dateInput}
                         onPress={() => setOpenToDate(true)}
                       >
-                        <Text style={[GlobalFont.CustomFont,styles.dateTextDisplay]}>
+                        <Text style={[GlobalFont.CustomFont, styles.dateTextDisplay]}>
                           {formatDate(toDate)}
                         </Text>
                         <Text style={styles.calendarIcon}>📅</Text>
@@ -582,9 +749,9 @@ export default function LeaveManagementScreen() {
 
 
                   <View style={styles.rowContainer}>
-                    <Text style={[GlobalFont.CustomFont,styles.labelRow]}>No. of Days:</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.labelRow]}>No. of Days:</Text>
                     <TextInput
-                      style={[GlobalFont.CustomFont,styles.inputRow1, styles.disabledInput]}
+                      style={[GlobalFont.CustomFont, styles.inputRow1, styles.disabledInput]}
                       value={noOfDays}
                       editable={false}
                       selectTextOnFocus={false}
@@ -592,9 +759,9 @@ export default function LeaveManagementScreen() {
                   </View>
 
                   <View style={styles.rowContainer}>
-                    <Text style={[GlobalFont.CustomFont,styles.labelRow]}>Remaining Leaves:</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.labelRow]}>Remaining Leaves:</Text>
                     <TextInput
-                      style={[GlobalFont.CustomFont,styles.inputRow, styles.disabledInput]}
+                      style={[GlobalFont.CustomFont, styles.inputRow, styles.disabledInput]}
                       value={String(remainingLeaves)}
                       editable={false}
                       selectTextOnFocus={false}
@@ -602,9 +769,9 @@ export default function LeaveManagementScreen() {
                   </View>
 
                   <View style={styles.reasonContainer}>
-                    <Text style={[GlobalFont.CustomFont,styles.labelColumn]}>Reason:</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.labelColumn]}>Reason:</Text>
                     <TextInput
-                      style={[GlobalFont.CustomFont,styles.textArea]}
+                      style={[GlobalFont.CustomFont, styles.textArea]}
                       placeholder=""
                       placeholderTextColor="#6B7280"
                       multiline
@@ -615,7 +782,7 @@ export default function LeaveManagementScreen() {
                   </View>
 
                   <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                    <Text style={[GlobalFont.CustomFont,styles.submitButtonText]}>Submit</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.submitButtonText]}>Submit</Text>
                   </TouchableOpacity>
                 </ScrollView>
               </LinearGradient>
@@ -623,22 +790,32 @@ export default function LeaveManagementScreen() {
           </Modal>
 
         </View>
-                    
-        <Text style={[GlobalFont.bold,styles.sectionTitle]}>Leave Status</Text>
+
+        <Text style={[GlobalFont.bold, styles.sectionTitle]}>Leave Status</Text>
 
         {loading && (
           <View style={styles.loaderOverlay}>
             <ActivityIndicator size="large" color="#fff" />
-            <Text style={[GlobalFont.CustomFont,{ color: "white", marginTop: 5 ,margin:"auto" }]}>Loading...</Text>
+            <Text style={[GlobalFont.CustomFont, { color: "white", marginTop: 5, margin: "auto" }]}>Loading...</Text>
           </View>
         )}
-        {!loading && statusData?.length === 0 && (
+        {/* {!loading && statusData?.length === 0 && (
           <View style={styles.centerBox}>
-            <Text style={[GlobalFont.CustomFont,styles.noDataText]}>No status found</Text>
+            <Text style={[GlobalFont.CustomFont, styles.noDataText]}>No status found</Text>
+          </View>
+        )} */}
+        {!loading && filteredStatusData?.length === 0 && (
+          <View style={styles.centerBox}>
+            <Text style={[GlobalFont.CustomFont, styles.noDataText]}>
+              No leave data found for selected month
+            </Text>
           </View>
         )}
 
-        {!loading && statusData?.map(item => (
+
+        {/* {!loading && statusData?.map(item => ( */}
+        {!loading && filteredStatusData?.map(item => (
+
           <LinearGradient
             colors={["#173e58ff", "#285879ff"]}
             start={{ x: 0, y: 0 }}
@@ -652,12 +829,12 @@ export default function LeaveManagementScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.status_card}
             >
-              <Text style={[GlobalFont.CustomFont,styles.upcomingDate]}>
+              <Text style={[GlobalFont.CustomFont, styles.upcomingDate]}>
                 {formatDateRange(item.leave_from_date, item.leave_to_date)}
               </Text>
 
               <View style={styles.leave_head}>
-                <Text style={[GlobalFont.CustomFont,styles.upcomingStatusText]}>
+                <Text style={[GlobalFont.CustomFont, styles.upcomingStatusText]}>
                   {item.leave_head}
                 </Text>
               </View>
@@ -665,15 +842,15 @@ export default function LeaveManagementScreen() {
               <View style={styles.upcomingStatusBox}>
                 <Text
                   style={[GlobalFont.CustomFont,
-                    styles.upcomingStatusText,
-                    {
-                      color:
-                        item.leave_approval_status === "approved"
-                          ? "#08d319ff"
-                          : item.leave_approval_status === "rejected"
-                            ? "#d11a2a"
-                            : "#e8ec00ff",
-                    },
+                  styles.upcomingStatusText,
+                  {
+                    color:
+                      item.leave_approval_status === "approved"
+                        ? "#08d319ff"
+                        : item.leave_approval_status === "rejected"
+                          ? "#d11a2a"
+                          : "#e8ec00ff",
+                  },
                   ]}
                 >
                   {item.leave_approval_status?.charAt(0).toUpperCase() +
@@ -687,7 +864,7 @@ export default function LeaveManagementScreen() {
 
 
 
-        <Text style={[GlobalFont.bold,styles.sectionTitle]}>Leave History</Text>
+        <Text style={[GlobalFont.bold, styles.sectionTitle]}>Leave History</Text>
 
         {historyData?.length > 0 ? (
           historyData.map(item => (
@@ -704,12 +881,12 @@ export default function LeaveManagementScreen() {
                 end={{ x: 1, y: 1 }}
                 style={styles.status_card}
               >
-                <Text style={[GlobalFont.CustomFont,styles.upcomingDate]}>
+                <Text style={[GlobalFont.CustomFont, styles.upcomingDate]}>
                   {formatDateRange(item.leave_from_date, item.leave_to_date)}
                 </Text>
 
                 <View style={styles.leave_head}>
-                  <Text style={[GlobalFont.CustomFont,styles.upcomingStatusText]}>
+                  <Text style={[GlobalFont.CustomFont, styles.upcomingStatusText]}>
                     {item.leave_head}
                   </Text>
                 </View>
@@ -717,15 +894,15 @@ export default function LeaveManagementScreen() {
                 <View style={styles.upcomingStatusBox}>
                   <Text
                     style={[GlobalFont.CustomFont,
-                      styles.upcomingStatusText,
-                      {
-                        color:
-                          item.leave_approval_status === "approved"
-                            ? "#08d319ff"
-                            : item.leave_approval_status === "rejected"
-                              ? "#d11a2a"
-                              : "#e8ec00ff",
-                      },
+                    styles.upcomingStatusText,
+                    {
+                      color:
+                        item.leave_approval_status === "approved"
+                          ? "#08d319ff"
+                          : item.leave_approval_status === "rejected"
+                            ? "#d11a2a"
+                            : "#e8ec00ff",
+                    },
                     ]}
                   >
                     {item.leave_approval_status?.charAt(0).toUpperCase() +
@@ -736,8 +913,11 @@ export default function LeaveManagementScreen() {
             </LinearGradient>
           ))
         ) : (
-          <Text style={[GlobalFont.CustomFont,styles.noDataText]}>No history found</Text>
+          <Text style={[GlobalFont.CustomFont, styles.noDataText]}>No history found</Text>
         )}
+
+       
+
 
 
       </ScrollView>
@@ -777,16 +957,16 @@ const styles = StyleSheet.create({
     padding: 13,
   },
 
-    header: {
-    flexDirection:"row",
+  header: {
+    flexDirection: "row",
     width: "100%",
     marginBottom: 12,
-    alignItems:"center",
-    gap:5
+    alignItems: "center",
+    gap: 5
   },
-   header_iconImage: {
+  header_iconImage: {
     width: 35,
-    padding:20,
+    padding: 20,
     height: 20,
     marginLeft: -5,
   },
@@ -801,7 +981,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     // padding: 5,
     top: 15,
-    paddingBottom: 60,
+    paddingBottom: 100,
   },
 
   selectorBox: {
@@ -922,7 +1102,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   status_card: {
-    width:width * 0.88,
+    width: width * 0.88,
     backgroundColor: "#0b3863ff",
     flexDirection: 'row',
     gap: 13,
@@ -1208,11 +1388,11 @@ const styles = StyleSheet.create({
     width: "50%"
   },
 
-   dropdownRow: {
+  dropdownRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     // marginTop: 10,
-    marginBottom:10
+    marginBottom: 10
   },
   dropdown: {
     backgroundColor: "rgba(255,255,255,0.1)",
@@ -1226,7 +1406,7 @@ const styles = StyleSheet.create({
   dropdownText: {
     color: "#fff",
     fontSize: 16,
-    fontFamily:"Outfit-Regular"
+    fontFamily: "Outfit-Regular"
   },
 
   // dropdownRow: {
@@ -1316,7 +1496,7 @@ const styles = StyleSheet.create({
   barSection: {
     flex: 1,
     paddingLeft: 10,
-    gap:20
+    gap: 20
   },
 
   barRow: {
@@ -1353,11 +1533,11 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   barchart: {
-    
+
     marginTop: -40,
     marginLeft: -10,
     // margin: -20,
-    height:170,
+    height: 170,
     paddingVertical: -20
   },
   leaveList: {
@@ -1366,7 +1546,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#194a7ea2",
     borderRadius: 17,
     paddingVertical: 10,
-    marginTop: "auto", 
+    marginTop: "auto",
   },
 
   leaveCountRow: {
@@ -1389,6 +1569,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     // marginRight:-20
   },
+
+  yearHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#173e58",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+
+  monthHeader: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#285879",
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+
 
 
 
