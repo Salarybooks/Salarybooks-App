@@ -37,7 +37,7 @@ export default function Blank() {
         {/* Center Text */}
         <View style={styles.middle_text}>
           <Text style={styles.middleText}>
-            We are working on this page...
+            We are Developing this page...
           </Text>
         </View>
       </ScrollView>
