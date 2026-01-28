@@ -54,6 +54,7 @@ const PayslipScreen = () => {
   }));
 
   const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex].label);
+  const [rights,setRights]=useState(false);
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [payslipData, setPayslipData] = useState(null);
   const [token, setToken] = useState(null);
@@ -65,6 +66,7 @@ const PayslipScreen = () => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
       setToken(t);
+      setRights( JSON.parse(await AsyncStorage.getItem("rights")))
       console.log("TOKEN LOADED:", t);
     };
     loadToken();
@@ -553,7 +555,7 @@ const PayslipScreen = () => {
             setPopupConfig(prev => ({ ...prev, visible: false }))
           }
         />
-        <BottomNavigation />
+        <BottomNavigation rights={rights}/>
 
       </SafeAreaView>
     </LinearGradient>

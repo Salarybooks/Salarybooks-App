@@ -31,11 +31,11 @@ const Advance = ({ rights }) => {
     // if (!rights) return null;
     const canApplyAttendance = rights?.apply?.includes("Attendance");
     const canApplyleave = rights?.apply?.includes("leave");
-    const canApplyvault = rights?.apply?.includes("Documents Vault");
-    const canApplypayslip = rights?.apply?.includes("Payslip");
+    const canApplyvault = rights?.apply?.includes("documents vault");
+    const canApplypayslip = rights?.view?.includes("payslip");
     const canApplyadvance = rights?.apply?.includes("advance");
-    const canApplyreimburdement = rights?.apply?.includes("reimburdement");
-    console.log("canApplyAttendance", canApplyAttendance);
+    const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+    // console.log("canApplyAttendance", canApplyAttendance);
     useEffect(() => {
         const loadToken = async () => {
             const t = await AsyncStorage.getItem("authToken");

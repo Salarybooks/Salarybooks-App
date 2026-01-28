@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import axios from 'axios';
+import StatusPopup from "../StatusPopup/StatusPopup";
 const { width } = Dimensions.get("window");
 
 const Reimbursement = () => {
@@ -27,10 +28,16 @@ const Reimbursement = () => {
     const [pending, setPending] = useState(0);
     const [rejected, setRejected] = useState(0);
     const [latestClaim, setLatestClaim] = useState(null);
+    const [rights, setRights] = useState(null);
+    const canApplyleave = rights?.apply?.includes("leave");
+    const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+    const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+
     useEffect(() => {
         const loadToken = async () => {
             const t = await AsyncStorage.getItem("authToken");
             setToken(t);
+            setRights( JSON.parse(await AsyncStorage.getItem("rights")))
             console.log("TOKEN LOADEDaa:", t);
         };
         loadToken();
@@ -44,6 +51,30 @@ const Reimbursement = () => {
         }, [token])
     );
 
+    const showPopup = (type, title, message) => {
+        setPopupConfig({
+            visible: true,
+            type,
+            title,
+            message,
+        });
+    };
+    const screenLeave = () => {
+
+        if (!canApplyleave) {
+            showPopup("error", "Permission Denied", "you don't have This functionality");
+            return;
+        }
+        navigation.navigate("Blank", { title: "Attendance" });
+    }
+    const screenExpence = () => {
+
+        if (!canApplyreimburdement) {
+            showPopup("error", "Permission Denied", "you don't have This functionality");
+            return;
+        }
+         navigation.navigate('Expense',{ title: "Expense Management" });
+    }
     const fetchClaimsData = async () => {
         console.log("Expense", token)
         if (!token) return;
@@ -191,7 +222,8 @@ const Reimbursement = () => {
 
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => navigation.navigate('Expense',{ title: "Expense Management" }) }
+                        // onPress={() => navigation.navigate('Expense',{ title: "Expense Management" }) }
+                        onPress={screenExpence }
                     >
                         <Text style={styles.buttonText}>Apply Claim</Text>
                     </TouchableOpacity>
@@ -211,13 +243,22 @@ const Reimbursement = () => {
                     </View>
                     <TouchableOpacity
                         style={styles.button2}
-                        onPress={() => navigation.navigate('Leave_Management',{ title: "Leave Management" })}
+                        // onPress={() => navigation.navigate('Leave_Management',{ title: "Leave Management" })}
+                        onPress={screenLeave}
                     >
                         <Text style={styles.buttonText2}>Apply Leave</Text>
                     </TouchableOpacity>
 
                 </LinearGradient>
-
+                <StatusPopup
+                    visible={popupConfig.visible}
+                    type={popupConfig.type}
+                    title={popupConfig.title}
+                    message={popupConfig.message}
+                    onClose={() =>
+                        setPopupConfig(prev => ({ ...prev, visible: false }))
+                    }
+                />
             </View>
         </View>
     );
@@ -280,7 +321,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontSize: 11,
         marginBottom: 5,
-        marginTop: -5,
+        marginTop: -2,
         textAlign: "center",
         fontFamily:"Outfit-Regular"
     },

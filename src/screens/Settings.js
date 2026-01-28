@@ -30,7 +30,7 @@ const Settings = ({ navigation }) => {
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
   const [bankData, setBankData] = useState(null);
   const [profilepic, setProfilepic] = useState(null);
-
+  const [rights,setRights]=useState(false);
   const themeColors = {
     background: isDarkMode ? '#000' : '#fff',
     card: isDarkMode ? '#1c1c1e' : '#f4f4f4',
@@ -52,7 +52,7 @@ const Settings = ({ navigation }) => {
         const storedBankDetails = await AsyncStorage.getItem("employee_bank_details");
         const profilepic = await AsyncStorage.getItem("imageUrl");
         console.log("profilepicprofilepicprofilepicprofilepic", profilepic);
-
+        setRights( JSON.parse(await AsyncStorage.getItem("rights")));
         setProfilepic(profilepic)
         const bankDetails = storedBankDetails
           ? JSON.parse(storedBankDetails)
@@ -254,7 +254,7 @@ const Settings = ({ navigation }) => {
         showCancel={true}
         onCancel={() => setShowLogoutPopup(false)}
       />
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
       {/* </View> */}
     </LinearGradient>
   );

@@ -15,7 +15,7 @@ import CheckBox from '@react-native-community/checkbox';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import StatusPopup from './StatusPopup/StatusPopup';
 const { width, height } = Dimensions.get('window');
 
 const SignUpScreen = () => {
@@ -27,7 +27,8 @@ const SignUpScreen = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [userData, setUserData] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
+  
   //   const handleSignIn = async () => {
 
   // try{  
@@ -81,7 +82,14 @@ const SignUpScreen = () => {
     checkLogin();
   }, [rememberMe]);
 
-
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
   const handleSignIn = async () => {
     try {
       await AsyncStorage.setItem('rememberMe', JSON.stringify(rememberMe));
@@ -110,11 +118,13 @@ const SignUpScreen = () => {
 
         navigation.navigate('Dashboard');
       } else {
-        Alert.alert(response.data.message || 'Login failed');
+        showPopup("error", response.data.message, "Login failed");
+        // Alert.alert(response.data.message || 'Login failed');
       }
     } catch (error) {
-      console.error('Login Failed:', error.response?.data || error.message);
-      Alert.alert('Something went wrong. Please try again.');
+      showPopup("error", error.response?.data || error.message, "'Something went wrong. Please try again.'");
+      // console.error('Login Failed:', error.response?.data || error.message);
+      // Alert.alert('Something went wrong. Please try again.');
     }
   };
   // const handleRememberMe = async () => {
@@ -208,6 +218,15 @@ const SignUpScreen = () => {
             <Text style={styles.forgotText}>Forget Password?</Text>
           </TouchableOpacity>
         </View>
+        <StatusPopup
+          visible={popupConfig.visible}
+          type={popupConfig.type}
+          title={popupConfig.title}
+          message={popupConfig.message}
+          onClose={() =>
+            setPopupConfig(prev => ({ ...prev, visible: false }))
+          }
+        />
       </ScrollView>
     </LinearGradient>
   );

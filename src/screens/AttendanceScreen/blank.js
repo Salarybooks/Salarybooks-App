@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect , useState} from 'react';
 import { View, Text, ScrollView, StyleSheet,Image } from 'react-native';
 import { useRoute } from "@react-navigation/native";
 import LinearGradient from 'react-native-linear-gradient';
 import Navbar from '../Dashboardscreen/navbar';
 import BottomNavigation from '../BottomNavigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Blank() {
   const route = useRoute();
   const screenTitle = route.params?.title;
-
+  const [rights,setRights]=useState(false);
+  useEffect(()=>{
+    const loadtoken=async()=>{
+      setRights( JSON.parse(await AsyncStorage.getItem("rights")));
+      
+    }
+    loadtoken();
+  }, [])
+  
   return (
     <LinearGradient
       colors={["#000000ff", "#1c68beff"]}
@@ -32,7 +41,7 @@ export default function Blank() {
           </Text>
         </View>
       </ScrollView>
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 }

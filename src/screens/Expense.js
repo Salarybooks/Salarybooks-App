@@ -48,10 +48,12 @@ const Expense = () => {
   const [image, setImage] = useState(null);
   const [token, setToken] = useState(null);
   const [file, setFile] = useState(false);
+  const [rights,setRights]=useState(false);
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
+      setRights( JSON.parse(await AsyncStorage.getItem("rights")))
       setToken(t);
       console.log("TOKEN LOADED:", t);
     };
@@ -557,7 +559,7 @@ const Expense = () => {
         }
       />
       </SafeAreaView>
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };

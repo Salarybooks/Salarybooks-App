@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef , useState} from 'react';
 import {
   View,
   Text,
@@ -13,14 +13,22 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from './ThemeContext';
 import GlobalFont from '../theme/GlobalFont';
+import StatusPopup from './StatusPopup/StatusPopup';
 const { width } = Dimensions.get('window');
 
-const BottomNavigation = () => {
+const BottomNavigation = ({ rights }) => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { isDarkMode } = useTheme();
   const translateY = useRef(new Animated.Value(0)).current;
+  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
   
+
+  const canApplyAttendance = rights?.apply?.includes("Attendance");
+  const canApplyleave = rights?.apply?.includes("leave");
+  const canApplypayslip = rights?.view?.includes("payslip");
+  const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+
   const handleHomePress = () => {
     navigation.navigate('Dashboard');
   };
@@ -50,12 +58,21 @@ const BottomNavigation = () => {
   ).current;
 
   const navItems = [
-    { label: 'Expenses', icon: require('../assets/expenses.png'), screen: 'Expense',title:"Expense Management"},
-    { label: 'Leaves', icon: require('../assets/leaves.png'), screen: 'Leave_Management',title:"Leave Management" },
-    { label: 'Payslips', icon: require('../assets/payslips.png'), screen: 'Payslips',title:"Payslips" },
-    { label: 'Check In', icon: require('../assets/checkin.png'), screen: 'AttendanceScreen',title:"Attendance Management" },
-    { label: 'Settings', icon: require('../assets/settings.png'), screen: 'Settings',title:"Settings" },
+    { label: 'Expenses', icon: require('../assets/expenses.png'), screen: 'Expense',title:"Expense Management", permission:canApplyreimburdement},
+    { label: 'Leaves', icon: require('../assets/leaves.png'), screen: 'Leave_Management',title:"Leave Management", permission:canApplyleave },
+    { label: 'Payslips', icon: require('../assets/payslips.png'), screen: 'Payslips',title:"Payslips" ,permission:canApplypayslip},
+    { label: 'Check In', icon: require('../assets/checkin.png'), screen: 'Blank',title:"Attendance Management",permission:canApplyAttendance },
+    { label: 'Settings', icon: require('../assets/settings.png'), screen: 'Settings',title:"Settings",permission:true },
   ];
+
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom || 10 }]}>
@@ -65,7 +82,14 @@ const BottomNavigation = () => {
           <TouchableOpacity
             key={index}
             style={styles.navItem}
-            onPress={() => navigation.navigate(item.screen, { title: item.title })}
+            onPress={() => {
+              if (!item.permission) {
+                showPopup("error", "Permission Denied", "you don't have This functionality");
+                return;
+              }
+
+              navigation.navigate(item.screen, { title: item.title });
+            }}
           >
             <Image
               source={item.icon}
@@ -80,7 +104,15 @@ const BottomNavigation = () => {
           </TouchableOpacity>
         ))}
       </View>
-
+      <StatusPopup
+        visible={popupConfig.visible}
+        type={popupConfig.type}
+        title={popupConfig.title}
+        message={popupConfig.message}
+        onClose={() =>
+          setPopupConfig(prev => ({ ...prev, visible: false }))
+        }
+      />
       {/* Home Button */}
       <Animated.View
         style={[

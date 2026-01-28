@@ -57,7 +57,7 @@ const DocumentVaultScreen = () => {
   const [isPDF, setIsPDF] = useState(false);
 
   const [uploading, setUploading] = useState(false);
-
+  const [rights,setRights]=useState(false);
 
   useEffect(() => {
     const loadToken = async () => {
@@ -72,7 +72,7 @@ const DocumentVaultScreen = () => {
 
           setToken(token);
           setuserData(parsedUser);
-
+          setRights( JSON.parse(await AsyncStorage.getItem("rights")))
           fetchUploadedDocs(parsedUser._id, token);
 
         }
@@ -110,7 +110,7 @@ const DocumentVaultScreen = () => {
       const currentList = uploadedFiles[key] || [];
       // extractedName=extractedName.replace("%", "_")
       extractedName = `Document ${currentList.length + 1}`.replace(" ", "_");
-      console.log(extractedName,"extractedName");
+      // console.log(extractedName,"extractedName");
       
       // setUploadedFiles(prev => [
       //   ...prev,
@@ -191,7 +191,7 @@ const DocumentVaultScreen = () => {
 
 
   const uploadFileToServer = async (file, field) => {
-    console.log(API_BASE_URL,"API_BASE_URL");
+    // console.log(API_BASE_URL,"API_BASE_URL");
     
     setUploading(true);
     try {
@@ -856,7 +856,7 @@ const DocumentVaultScreen = () => {
             }
           />
         </SafeAreaView>
-        <BottomNavigation />
+        <BottomNavigation rights={rights}/>
       </LinearGradient>
     </TouchableWithoutFeedback>
   );

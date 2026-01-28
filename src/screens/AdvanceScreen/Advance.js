@@ -45,6 +45,7 @@ const AdvanceManagement =() => {
   const [percentage, setPercentage] = useState(0);
   const [prog, setProgress] = useState(0);
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+  const [rights,setRights]=useState(false);
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
@@ -56,6 +57,7 @@ const AdvanceManagement =() => {
       const percentage = storedpercentage? JSON.parse(storedpercentage): 0;
       setPercentage(percentage);
       setProgress(Progress);
+      setRights( JSON.parse(await AsyncStorage.getItem("rights")))
       console.log("TOKEN LOADED:", t);
     };
     loadToken();
@@ -562,7 +564,7 @@ const AdvanceManagement =() => {
             setPopupConfig(prev => ({ ...prev, visible: false }))
           }
         />
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };
@@ -670,6 +672,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 6,
+    textAlign:"center",
     left: 20
   },
   // addBtnText: {

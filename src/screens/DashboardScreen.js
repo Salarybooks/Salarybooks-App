@@ -16,15 +16,17 @@ import Reimbursement from "./Dashboardscreen/Dashboard_Reimbursement";
 import Advance from "./Dashboardscreen/Dashboard_Advance";
 import { BackHandler, ToastAndroid } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import StatusPopup from "./StatusPopup/StatusPopup";
 // import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL } from "@env";
-
+import { useNavigation } from '@react-navigation/native';
 const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
 
 
 
 const Dashboard = () => {
+  const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(null);
   const [empData, setEmpData] = useState(null);
@@ -35,10 +37,22 @@ const Dashboard = () => {
   const [absent, setAbsent] = useState(null);
   const [presentDates, setPresentDates] = useState([]);
   const [absentDates, setAbsentDates] = useState([]);
+  const canApplyAttendance = rights?.apply?.includes("Attendance");
+  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+  
   const loadToken = async () => {
     const t = await AsyncStorage.getItem("authToken");
     setToken(t);
     // console.log("TOKEN LOADED:", t);
+  };
+
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
   };
 
   const fetchemployeedata = async () => {
@@ -95,6 +109,7 @@ const Dashboard = () => {
         console.log("rightsData", rightsData);
 
         setRights(rightsData);
+        AsyncStorage.setItem('rights',JSON.stringify(rightsData))
       }
 
     } catch (error) {
@@ -173,6 +188,16 @@ const Dashboard = () => {
         .filter(Boolean)
     );
   };
+
+  const screenAttendace=()=>{
+    console.log("tree");
+    
+    if (!canApplyAttendance) {
+      showPopup("error", "Permission Denied", "you don't have This functionality");
+      return;
+    }
+    navigation.navigate("Blank", { title: "Attendance" });
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -350,7 +375,7 @@ const Dashboard = () => {
                 </View>
               </View>
 
-              <TouchableOpacity style={styles.markBtn}>
+              <TouchableOpacity style={styles.markBtn} onPress={screenAttendace}>
                 <Text style={styles.markBtnText}>Mark Attendance</Text>
               </TouchableOpacity>
             </View>
@@ -358,9 +383,17 @@ const Dashboard = () => {
 
           <Reimbursement />
           <Advance rights={rights} />
-
+          <StatusPopup
+            visible={popupConfig.visible}
+            type={popupConfig.type}
+            title={popupConfig.title}
+            message={popupConfig.message}
+            onClose={() =>
+              setPopupConfig(prev => ({ ...prev, visible: false }))
+            }
+          />
         </ScrollView>
-        <BottomNavigation />
+        <BottomNavigation rights={rights}/>
       </SafeAreaView>
     </LinearGradient>
   );

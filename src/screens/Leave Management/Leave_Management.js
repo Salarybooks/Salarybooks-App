@@ -62,7 +62,7 @@ export default function LeaveManagementScreen() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
-
+  const [rights,setRights]=useState(false);
 
   // useEffect(() => {
   //   const loadToken = async () => {
@@ -78,7 +78,7 @@ export default function LeaveManagementScreen() {
       const stored = await AsyncStorage.getItem("userData");
       setemployee_id(await AsyncStorage.getItem("employee_id"));
 
-
+      setRights( JSON.parse(await AsyncStorage.getItem("rights")))
       if (stored) {
         const parsedUser = JSON.parse(stored);
         setuserData(parsedUser);
@@ -87,6 +87,7 @@ export default function LeaveManagementScreen() {
       }
       setToken(t);
       console.log("TOKEN LOADED:", t);
+      
       // fetch_applied_leave_data();
       // if (t) {
       //   fetch_leave_list(t);
@@ -160,7 +161,7 @@ export default function LeaveManagementScreen() {
 
 
   const fetch_leave_list = async (token) => {
-
+    
 
     if (!token) return;
     console.log(API_BASE_URL, "API_BASE_URL11");
@@ -259,7 +260,7 @@ export default function LeaveManagementScreen() {
 
   const handleSubmit = async () => {
     // console.log("LOG");
-
+    // console.log( rights);
     if (!token || !selectedLeave) {
       showPopup("error", "Error", "Please select leave type");
       // Alert.alert("Error", "Please select leave type");
@@ -371,10 +372,7 @@ export default function LeaveManagementScreen() {
   monthEnd.setHours(23, 59, 59, 999);
 
   return (
-    // ❌ exclude completed leaves
     leaveEnd >= today &&
-
-    // ✅ show if overlapping selected month
     leaveStart <= monthEnd &&
     leaveEnd >= monthStart
   );
@@ -457,23 +455,23 @@ return (
 //     toDate >= today
 //   );
 // });
-const leaveStatusData = Leavedata?.filter(item => {
-  const fromDate = new Date(item.leave_from_date);
-  fromDate.setHours(0, 0, 0, 0);
+// const leaveStatusData = Leavedata?.filter(item => {
+//   const fromDate = new Date(item.leave_from_date);
+//   fromDate.setHours(0, 0, 0, 0);
 
-  return fromDate >= today;
-});
+//   return fromDate >= today;
+// });
 
 
-  const statusData = Leavedata?.filter(item => {
-    const toDate = new Date(item.leave_to_date);
-    toDate.setHours(0, 0, 0, 0);
+//   const statusData = Leavedata?.filter(item => {
+//     const toDate = new Date(item.leave_to_date);
+//     toDate.setHours(0, 0, 0, 0);
 
-    return (
-      item.leave_approval_status === "pending" ||
-      ((item.leave_approval_status === "approved" || item.leave_approval_status === "rejected" || item.leave_approval_status === "cancelled") && toDate >= today)
-    );
-  });
+//     return (
+//       item.leave_approval_status === "pending" ||
+//       ((item.leave_approval_status === "approved" || item.leave_approval_status === "rejected" || item.leave_approval_status === "cancelled") && toDate >= today)
+//     );
+//   });
 
 
 
@@ -931,7 +929,7 @@ const leaveStatusData = Leavedata?.filter(item => {
         }
       />
 
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 }
@@ -1123,7 +1121,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8,
-    marginLeft: 10,
+    // marginLeft: 10,
+    margin:"auto",
     width: 50
   },
   upcomingStatusBox: {
@@ -1137,7 +1136,7 @@ const styles = StyleSheet.create({
   upcomingStatusText: {
     color: "#fff",
     fontWeight: "600",
-    textAlign: "right"
+    textAlign: "center"
   },
 
   historyCard: {
