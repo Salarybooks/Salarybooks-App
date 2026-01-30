@@ -83,7 +83,7 @@ const AdvanceManagement =() => {
         });
 
       if (res.data?.status === "success") {
-        console.log(res.data,"res.data");
+        // console.log(res.data,"res.data");
         
         setAdvanceList(res.data.advance_data.docs || []);
       }
@@ -239,7 +239,7 @@ const AdvanceManagement =() => {
       }
 
     } catch (err) {
-      // console.log(err);
+      console.log(err);
        showPopup("error", "Error",  "Failed to submit advance request");
       // Alert.alert("Error", "Failed to submit advance request");
     }

@@ -65,7 +65,7 @@ const Reimbursement = () => {
             showPopup("error", "Permission Denied", "you don't have This functionality");
             return;
         }
-        navigation.navigate("Blank", { title: "Attendance" });
+        navigation.navigate("Leave_Management", { title: "Leave Management" });
     }
     const screenExpence = () => {
 

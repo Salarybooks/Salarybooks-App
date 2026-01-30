@@ -58,11 +58,9 @@ const Dashboard = () => {
   const fetchemployeedata = async () => {
     if (!token) return;
     try {
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
       const payload = {
         pageno: 1,
       };
-      // const res = await axios.post("http://10.0.2.2:8080/employee/employee-get-advance-list",
       const res = await axios.post(`${API_BASE_URL}employee/get-account`,
         payload,
         {
@@ -72,11 +70,6 @@ const Dashboard = () => {
           },
         });
 
-      // if (res.data?.status === "success") {
-      //   setEmpData(res.data?.employee_data);
-      //   console.log("employee data", empData,res.data?.employee_data.profile_pic,API_BASE_URL);
-      //   saveImageUrl();
-      // }
       if (res.data?.status === "success") {
         const employeeData = res.data.employee_data;
         console.log("API_BASE_URL",API_BASE_URL);
