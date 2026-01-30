@@ -173,7 +173,7 @@ const Leave_Balance = () => {
     const getLeaveByCode = (code) => {
         return (
             LeaveList.find(item => item.abbreviation === code) || {
-                available: 0,
+                consumed: 0,
                 total_balance: 0,
             }
         );
@@ -306,9 +306,10 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     loading:{
+        color:"#fff",
         margin:"auto",
-        marginTop:90,
-        marginLeft:45
+        marginTop:100,
+        marginLeft:55
     }
 });
 

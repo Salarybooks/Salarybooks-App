@@ -17,6 +17,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatusPopup from './StatusPopup/StatusPopup';
 const { width, height } = Dimensions.get('window');
+import { API_BASE_URL } from "@env";
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -93,10 +94,12 @@ const SignUpScreen = () => {
   const handleSignIn = async () => {
     try {
       await AsyncStorage.setItem('rememberMe', JSON.stringify(rememberMe));
-      const url = 'https://back.finalpayroll.in/employee_signin';
+      // const url = 'https://back.finalpayroll.in/employee_signin';
+      const url = `${API_BASE_URL}employee_signin`;
       // const url = 'http://10.0.2.2:8080/employee_signin';
       const data = { corporate_id: corporateId, userid: userId, password };
-
+      console.log(url,"url");
+      
       const response = await axios.post(url, data, {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -122,7 +125,7 @@ const SignUpScreen = () => {
         // Alert.alert(response.data.message || 'Login failed');
       }
     } catch (error) {
-      showPopup("error", error.response?.data || error.message, "'Something went wrong. Please try again.'");
+      showPopup("error",  error.message, "'Something went wrong. Please try again.'");
       // console.error('Login Failed:', error.response?.data || error.message);
       // Alert.alert('Something went wrong. Please try again.');
     }
