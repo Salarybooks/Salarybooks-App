@@ -275,11 +275,12 @@ const Leave_Balance = () => {
                      color: "#FFFFFF",
                      fontFamily:"Outfit-Regular"
                 }}
-
+                formatYLabel={(value) => Math.round(value).toString()}
                 yAxisTextStyle={{
-                    color: "#AFC3D6",
+                    color: "#FFFFFF",
                     fontSize: 10,
-                    fontFamily:"Outfit-Regular"
+                    fontFamily:"Outfit-Regular",
+                    
                 }}
 
                 isAnimated
