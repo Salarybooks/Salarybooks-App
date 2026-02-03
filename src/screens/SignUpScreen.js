@@ -130,6 +130,12 @@ const SignUpScreen = () => {
       // Alert.alert('Something went wrong. Please try again.');
     }
   };
+
+  const handleForgotPassword = async () =>{
+    // console.log("Forgotpasseword");
+    
+    showPopup("error",  "Forgot Password", "Please contact your HR for credentials");
+  }
   // const handleRememberMe = async () => {
   //   setRememberMe(!rememberMe);
   //   await AsyncStorage.setItem('rememberMe', rememberMe);
@@ -217,7 +223,7 @@ const SignUpScreen = () => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={styles.forgotText}>Forget Password?</Text>
           </TouchableOpacity>
         </View>

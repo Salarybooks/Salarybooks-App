@@ -1068,9 +1068,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   centerBox: {
-    paddingVertical: 10,
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingVertical: 15,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    rowGap:10,
+    marginBottom:20,
+    height: 50,
   },
 
 
