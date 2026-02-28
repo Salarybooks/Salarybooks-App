@@ -47,8 +47,8 @@ const Settings = ({ navigation }) => {
     const loadData = async () => {
       try {
         const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-        const employeeBankDetails = JSON.parse(await AsyncStorage.getItem("employee_bank_details"));
-        console.log("userData", userData);
+        // const employeeBankDetails = JSON.parse(await AsyncStorage.getItem("employee_bank_details"));
+        // console.log("userData", userData);
         const storedBankDetails = await AsyncStorage.getItem("employee_bank_details");
         const profilepic = await AsyncStorage.getItem("imageUrl");
         console.log("profilepicprofilepicprofilepicprofilepic", profilepic);
@@ -58,7 +58,7 @@ const Settings = ({ navigation }) => {
           ? JSON.parse(storedBankDetails)
           : null;
         setBankData(bankDetails)
-        console.log(bankDetails);
+        // console.log(bankDetails);
         if (userData) {
           // console.log(userData,"userData");
           setUserData(userData);
@@ -222,8 +222,8 @@ const Settings = ({ navigation }) => {
           <View style={styles.card}>
             <Text style={[GlobalFont.CustomFont,styles.label_bank, { color:  "#fff"  }]}>Bank Accounts</Text>
             <View style={styles.infoRow1}>
-              <Text style={[GlobalFont.CustomFont,styles.value, { color:  "#fff"  }]}>HDFC Bank</Text>
-              <Text style={[GlobalFont.CustomFont,styles.value, { color:  "#fff" }]}>*7636</Text>
+              <Text style={[styles.value, { color: "#fff" }]}>{bankData?.bank_name}</Text>
+              <Text style={[styles.value, { color: "#fff" }]}>{bankData?.account_no? `****${bankData.account_no.slice(-4)}`: ""}</Text>
             </View>
             </View>
           </View>
