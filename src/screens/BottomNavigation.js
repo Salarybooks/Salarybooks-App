@@ -62,7 +62,7 @@ const BottomNavigation = ({ rights }) => {
     { label: 'Leaves', icon: require('../assets/leaves.png'), screen: 'Leave_Management',title:"Leave Management", permission:canApplyleave },
     { label: 'Payslips', icon: require('../assets/payslips.png'), screen: 'Payslips',title:"Payslips" ,permission:canApplypayslip},
     { label: 'Check In', icon: require('../assets/checkin.png'), screen: 'Blank',title:"Attendance Management",permission:canApplyAttendance },
-    { label: 'Settings', icon: require('../assets/settings.png'), screen: 'Settings',title:"Settings",permission:true },
+    { label: 'Account', icon: require('../assets/settings.png'), screen: 'Account',title:"My Account",permission:true },
   ];
 
   const showPopup = (type, title, message) => {

@@ -15,7 +15,7 @@ export default function InstallmentHistoryScreen({ route }) {
   const pct = data.advance_amount
     ? (data.advance_recovered / data.advance_amount) * 100
     : 0;
-
+  
   return (
     <LinearGradient
       colors={["#062945", "#0A355A", "#0E4A7A"]}

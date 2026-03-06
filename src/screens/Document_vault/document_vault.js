@@ -37,8 +37,8 @@ const DocumentVaultScreen = () => {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState("Personal");
   const navigation = useNavigation();
-  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
-  
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
+
   const [uploadedFiles, setUploadedFiles] = useState({
     documents: [],
     other_documents: []
@@ -57,14 +57,14 @@ const DocumentVaultScreen = () => {
   const [isPDF, setIsPDF] = useState(false);
 
   const [uploading, setUploading] = useState(false);
-  const [rights,setRights]=useState(false);
+  const [rights, setRights] = useState(false);
 
   useEffect(() => {
     const loadToken = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
         const stored = await AsyncStorage.getItem("userData");
-
+        
         console.log("TOKEN LOADED:", token);
 
         if (stored) {
@@ -72,7 +72,7 @@ const DocumentVaultScreen = () => {
 
           setToken(token);
           setuserData(parsedUser);
-          setRights( JSON.parse(await AsyncStorage.getItem("rights")))
+          setRights(JSON.parse(await AsyncStorage.getItem("rights")))
           fetchUploadedDocs(parsedUser._id, token);
 
         }
@@ -83,6 +83,7 @@ const DocumentVaultScreen = () => {
 
     loadToken();
   }, []);
+  console.log(uploadedFiles, "uploadedFiles");
 
   const showPopup = (type, title, message) => {
     setPopupConfig({
@@ -105,13 +106,13 @@ const DocumentVaultScreen = () => {
         const parts = file.uri.split("/");
         extractedName = parts[parts.length - 1];
       }
-      console.log(extractedName,"extractedName");
+      console.log(extractedName, "extractedName");
       const key = field === "Personal" ? "documents" : "other_documents";
       const currentList = uploadedFiles[key] || [];
       // extractedName=extractedName.replace("%", "_")
       extractedName = `Document ${currentList.length + 1}`.replace(" ", "_");
       // console.log(extractedName,"extractedName");
-      
+
       // setUploadedFiles(prev => [
       //   ...prev,
       //   {
@@ -148,7 +149,7 @@ const DocumentVaultScreen = () => {
     }
   };
 
-  
+
   // const pickDocument = async (field) => {
   //   try {
   //     const file = await PdfPicker.pickFile();
@@ -158,7 +159,7 @@ const DocumentVaultScreen = () => {
 
   //     const newCustomName = `Document ${currentList.length + 1}`;
   //     console.log(newCustomName,"newCustomName");
-      
+
   //     const fileObj = {
   //       shownName: newCustomName,
   //       uri: file.uri,
@@ -191,16 +192,17 @@ const DocumentVaultScreen = () => {
 
 
   const uploadFileToServer = async (file, field) => {
-    // console.log(API_BASE_URL,"API_BASE_URL");
-    
+    console.log(API_BASE_URL, "API_BASE_URL");
+
     setUploading(true);
     try {
       const formData = new FormData();
 
       formData.append("employee_id", userData._id);
-      formData.append("field", field);
-
-      formData.append("document_file", {
+      // formData.append("field", field);
+      formData.append('emp_id', userData.emp_id);
+      formData.append('corporate_id', userData?.corporate_id);
+      formData.append(field, {
         uri: file.uri,
         name: file.name,
         type: file.type || "application/octet-stream",
@@ -235,8 +237,6 @@ const DocumentVaultScreen = () => {
   };
 
   const fetchUploadedDocs = async (employeeId, token) => {
-    console.log(API_BASE_URL,"API");
-    
     try {
       const response = await axios.post(
         `${API_BASE_URL}employee/get-employee-documents`,
@@ -245,14 +245,17 @@ const DocumentVaultScreen = () => {
       );
 
       console.log("Fetched Docs:", response.data);
-      console.log(response.data, "response.data.documents");
 
       if (response.data.success) {
-        setUploadedFiles(prev => ({
-          ...prev,
+
+        const othersObj = response.data.documents.other_documents || {};
+
+        const othersArray = Object.values(othersObj);
+        console.log(othersArray,"othersArray")
+        setUploadedFiles({
           documents: response.data.documents || [],
-          other_documents: response.data.other_documents || []
-        }));
+          other_documents: othersArray,
+        });
       }
     } catch (error) {
       console.log("Fetch Docs Error:", error.response?.data || error);
@@ -264,55 +267,55 @@ const DocumentVaultScreen = () => {
     return `${API_BASE_URL}${filePath.replace(/\\/g, "/")}`;
   };
   const getMimeType = (uri) => {
-  if (!uri) return "application/octet-stream";
+    if (!uri) return "application/octet-stream";
 
-  const ext = uri.split(".").pop().toLowerCase();
+    const ext = uri.split(".").pop().toLowerCase();
 
-  switch (ext) {
-    case "pdf":
-      return "application/pdf";
+    switch (ext) {
+      case "pdf":
+        return "application/pdf";
 
-    case "png":
-      return "image/png";
+      case "png":
+        return "image/png";
 
-    case "jpg":
-    case "jpeg":
-      return "image/jpeg";
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
 
-    case "txt":
-      return "text/plain";
+      case "txt":
+        return "text/plain";
 
-    case "doc":
-      return "application/msword";
+      case "doc":
+        return "application/msword";
 
-    case "docx":
-      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      case "docx":
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-    case "xls":
-      return "application/vnd.ms-excel";
+      case "xls":
+        return "application/vnd.ms-excel";
 
-    case "xlsx":
-      return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      case "xlsx":
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    case "ppt":
-      return "application/vnd.ms-powerpoint";
+      case "ppt":
+        return "application/vnd.ms-powerpoint";
 
-    case "pptx":
-      return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+      case "pptx":
+        return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
-    case "csv":
-      return "text/csv";
+      case "csv":
+        return "text/csv";
 
-    case "zip":
-      return "application/zip";
+      case "zip":
+        return "application/zip";
 
-    case "rar":
-      return "application/vnd.rar";
+      case "rar":
+        return "application/vnd.rar";
 
-    default:
-      return "application/octet-stream"; 
-  }
-};
+      default:
+        return "application/octet-stream";
+    }
+  };
 
   // const getMimeType = (uri) => {
   //   const ext = uri.split(".").pop().toLowerCase();
@@ -324,7 +327,7 @@ const DocumentVaultScreen = () => {
   //       return "image/jpeg";
   //     case "doc":
   //       return "application/msword";
-        
+
   //     case "docx":
   //       return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   //     default:
@@ -364,46 +367,46 @@ const DocumentVaultScreen = () => {
   // };
 
   const downloadFile = async (remoteFileUrl, fileName) => {
-  try {
-    remoteFileUrl = buildFileUri(remoteFileUrl);
-    const fileUrl = remoteFileUrl.replace(/\\/g, "/");
+    try {
+      remoteFileUrl = buildFileUri(remoteFileUrl);
+      const fileUrl = remoteFileUrl.replace(/\\/g, "/");
 
-    const downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir;
+      const downloadDir = ReactNativeBlobUtil.fs.dirs.DownloadDir;
 
-    let safeName = fileName;
+      let safeName = fileName;
 
-    if (!safeName || !safeName.includes(".")) {
+      if (!safeName || !safeName.includes(".")) {
 
-      const matchExt = fileUrl.split(".").pop();
+        const matchExt = fileUrl.split(".").pop();
 
-      if (matchExt && matchExt.length <= 4) {
-        safeName = (fileName || ("doc_" + Date.now())) + "." + matchExt;
-      } else {
-        safeName = (fileName || ("doc_" + Date.now())) + ".pdf"; 
+        if (matchExt && matchExt.length <= 4) {
+          safeName = (fileName || ("doc_" + Date.now())) + "." + matchExt;
+        } else {
+          safeName = (fileName || ("doc_" + Date.now())) + ".pdf";
+        }
       }
+
+      const localPath = `${downloadDir}/${safeName}`;
+
+      console.log("Downloading to:", localPath);
+
+      const res = await ReactNativeBlobUtil.config({
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: localPath,
+          title: "Downloading Document",
+          mime: getMimeType(localPath),
+        },
+      }).fetch("GET", fileUrl);
+
+      // console.log("Downloaded File Path:", res.path());
+    } catch (e) {
+      // console.log("Download error:", e);
+      showPopup("error", "Error", "Download Failed");
+      // alert("Download Failed");
     }
-    
-    const localPath = `${downloadDir}/${safeName}`;
-
-    console.log("Downloading to:", localPath);
-
-    const res = await ReactNativeBlobUtil.config({
-      addAndroidDownloads: {
-        useDownloadManager: true,
-        notification: true,
-        path: localPath,
-        title: "Downloading Document",
-        mime: getMimeType(localPath),
-      },
-    }).fetch("GET", fileUrl);
-
-    // console.log("Downloaded File Path:", res.path());
-  } catch (e) {
-    // console.log("Download error:", e);
-    showPopup("error", "Error", "Download Failed");
-    // alert("Download Failed");
-  }
-};
+  };
 
   const renameFile = async () => {
     if (!renameText.trim()) return;
@@ -449,7 +452,7 @@ const DocumentVaultScreen = () => {
       }
     } catch (error) {
       // console.log("Rename Error:", error.response?.data || error);
-      showPopup("error", "Error","Rename Failed");
+      showPopup("error", "Error", "Rename Failed");
       // alert("Rename Failed");
     }
 
@@ -495,7 +498,7 @@ const DocumentVaultScreen = () => {
           }
         });
       } else {
-        showPopup("error", "Error","Delete Failed");
+        showPopup("error", "Error", "Delete Failed");
         // alert("Delete Failed");
       }
 
@@ -513,65 +516,53 @@ const DocumentVaultScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={() => setMenuIndex(null)}>
       <LinearGradient
-            colors={["#000000ff", "#1c68beff"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
-          >
+        colors={["#000000ff", "#1c68beff"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
         <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
 
-         <View style={styles.header}>
-          <Image
+          <View style={styles.header}>
+            <Image
               source={require("../../assets/document_vault.png")}
               style={styles.header_iconImage}
             />
-          <Navbar title={screenTitle} />
-        </View>
+            <Navbar title={screenTitle} />
+          </View>
 
           <View style={styles.tabContainer}>
-                  <TouchableOpacity
-                    style={[styles.tab, activeTab === "Personal" && styles.activeTab]}
-                    onPress={() => setActiveTab("Personal")}
-                  >
-                    <Text
-                      style={[GlobalFont.CustomFont,
-                        activeTab === "Personal"
-                          ? styles.activeTabText
-                          : styles.inactiveTabText
-                      ]}
-                    >
-                      Personal
-                    </Text>
-                  </TouchableOpacity>
-          
-                  <TouchableOpacity
-                    style={[styles.tab, activeTab === "Others" && styles.activeTab]}
-                    onPress={() => setActiveTab("Others")}
-                  >
-                    <Text
-                      style={[GlobalFont.CustomFont,
-                        activeTab === "Others"
-                          ? styles.activeTabText
-                          : styles.inactiveTabText
-                      ]}
-                    >
-                      Others
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-          <View style={styles.titleRow}>
-            <Text style={[GlobalFont.bold,styles.sectionTitle]}>Uploaded PDFs</Text>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "Personal" && styles.activeTab]}
+              onPress={() => setActiveTab("Personal")}
+            >
+              <Text
+                style={[GlobalFont.CustomFont,
+                activeTab === "Personal"
+                  ? styles.activeTabText
+                  : styles.inactiveTabText
+                ]}
+              >
+                Official
+              </Text>
+            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.uploadBtn} onPress={() => pickDocument(activeTab)}>
-              <Text style={[GlobalFont.CustomFont,styles.uploadText]}>Upload File</Text>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "Others" && styles.activeTab]}
+              onPress={() => setActiveTab("Others")}
+            >
+              <Text
+                style={[GlobalFont.CustomFont,
+                activeTab === "Others"
+                  ? styles.activeTabText
+                  : styles.inactiveTabText
+                ]}
+              >
+                Others
+              </Text>
             </TouchableOpacity>
           </View>
-          {uploading && (
-            <View style={styles.loaderOverlay}>
-              <ActivityIndicator size="large" color="#fff" />
-              <Text style={[GlobalFont.CustomFont,{ color: "white", marginTop: 5 }]}>Uploading...</Text>
-            </View>
-          )}
+
 
           <ScrollView
             style={styles.fileScroll}
@@ -580,146 +571,179 @@ const DocumentVaultScreen = () => {
             keyboardShouldPersistTaps="always"
           >
             {activeTab === "Personal" &&
-            uploadedFiles?.documents?.length > 0 && (
-            <View  style={styles.card}>
-            { uploadedFiles.documents.map((file, index) => (
-              
-                <View key={index} style={styles.card_inner}>
+              uploadedFiles?.documents?.files &&
+              Object.values(uploadedFiles.documents.files).length > 0 && (
 
-                <TouchableOpacity
-                  key={index}
-                  // style={styles.card}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    const uri = buildFileUri(file.file_path);
-                    setSelectedFile({ ...file, uri });
-                    setIsPDF(file.file_type === "application/pdf");
-                    setModalVisible(true);
-                  }}
-                >
-                  <View style={styles.cardLeft}>
-                    {/* <Text style={styles.cardIcon}>{pdf_icon}</Text> */}
-                    <Image
-                        source={require("../../assets/pdf_icon.png")}
-                        style={styles.iconImage}
-                      />
-                    <Text style={[GlobalFont.CustomFont,styles.cardTitle]}>{file.file_name}</Text>
-                  </View>
+                <View style={styles.card}>
 
-                </TouchableOpacity>
-                <View>
-                  <TouchableOpacity
-                    onPress={() => setMenuIndex(menuIndex === index ? null : index)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text style={styles.menuDots}>⋮</Text>
-                  </TouchableOpacity>
+                  {Object.values(uploadedFiles.documents.files).map((file, index) => (
 
-                  {menuIndex === index && (
-                    <View style={styles.dropdown}>
-                      {/* <TouchableOpacity
-                      style={styles.dropdownItem}
-                      onPress={async () => {
-                        const uri = buildFileUri(file.file_path);
-                        setSelectedFile({ ...file, uri });
-                        setIsPDF(file.file_type === "application/pdf");
-                        setModalVisible(true);
-                        setMenuIndex(null);
-                      }}
-                    >
-                      <Text style={styles.dropdownText}>👁  View</Text>
-                    </TouchableOpacity> */}
+                    <View key={index} style={styles.card_inner}>
 
                       <TouchableOpacity
-                        style={styles.dropdownItem}
+                        activeOpacity={0.8}
                         onPress={() => {
-                          downloadFile(file.file_path, file.file_name);
-                          setMenuIndex(null);
+                          const uri = buildFileUri(file.file_path);
+                          setSelectedFile({ ...file, uri });
+                          setIsPDF(file.file_type === "application/pdf");
+                          setModalVisible(true);
                         }}
                       >
-                        <Image
-                          source={require("../../assets/DownloadVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Download</Text>
+
+                        <View style={styles.cardLeft}>
+
+                          <Image
+                            source={require("../../assets/pdf_icon.png")}
+                            style={styles.iconImage}
+                          />
+
+                          <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>
+                            {file.file_name || file.folder_name}
+                          </Text>
+
+                        </View>
+
                       </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setRenameIndex(index);
-                          setRenameText(file.file_name);
-                          setRenameModalVisible(true);
-                          setMenuIndex(null);
-                        }}
-                      >
-                        <Image
-                          source={require("../../assets/RenameVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Rename</Text>
-                      </TouchableOpacity>
+                      <View>
 
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          deleteDocument(file._id || file.id, index, "Personal");
-                          setMenuIndex(null);
-                        }}
-                      >
-                        <Image
-                          source={require("../../assets/DeleteVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Delete</Text>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => setMenuIndex(menuIndex === index ? null : index)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <Text style={styles.menuDots}>⋮</Text>
+                        </TouchableOpacity>
+
+                        {menuIndex === index && (
+                          <View style={styles.dropdown}>
+
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                downloadFile(file.file_path, file.file_name);
+                                setMenuIndex(null);
+                              }}
+                            >
+                              <Image
+                                source={require("../../assets/DownloadVault.png")}
+                                style={styles.download}
+                              />
+                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                                Download
+                              </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                setRenameIndex(index);
+                                setRenameText(file.file_name);
+                                setRenameModalVisible(true);
+                                setMenuIndex(null);
+                              }}
+                            >
+                              <Image
+                                source={require("../../assets/RenameVault.png")}
+                                style={styles.download}
+                              />
+                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                                Rename
+                              </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                deleteDocument(file._id || file.id, index, "Personal");
+                                setMenuIndex(null);
+                              }}
+                            >
+                              <Image
+                                source={require("../../assets/DeleteVault.png")}
+                                style={styles.download}
+                              />
+                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                                Delete
+                              </Text>
+                            </TouchableOpacity>
+
+                          </View>
+                        )}
+
+                      </View>
+
                     </View>
-                  )}
+
+                  ))}
+
                 </View>
-              </View>
-              
-            ))}
-            </View>)}
+              )}
             {/* Others */}
-            {activeTab === "Others" &&
-            uploadedFiles?.other_documents?.length > 0 && (
-            <View style={styles.card}>
-            { uploadedFiles.other_documents.map((file, index) => (
-              
-                <View key={index} style={styles.card_inner}>
-                {/* <View style={styles.cardLeft}>
+
+            {activeTab === "Others" && (
+              <>
+                <View style={styles.titleRow}>
+                  <Text style={[GlobalFont.bold, styles.sectionTitle]}>
+                    Uploaded PDFs
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.uploadBtn}
+                    onPress={() => pickDocument(activeTab)}
+                  >
+                    <Text style={[GlobalFont.CustomFont, styles.uploadText]}>
+                      Upload File
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {uploading && (
+                  <View style={styles.loaderOverlay}>
+                    <ActivityIndicator size="large" color="#fff" />
+                    <Text style={[GlobalFont.CustomFont, { color: "white", marginTop: 5 }]}>
+                      Uploading...
+                    </Text>
+                  </View>
+                )}
+
+                {uploadedFiles?.other_documents?.length > 0 && (
+                  <View style={styles.card}>
+                    {uploadedFiles.other_documents.map((file, index) => (
+
+                      <View key={index} style={styles.card_inner}>
+                        {/* <View style={styles.cardLeft}>
                 <Text style={styles.cardIcon}>📄</Text>
                 <Text style={styles.cardTitle}>{file.file_name}</Text>
               </View> */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    const uri = buildFileUri(file.file_path);
-                    setSelectedFile({ ...file, uri });
-                    setIsPDF(file.file_type === "application/pdf");
-                    setModalVisible(true);
-                  }}
-                >
-                  <View style={styles.cardLeft}>
-                    {/* <Text style={styles.cardIcon}>📄</Text> */}
-                     <Image
-                        source={require("../../assets/pdf_others.png")}
-                        style={styles.iconImage_others}
-                      />
-                    <Text style={[GlobalFont.CustomFont,styles.cardTitle]}>{file.file_name}</Text>
-                  </View>
-                </TouchableOpacity>
-                <View>
-                  <TouchableOpacity
-                    onPress={() => setMenuIndex(menuIndex === index ? null : index)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text style={styles.menuDots}>⋮</Text>
-                  </TouchableOpacity>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => {
+                            const uri = buildFileUri(file.file_path);
+                            setSelectedFile({ ...file, uri });
+                            setIsPDF(file.file_type === "application/pdf");
+                            setModalVisible(true);
+                          }}
+                        >
+                          <View style={styles.cardLeft}>
+                            {/* <Text style={styles.cardIcon}>📄</Text> */}
+                            <Image
+                              source={require("../../assets/pdf_others.png")}
+                              style={styles.iconImage_others}
+                            />
+                            <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>{file.file_name}</Text>
+                          </View>
+                        </TouchableOpacity>
+                        <View>
+                          <TouchableOpacity
+                            onPress={() => setMenuIndex(menuIndex === index ? null : index)}
+                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                          >
+                            <Text style={styles.menuDots}>⋮</Text>
+                          </TouchableOpacity>
 
-                  {menuIndex === index && (
-                    <View style={styles.dropdown}>
-                      {/* <TouchableOpacity
+                          {menuIndex === index && (
+                            <View style={styles.dropdown}>
+                              {/* <TouchableOpacity
                         style={styles.dropdownItem}
                         onPress={async () => {
                           const uri = buildFileUri(file.file_path);
@@ -732,55 +756,57 @@ const DocumentVaultScreen = () => {
                         <Text style={styles.dropdownText}>👁  View</Text>
                       </TouchableOpacity> */}
 
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          downloadFile(file.file_path, file.file_name);
-                          setMenuIndex(null);
-                        }}
-                      >
-                        <Image
-                          source={require("../../assets/DownloadVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Download</Text>
-                      </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                  downloadFile(file.file_path, file.file_name);
+                                  setMenuIndex(null);
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/DownloadVault.png")}
+                                  style={styles.download}
+                                />
+                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Download</Text>
+                              </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setRenameIndex(index);
-                          setRenameText(file.file_name);
-                          setRenameModalVisible(true);
-                          setMenuIndex(null);
-                        }}
-                      >
-                        <Image
-                          source={require("../../assets/RenameVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Rename</Text>
-                      </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                  setRenameIndex(index);
+                                  setRenameText(file.file_name);
+                                  setRenameModalVisible(true);
+                                  setMenuIndex(null);
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/RenameVault.png")}
+                                  style={styles.download}
+                                />
+                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Rename</Text>
+                              </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          deleteDocument(file._id || file.id, index, "Others");
-                          setMenuIndex(null);
-                        }}
-                      >
-                        <Image
-                          source={require("../../assets/DeleteVault.png")}
-                          style={styles.download}
-                        />
-                        <Text style={[GlobalFont.CustomFont,styles.dropdownText]}> Delete</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              </View>
-            ))}
-              </View>)}
+                              <TouchableOpacity
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                  deleteDocument(file._id || file.id, index, "Others");
+                                  setMenuIndex(null);
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/DeleteVault.png")}
+                                  style={styles.download}
+                                />
+                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Delete</Text>
+                              </TouchableOpacity>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>)}
+              </>
+            )}
             <View style={{ height: 140 }} />
           </ScrollView>
           <Modal
@@ -800,7 +826,7 @@ const DocumentVaultScreen = () => {
 
                 <View style={{ height: 450, marginTop: 10 }}>
                   {!selectedFile ? (
-                    <Text style={[GlobalFont.CustomFont,{ color: "#fff" }]}>No File Available</Text>
+                    <Text style={[GlobalFont.CustomFont, { color: "#fff" }]}>No File Available</Text>
                   ) : isPDF ? (
                     <Pdf
                       source={{ uri: selectedFile.uri }}
@@ -822,7 +848,7 @@ const DocumentVaultScreen = () => {
           <Modal transparent={true} visible={renameModalVisible} animationType="fade">
             <View style={styles.modalOverlay}>
               <View style={styles.modalBox}>
-                <Text style={[GlobalFont.CustomFont,styles.modalTitle]}>Rename File</Text>
+                <Text style={[GlobalFont.CustomFont, styles.modalTitle]}>Rename File</Text>
 
                 <TextInput
                   value={renameText}
@@ -834,18 +860,18 @@ const DocumentVaultScreen = () => {
 
                 <View style={styles.modalBtns}>
                   <TouchableOpacity style={styles.cancelBtn} onPress={() => setRenameModalVisible(false)}>
-                    <Text style={[GlobalFont.CustomFont,styles.cancelText]}>Cancel</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.cancelText]}>Cancel</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.saveBtn} onPress={renameFile}>
-                    <Text style={[GlobalFont.CustomFont,styles.saveText]}>Save</Text>
+                    <Text style={[GlobalFont.CustomFont, styles.saveText]}>Save</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
           </Modal>
-          
-          
+
+
           <StatusPopup
             visible={popupConfig.visible}
             type={popupConfig.type}
@@ -856,7 +882,7 @@ const DocumentVaultScreen = () => {
             }
           />
         </SafeAreaView>
-        <BottomNavigation rights={rights}/>
+        <BottomNavigation rights={rights} />
       </LinearGradient>
     </TouchableWithoutFeedback>
   );
@@ -1028,15 +1054,15 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection:"row",
+    flexDirection: "row",
     width: "100%",
     marginBottom: 12,
-    alignItems:"center",
-    gap:5
+    alignItems: "center",
+    gap: 5
   },
-   header_iconImage: {
+  header_iconImage: {
     width: 35,
-    padding:20,
+    padding: 20,
     height: 20,
     marginLeft: -5,
   },
@@ -1128,36 +1154,36 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
-    rowGap:10
+    rowGap: 10
   },
-  card_inner:{
-    backgroundColor:"rgba(255,255,255,0.1)",
+  card_inner: {
+    backgroundColor: "rgba(255,255,255,0.1)",
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding:6,
+    padding: 6,
     // marginLeft:4,
     // margin:"auto",
-     alignItems: "center",
-    borderRadius:8,
+    alignItems: "center",
+    borderRadius: 8,
     // marginBottom:10,
-    height:50,
-    width:width * .87
+    height: 50,
+    width: width * .87
   },
   cardLeft: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
- 
+
   iconImage: {
     width: 35,
-    padding:23,
+    padding: 23,
     height: 20,
     marginLeft: 5,
   },
   iconImage_others: {
     width: 35,
-    padding:21,
+    padding: 21,
     height: 20,
     marginLeft: 5,
   },
@@ -1173,7 +1199,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     flexShrink: 1,
-    marginLeft:10
+    marginLeft: 10
   },
 
   menuDots: {
@@ -1196,10 +1222,10 @@ const styles = StyleSheet.create({
   },
 
   dropdownItem: {
-    display:"flex",
-    flexDirection:"row",
+    display: "flex",
+    flexDirection: "row",
     paddingVertical: 8,
-    gap:8
+    gap: 8
   },
 
   dropdownText: {
@@ -1263,7 +1289,7 @@ const styles = StyleSheet.create({
   modalBtns: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap:10
+    gap: 10
   },
 
   cancelBtn: {
@@ -1297,9 +1323,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 15,
   },
-  download:{
-     width: 20,
-    padding:10,
+  download: {
+    width: 20,
+    padding: 10,
     height: 10,
     // marginLeft: -5,
   }

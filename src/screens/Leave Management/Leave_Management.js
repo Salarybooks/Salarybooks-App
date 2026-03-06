@@ -280,7 +280,8 @@ export default function LeaveManagementScreen() {
       formData.append("remaining_leaves", remainingLeaves);
       formData.append("emp_reason", reason);
       formData.append("available", selectedLeave.available);
-
+      console.log(formData,"formData");
+      
       const response = await axios.post(
         `${API_BASE_URL}employee/employee-leave-request`,
         formData,
@@ -299,6 +300,8 @@ export default function LeaveManagementScreen() {
         setModalVisible(false);
         fetch_applied_leave_data();
       } else {
+        console.log("true");
+        
         showPopup("error", "Error", response.data.message);
         // Alert.alert("Error", response.data.message);
       }
