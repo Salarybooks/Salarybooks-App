@@ -172,10 +172,160 @@ const PayslipScreen = () => {
     }
   };
 
+<<<<<<< HEAD
  
   const viewPayslipInOverlay = async (monthKey, year) => {
     console.log(monthKey,year,"year");
     
+=======
+//   const viewPayslipInOverlay = async (monthKey, year) => {
+//   if (!payslipData) {
+//     showPopup("error", "Error", "Payslip data not loaded");
+//     return;
+//   }
+
+//   const matched = payslipData.master_data.docs.find(
+//     item => item.wage_month === monthKey
+//   );
+
+//   if (!matched) {
+//     showPopup("error", "Error", "Payslip not found");
+//     return;
+//   }
+
+//   try {
+//     const res = await axios.post(
+//       `${API_BASE_URL}employee/download-payslip-data`,
+//       {
+//         row_checked_all: false,
+//         pageno: 1,
+//         perpage: 1,
+//         wage_month: monthKey,
+//         wage_year: parseInt(year),
+//         checked_row_ids: JSON.stringify([matched._id]),
+//         unchecked_row_ids: "[]",
+//         type: "view",
+//       },
+//       {
+//         headers: { "x-access-token": token },
+//       }
+//     );
+
+//     if (!res.data?.file_url) {
+//       showPopup("error", "Error", "Payslip not available");
+//       return;
+//     }
+
+//     const finalUrl =
+//       API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
+
+//     setPdfUrl(finalUrl);
+//     setModalVisible(true);
+//   } catch (err) {
+//     showPopup("error", "View Failed", err.message);
+//   }
+// };
+
+  // const download_payslip = async (monthKey, year) => {
+  //   console.log("API_BASE_URL", API_BASE_URL);
+  //   if (!payslipData) {
+  //     showPopup("error", "Error", "Payslip data not loaded");
+  //     // Alert.alert("Error", "Payslip data not loaded");
+  //     return;
+  //   }
+
+  //   const hasPermission = await requestStoragePermission();
+  //   if (!hasPermission) {
+  //     showPopup("error", "Permission Denied", "Storage permission is required");
+  //     // Alert.alert("Permission Denied", "Storage permission is required");
+  //     return;
+  //   }
+
+  //   console.log("payslipDatapayslipData", payslipData);
+
+  //   const docs = payslipData.master_data.docs;
+  //   const matched = docs.find((item) => item.wage_month === monthKey);
+
+  //   if (!matched) {
+  //     showPopup("error", "Error", "No payslip found for this month");
+  //     // Alert.alert("Error", "No payslip found for this month");
+  //     return;
+  //   }
+  //   const emp_id = await AsyncStorage.getItem("employee_mongose_id");
+  //   // console.log("emp_id", emp_id);
+
+  //   const payload = {
+  //     row_checked_all: false,
+  //     pageno: 1,
+  //     perpage: 20,
+  //     wage_month: monthKey,
+  //     wage_year: parseInt(year),
+  //     // checked_row_ids: JSON.stringify([matched._id]),
+  //     // checked_row_ids: emp_id,
+  //     checked_row_ids: JSON.stringify([matched._id]),
+  //     unchecked_row_ids: "[]",
+  //     type: "download",
+  //   };
+
+  //   console.log("payload", payload);
+
+  //   try {
+  //     const { fs, config } = RNBlobUtil;
+
+  //     const downloadPath =
+  //       fs.dirs.DownloadDir + `/payslip_${monthKey}_${year}.pdf`;
+
+
+  //     const res = await axios.post(
+  //       `${API_BASE_URL}employee/download-payslip-data`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           "x-access-token": token,
+  //         },
+  //       }
+  //     );
+
+  //     if (!res.data?.file_url) {
+  //       showPopup("error", "Error", "Payslip not found");
+  //       // Alert.alert("Error", "Payslip not found");
+  //       return;
+  //     }
+
+  //     // const fileUrl = res.data.file_url;
+  //     // const fileUrl = normalizeUrl(API_BASE_URL, matched.pdf_link);
+  //     // const fileUrl =API_BASE_URL.replace(/\/$/, "") +matched.pdf_link;
+  //     const fileUrl =
+  //       API_BASE_URL.replace(/\/$/, "") +
+  //       res.data.file_url;
+  //     console.log("fileUrl", fileUrl, res.data.file_url, API_BASE_URL);
+
+
+  //     await RNBlobUtil.config({
+  //       fileCache: true,
+  //       appendExt: "pdf",
+  //       addAndroidDownloads: {
+  //         useDownloadManager: true,
+  //         notification: true,
+  //         path: downloadPath,
+  //         mime: "application/pdf",
+  //         description: "Payslip downloaded",
+  //         mediaScannable: true,
+  //       },
+  //     }).fetch("GET", fileUrl);
+  //     // Alert.alert(
+  //     //   "Success",
+  //     //   "Payslip downloaded to Downloads folder 📂"
+  //     // );
+  //   } catch (err) {
+  //     // console.log("Download Error:", err);
+  //     showPopup("error","Download Failed", err.message);
+  //     // Alert.alert("Download Failed", err.message);
+  //   }
+  // };
+
+const viewPayslipInOverlay = async (monthKey, year) => {
+>>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
   if (!payslipData) {
     showPopup("error", "Error", "Payslip data not loaded");
     return;
@@ -205,27 +355,42 @@ const PayslipScreen = () => {
       },
       {
         headers: { "x-access-token": token },
+        responseType: "arraybuffer", // ⭐ IMPORTANT
       }
     );
+<<<<<<< HEAD
     console.log(res.data,"res.data");
     
     if (!res.data?.file_url) {
       showPopup("error", "Error", "Payslip not available");
       return;
     }
+=======
 
-    const finalUrl =
-      API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
+    const base64Data = RNBlobUtil.base64.encode(
+      String.fromCharCode(...new Uint8Array(res.data))
+    );
+>>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
 
-    setPdfUrl(finalUrl);
+    const tempPath = `${RNBlobUtil.fs.dirs.CacheDir}/payslip_preview.pdf`;
+
+    await RNBlobUtil.fs.writeFile(tempPath, base64Data, "base64");
+
+    setPdfUrl(`file://${tempPath}`);
     setModalVisible(true);
+
   } catch (err) {
-    showPopup("error", "View Failed", err.message);
+    console.log(err);
+    showPopup("error", "View Failed", "Unable to open payslip");
   }
 };
+    const download_payslip = async (monthKey, year) => {
 
+<<<<<<< HEAD
   const download_payslip = async (monthKey, year) => {
 
+=======
+>>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
     console.log("API_BASE_URL", monthKey,year);
     if (!payslipData) {
       showPopup("error", "Error", "Payslip data not loaded");
@@ -374,26 +539,6 @@ const PayslipScreen = () => {
 }
   };
 
-
-  // const view_payslip = (monthKey, year) => {
-  //   if (!payslipData) {
-  //     showPopup("error","Error", "Payslip data not loaded");
-  //     // Alert.alert("Error", "Payslip data not loaded");
-  //     return;
-  //   }
-
-  //   const docs = payslipData.master_data.docs;
-
-  //   let matched = docs.find((item) => item.wage_month === monthKey);
-
-  //   if (!matched) {
-  //     showPopup("error","Error", "No payslip found for this month");
-  //     // Alert.alert("Error", "No payslip found for this month");
-  //     return;
-  //   }
-
-  //   navigation.navigate("ViewPayslipScreen", { data: matched });
-  // };
   const route = useRoute();
   const screenTitle = route.params?.title;
   return (

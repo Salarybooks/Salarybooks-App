@@ -522,6 +522,7 @@ const Expense = () => {
                       <Picker.Item label="Select" value="" />
                       <Picker.Item label="2024" value="2024" />
                       <Picker.Item label="2025" value="2025" />
+                      <Picker.Item label="2026" value="2026" />
                     </Picker>
                   </View>
 
