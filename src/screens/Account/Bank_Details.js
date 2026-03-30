@@ -29,10 +29,12 @@ const BankDetailsForm = () => {
   const [unapproveBankDetails, setUnapproveBankDetails] = useState(null);
   const [BankDetailsStatus, setBankDetailsStatus] = useState(null);
   const [rejectedRemark, setrejectedRemark] = useState(null);
-  const [employeeVault, setEmployeeVault] = useState(0);
+  const [employee_vault, setEmployeeVault] = useState(0);
+  const [rights, setRights] = useState(false);
   const [alreadyUploadedSize, setAlreadyUploadedSize] = useState(0);
   const MAX_SINGLE_FILE_KB = 200;
   const [employee_id, setemployee_id] = useState(null);
+  const [updateButton, setUpdateButton] = useState(false);
   const [form, setForm] = useState({
     bank_name: '',
     branch_name: '',
@@ -61,8 +63,11 @@ const BankDetailsForm = () => {
         setUserData(userData);
         setBankDetails(employee_bank_details)
         setUnapproveBankDetails(emp_unapprove_bank_details)
+        setUpdateButton(emp_unapprove_bank_details.bank_details_submit_status)
         setEmployeeVault(employee_vault || 0);
         setAlreadyUploadedSize(total_file_size || 0);
+        setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+
       }
       if (emp_unapprove_bank_details.bank_details_status) {
         setBankDetailsStatus(emp_unapprove_bank_details.bank_details_status);
@@ -97,7 +102,7 @@ const BankDetailsForm = () => {
     }));
   }, [bankDetails, userData, employee_id]);
 
-  console.log(alreadyUploadedSize,"alreadyUploadedSize");
+
   
   const Bank_Fields = [
     'bank_name',
@@ -113,9 +118,11 @@ const BankDetailsForm = () => {
 
   const getRemainingSizeKB = () => {
     const selectedSizeKB = file?.size ? file.size / 1024 : 0;
-
+    console.log(alreadyUploadedSize,"alreadyUploadedSize");
+    console.log(alreadyUploadedSize + selectedSizeKB,"alreadyUploadedSize + selectedSizeKB");
+    
     const remaining =
-      employeeVault - (alreadyUploadedSize + selectedSizeKB);
+      employee_vault - (alreadyUploadedSize + selectedSizeKB);
 
     return remaining > 0 ? remaining : 0;
   };
@@ -145,8 +152,9 @@ const BankDetailsForm = () => {
       if (!picked) return;
 
       const fileSizeKB = picked.size / 1024;
-      const remainingSizeKB = getRemainingSizeKB();
-
+      
+      // console.log(remainingSizeKB,"remainingSizeKB");
+      
       if (fileSizeKB > MAX_SINGLE_FILE_KB) {
         Alert.alert(
           "File Too Large",
@@ -155,13 +163,13 @@ const BankDetailsForm = () => {
         return;
       }
 
-      if (fileSizeKB > remainingSizeKB) {
-        Alert.alert(
-          "Storage Limit Exceeded",
-          `Only ${remainingSizeKB.toFixed(2)} KB remaining`
-        );
-        return;
-      }
+      // if (fileSizeKB > remainingSizeKB) {
+      //   Alert.alert(
+      //     "Storage Limit Exceeded",
+      //     `Only ${remainingSizeKB.toFixed(2)} KB remaining`
+      //   );
+      //   return;
+      // }
 
       const fileObj = {
         name: picked.name || picked.fileName || 'cancel_cheque.pdf',
@@ -177,11 +185,24 @@ const BankDetailsForm = () => {
     }
   };
   const onSubmit = async () => {
+      console.log(alreadyUploadedSize,"alreadyUploadedSize");
     if (form.account_no != form.re_account_no) {
       Alert.alert('Error', 'Account No. not match');
       return;
     }
     try {
+      const selectedFilesSizeKB = getRemainingSizeKB();
+             console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
+          const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
+            console.log(totalUsed,"totalUsed")
+            console.log(employee_vault-totalUsed,"remaining")
+          if (totalUsed > employee_vault) {
+            Alert.alert(
+              "Storage Limit Exceeded",
+              `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
+            );
+            return;
+          }
       const formData = new FormData();
 
       formData.append('employee_id', employee_id);
@@ -203,6 +224,7 @@ const BankDetailsForm = () => {
       if (Object.keys(bank_details).length > 0) {
          const bankPayload = {
         bank_details_status: 'pending',
+        bank_details_submit_status: 'inactive',
         ...bank_details
     };
         formData.append(
@@ -246,6 +268,7 @@ const BankDetailsForm = () => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.containerall}>
         <View style={styles.header}>
           <Image
             source={require('../../assets/credit-card.png')}
@@ -263,9 +286,13 @@ const BankDetailsForm = () => {
             ]}
           >
             <Text style={styles.notificationTitle}>
-              {BankDetailsStatus === 'rejected'
+            {BankDetailsStatus === 'rejected'
                 ? 'Details Rejected'
-                : ' Details Approved'}
+                : BankDetailsStatus === 'pending'
+                  ? 'Details Pending for Approval'
+                  : BankDetailsStatus === 'approved'
+                    ? 'Details Approved'
+                    : ''}
             </Text>
 
             {BankDetailsStatus === 'rejected' && (
@@ -361,12 +388,15 @@ const BankDetailsForm = () => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={onSubmit}>
-          <Text style={styles.buttonText}>UPDATE</Text>
-        </TouchableOpacity>
+        {updateButton !== "inactive" && (
+                  <TouchableOpacity style={styles.button} onPress={onSubmit}>
+                    <Text style={styles.buttonText}>Update</Text>
+                  </TouchableOpacity>
+                )}
+                </View>
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };
@@ -380,6 +410,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  containerall:{
+    marginBottom:100
   },
   headerIcon: {
     width: 28,

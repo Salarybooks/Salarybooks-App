@@ -12,7 +12,8 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Alert
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from "react-native-linear-gradient";
@@ -38,13 +39,15 @@ const DocumentVaultScreen = () => {
   const [activeTab, setActiveTab] = useState("Personal");
   const navigation = useNavigation();
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
-
+  const MAX_SINGLE_FILE_KB = 200;
   const [uploadedFiles, setUploadedFiles] = useState({
     documents: [],
     other_documents: []
   });
   const [menuIndex, setMenuIndex] = useState(null);
-
+  const [file, setFile] = useState(null);
+  const [employeeVault, setEmployeeVault] = useState(0);
+  const [alreadyUploadedSize, setAlreadyUploadedSize] = useState(0);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameText, setRenameText] = useState("");
   const [renameIndex, setRenameIndex] = useState(null);
@@ -64,8 +67,9 @@ const DocumentVaultScreen = () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
         const stored = await AsyncStorage.getItem("userData");
-        
-        console.log("TOKEN LOADED:", token);
+        const employee_vault = JSON.parse(await AsyncStorage.getItem("employee_vault"));
+        const total_file_size = JSON.parse(await AsyncStorage.getItem("total_file_size"));
+        // console.log("TOKEN LOADED:", token);
 
         if (stored) {
           const parsedUser = JSON.parse(stored);
@@ -74,7 +78,8 @@ const DocumentVaultScreen = () => {
           setuserData(parsedUser);
           setRights(JSON.parse(await AsyncStorage.getItem("rights")))
           fetchUploadedDocs(parsedUser._id, token);
-
+          setEmployeeVault(employee_vault || 0);
+          setAlreadyUploadedSize(total_file_size || 0);
         }
       } catch (error) {
         console.log("ERROR reading storage:", error);
@@ -83,7 +88,7 @@ const DocumentVaultScreen = () => {
 
     loadToken();
   }, []);
-  console.log(uploadedFiles, "uploadedFiles");
+  // console.log(uploadedFiles, "uploadedFiles");
 
   const showPopup = (type, title, message) => {
     setPopupConfig({
@@ -93,53 +98,55 @@ const DocumentVaultScreen = () => {
       message,
     });
   };
+  const getRemainingSizeKB = () => {
+    const selectedSizeKB = file?.size ? file.size / 1024 : 0;
 
-  const pickDocument = async (field) => {
-    // console.log(field,"field");
+    const remaining =
+      employeeVault - (alreadyUploadedSize + selectedSizeKB);
 
+    return remaining > 0 ? remaining : 0;
+  };
+  const pickDocument = async () => {
     try {
       const file = await PdfPicker.pickFile();
+      if (!file) return;
 
-
-      let extractedName = "Unknown File";
-      if (file.uri) {
-        const parts = file.uri.split("/");
-        extractedName = parts[parts.length - 1];
+      const fileSizeKB = file.size / 1024;
+      const remainingSizeKB = getRemainingSizeKB();
+      // console.log(remainingSizeKB,"remainingSizeKB");
+      
+      if (fileSizeKB > MAX_SINGLE_FILE_KB) {
+        Alert.alert(
+          "File Too Large",
+          `File must be less than ${MAX_SINGLE_FILE_KB} KB`
+        );
+        return;
       }
-      console.log(extractedName, "extractedName");
-      const key = field === "Personal" ? "documents" : "other_documents";
-      const currentList = uploadedFiles[key] || [];
-      // extractedName=extractedName.replace("%", "_")
-      extractedName = `Document ${currentList.length + 1}`.replace(" ", "_");
-      // console.log(extractedName,"extractedName");
+  
+      if (fileSizeKB > remainingSizeKB) {
+        Alert.alert(
+          "Storage Limit Exceeded",
+          `Only ${remainingSizeKB.toFixed(2)} KB remaining`
+        );
+        return;
+      }
+      const currentList = uploadedFiles.other_documents || [];
+      const extractedName = `Document_${currentList.length + 1}`;
 
-      // setUploadedFiles(prev => [
-      //   ...prev,
-      //   {
-      //     name: extractedName, 
-      //     uri: file.uri,
-      //     type: file.type,
-      //     size: file.size,
-      //   }
-      // ]);
       const fileObj = {
         name: extractedName,
         uri: file.uri,
         type: file.type,
         size: file.size,
       };
-
+      setFile(fileObj);
       setUploadedFiles(prev => ({
         ...prev,
-        [field === "Personal" ? "documents" : "other_documents"]: [
-          ...(prev[field === "Personal" ? "documents" : "other_documents"] || []),
-          fileObj
-        ]
+        other_documents: [...(prev.other_documents || []), fileObj]
       }));
 
-
       if (token) {
-        uploadFileToServer(fileObj, field);
+        uploadFileToServer(fileObj, "Others");
       } else {
         console.log("TOKEN NOT READY!");
       }
@@ -192,21 +199,21 @@ const DocumentVaultScreen = () => {
 
 
   const uploadFileToServer = async (file, field) => {
-    console.log(API_BASE_URL, "API_BASE_URL");
-
     setUploading(true);
     try {
       const formData = new FormData();
-
       formData.append("employee_id", userData._id);
-      // formData.append("field", field);
       formData.append('emp_id', userData.emp_id);
       formData.append('corporate_id', userData?.corporate_id);
-      formData.append(field, {
+
+      // Fix: use the correct field key your API expects
+      formData.append("other_documents", {
         uri: file.uri,
         name: file.name,
         type: file.type || "application/octet-stream",
       });
+
+      // console.log(formData, "formData");
 
       const response = await axios.post(
         `${API_BASE_URL}employee/upload-employee-documents`,
@@ -219,24 +226,24 @@ const DocumentVaultScreen = () => {
         }
       );
 
-      console.log("Upload Result:", response.data.status);
+      // console.log("Upload Result:", response.data); 
 
       if (response.data.status) {
-        // alert("Uploaded Successfully!");
         fetchUploadedDocs(userData._id, token);
-      }
-      else {
-        showPopup("error", "Error", "Upload Failed");
-        // alert("Upload Failed");
+      } else {
+        showPopup("error", "Error", response.data.message || "Upload Failed");
       }
     } catch (err) {
-      console.log("UPLOAD ERROR:", err.response?.data || err);
+      console.log("UPLOAD ERROR:", err.response?.data || err.message || err); // don't silence errors!
+      showPopup("error", "Error", "Upload Failed");
     } finally {
       setUploading(false);
     }
   };
 
   const fetchUploadedDocs = async (employeeId, token) => {
+    // console.log(employeeId, "employeeId", token, "token");
+
     try {
       const response = await axios.post(
         `${API_BASE_URL}employee/get-employee-documents`,
@@ -251,11 +258,13 @@ const DocumentVaultScreen = () => {
         const othersObj = response.data.documents.other_documents || {};
 
         const othersArray = Object.values(othersObj);
-        console.log(othersArray,"othersArray")
+        // console.log(othersArray,"othersArray")
         setUploadedFiles({
           documents: response.data.documents || [],
           other_documents: othersArray,
         });
+        // console.log(uploadedFiles,"uploadedFiles");
+        
       }
     } catch (error) {
       console.log("Fetch Docs Error:", error.response?.data || error);
@@ -388,7 +397,7 @@ const DocumentVaultScreen = () => {
 
       const localPath = `${downloadDir}/${safeName}`;
 
-      console.log("Downloading to:", localPath);
+      // console.log("Downloading to:", localPath);
 
       const res = await ReactNativeBlobUtil.config({
         addAndroidDownloads: {
@@ -409,13 +418,15 @@ const DocumentVaultScreen = () => {
   };
 
   const renameFile = async () => {
-    if (!renameText.trim()) return;
-
+    // if (!renameText.trim()) return;
+    console.log(renameText,"renameText");
+    
     try {
       const selectedArray = activeTab === "Personal" ? "documents" : "other_documents";
       const doc = uploadedFiles[selectedArray][renameIndex];
 
       const document_id = doc._id || doc.id;
+      console.log(document_id,"document_id");
       if (!document_id) {
         showPopup("error", "Error", "Unable to rename: document id missing.");
         // alert("Unable to rename: document id missing.");
@@ -514,536 +525,360 @@ const DocumentVaultScreen = () => {
 
 
   return (
-    <TouchableWithoutFeedback onPress={() => setMenuIndex(null)}>
-      <LinearGradient
-        colors={["#000000ff", "#1c68beff"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    
+  <View style={{ flex: 1 }}>
+    <LinearGradient
+      colors={["#000000ff", "#1c68beff"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
 
-          <View style={styles.header}>
-            <Image
-              source={require("../../assets/document_vault.png")}
-              style={styles.header_iconImage}
-            />
-            <Navbar title={screenTitle} />
-          </View>
+        <View style={styles.header}>
+          <Image
+            source={require("../../assets/document_vault.png")}
+            style={styles.header_iconImage}
+          />
+          <Navbar title={screenTitle} />
+        </View>
 
-          <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === "Personal" && styles.activeTab]}
-              onPress={() => setActiveTab("Personal")}
-            >
-              <Text
-                style={[GlobalFont.CustomFont,
-                activeTab === "Personal"
-                  ? styles.activeTabText
-                  : styles.inactiveTabText
-                ]}
-              >
-                Official
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === "Others" && styles.activeTab]}
-              onPress={() => setActiveTab("Others")}
-            >
-              <Text
-                style={[GlobalFont.CustomFont,
-                activeTab === "Others"
-                  ? styles.activeTabText
-                  : styles.inactiveTabText
-                ]}
-              >
-                Others
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-
-          <ScrollView
-            style={styles.fileScroll}
-            contentContainerStyle={styles.fileScrollContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="always"
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "Personal" && styles.activeTab]}
+            onPress={() => setActiveTab("Personal")}
           >
-            {activeTab === "Personal" &&
-              uploadedFiles?.documents?.files &&
-              Object.values(uploadedFiles.documents.files).length > 0 && (
+            <Text
+              style={[GlobalFont.CustomFont,
+              activeTab === "Personal"
+                ? styles.activeTabText
+                : styles.inactiveTabText
+              ]}
+            >
+              Official
+            </Text>
+          </TouchableOpacity>
 
-                <View style={styles.card}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "Others" && styles.activeTab]}
+            onPress={() => setActiveTab("Others")}
+          >
+            <Text
+              style={[GlobalFont.CustomFont,
+              activeTab === "Others"
+                ? styles.activeTabText
+                : styles.inactiveTabText
+              ]}
+            >
+              Others
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-                  {Object.values(uploadedFiles.documents.files).map((file, index) => (
+        <ScrollView
+          style={styles.fileScroll}
+          contentContainerStyle={styles.fileScrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+        >
+          {activeTab === "Personal" &&
+            uploadedFiles?.documents?.files &&
+            Object.values(uploadedFiles.documents.files).length > 0 && (
+              <View style={styles.card}>
+                {Object.values(uploadedFiles.documents.files).map((file, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.card_inner,
+                      menuIndex === index && { zIndex: 9999, elevation: 9999 }  
+                    ]}
+                  >
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        if (menuIndex === index) return;
+                        const uri = buildFileUri(file.file_path);
+                        setSelectedFile({ ...file, uri });
+                        setIsPDF(file.file_type === "application/pdf");
+                        setModalVisible(true);
+                      }}
+                      style={styles.cardLeft}
+                    >
+                      <Image
+                        source={require("../../assets/pdf_icon.png")}
+                        style={styles.iconImage}
+                      />
+                      <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>
+                        {file.file_name || file.folder_name}
+                      </Text>
+                    </TouchableOpacity>
 
-                    <View key={index} style={styles.card_inner}>
-
+                    <View style={styles.menuWrapper}>
                       <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => {
-                          const uri = buildFileUri(file.file_path);
-                          setSelectedFile({ ...file, uri });
-                          setIsPDF(file.file_type === "application/pdf");
-                          setModalVisible(true);
-                        }}
+                        onPress={() => setMenuIndex(menuIndex === index ? null : index)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        style={styles.menuButton}
                       >
-
-                        <View style={styles.cardLeft}>
-
-                          <Image
-                            source={require("../../assets/pdf_icon.png")}
-                            style={styles.iconImage}
-                          />
-
-                          <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>
-                            {file.file_name || file.folder_name}
-                          </Text>
-
-                        </View>
-
+                        <Text style={styles.menuDots}>⋮</Text>
                       </TouchableOpacity>
 
-                      <View>
+                      {menuIndex === index && (
+                        <View style={styles.dropdown}>
+                          <TouchableOpacity
+                            style={styles.dropdownItem}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              downloadFile(file.file_path, file.file_name);
+                              setMenuIndex(null);
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/DownloadVault.png")}
+                              style={styles.downloadIcon}
+                            />
+                            <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                              Download
+                            </Text>
+                          </TouchableOpacity>
 
-                        <TouchableOpacity
-                          onPress={() => setMenuIndex(menuIndex === index ? null : index)}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                          <Text style={styles.menuDots}>⋮</Text>
-                        </TouchableOpacity>
+                          {/* <TouchableOpacity
+                            style={styles.dropdownItem}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              setRenameIndex(index);
+                              setRenameText(file.file_name);
+                              setRenameModalVisible(true);
+                              setMenuIndex(null);
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/RenameVault.png")}
+                              style={styles.downloadIcon}
+                            />
+                            <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                              Rename
+                            </Text>
+                          </TouchableOpacity>
 
-                        {menuIndex === index && (
-                          <View style={styles.dropdown}>
-
-                            <TouchableOpacity
-                              style={styles.dropdownItem}
-                              onPress={() => {
-                                downloadFile(file.file_path, file.file_name);
-                                setMenuIndex(null);
-                              }}
-                            >
-                              <Image
-                                source={require("../../assets/DownloadVault.png")}
-                                style={styles.download}
-                              />
-                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
-                                Download
-                              </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                              style={styles.dropdownItem}
-                              onPress={() => {
-                                setRenameIndex(index);
-                                setRenameText(file.file_name);
-                                setRenameModalVisible(true);
-                                setMenuIndex(null);
-                              }}
-                            >
-                              <Image
-                                source={require("../../assets/RenameVault.png")}
-                                style={styles.download}
-                              />
-                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
-                                Rename
-                              </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                              style={styles.dropdownItem}
-                              onPress={() => {
-                                deleteDocument(file._id || file.id, index, "Personal");
-                                setMenuIndex(null);
-                              }}
-                            >
-                              <Image
-                                source={require("../../assets/DeleteVault.png")}
-                                style={styles.download}
-                              />
-                              <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
-                                Delete
-                              </Text>
-                            </TouchableOpacity>
-
-                          </View>
-                        )}
-
-                      </View>
-
+                          <TouchableOpacity
+                            style={styles.dropdownItem}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              deleteDocument(file._id || file.id, index, "Personal");
+                              setMenuIndex(null);
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/DeleteVault.png")}
+                              style={styles.downloadIcon}
+                            />
+                            <Text style={[GlobalFont.CustomFont, styles.dropdownText]}>
+                              Delete
+                            </Text>
+                          </TouchableOpacity> */}
+                        </View>
+                      )}
                     </View>
+                  </View>
+                ))}
+              </View>
+            )}
 
-                  ))}
+          {activeTab === "Others" && (
+            <>
+              <View style={styles.titleRow}>
+                <Text style={[GlobalFont.bold, styles.sectionTitle]}>
+                  Uploaded PDFs
+                </Text>
 
+                <TouchableOpacity
+                  style={styles.uploadBtn}
+                  onPress={() => pickDocument()}
+                >
+                  <Text style={[GlobalFont.CustomFont, styles.uploadText]}>
+                    Upload File
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {uploading && (
+                <View style={styles.loaderOverlay}>
+                  <ActivityIndicator size="large" color="#fff" />
+                  <Text style={[GlobalFont.CustomFont, { color: "white", marginTop: 5 }]}>
+                    Uploading...
+                  </Text>
                 </View>
               )}
-            {/* Others */}
-
-            {activeTab === "Others" && (
-              <>
-                <View style={styles.titleRow}>
-                  <Text style={[GlobalFont.bold, styles.sectionTitle]}>
-                    Uploaded PDFs
-                  </Text>
-
-                  <TouchableOpacity
-                    style={styles.uploadBtn}
-                    onPress={() => pickDocument(activeTab)}
-                  >
-                    <Text style={[GlobalFont.CustomFont, styles.uploadText]}>
-                      Upload File
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {uploading && (
-                  <View style={styles.loaderOverlay}>
-                    <ActivityIndicator size="large" color="#fff" />
-                    <Text style={[GlobalFont.CustomFont, { color: "white", marginTop: 5 }]}>
-                      Uploading...
-                    </Text>
-                  </View>
-                )}
 
                 {uploadedFiles?.other_documents?.length > 0 && (
                   <View style={styles.card}>
                     {uploadedFiles.other_documents.map((file, index) => (
-
-                      <View key={index} style={styles.card_inner}>
-                        {/* <View style={styles.cardLeft}>
-                <Text style={styles.cardIcon}>📄</Text>
-                <Text style={styles.cardTitle}>{file.file_name}</Text>
-              </View> */}
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() => {
-                            const uri = buildFileUri(file.file_path);
-                            setSelectedFile({ ...file, uri });
-                            setIsPDF(file.file_type === "application/pdf");
-                            setModalVisible(true);
-                          }}
-                        >
-                          <View style={styles.cardLeft}>
-                            {/* <Text style={styles.cardIcon}>📄</Text> */}
-                            <Image
-                              source={require("../../assets/pdf_others.png")}
-                              style={styles.iconImage_others}
-                            />
-                            <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>{file.file_name}</Text>
-                          </View>
-                        </TouchableOpacity>
-                        <View>
-                          <TouchableOpacity
-                            onPress={() => setMenuIndex(menuIndex === index ? null : index)}
-                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          >
-                            <Text style={styles.menuDots}>⋮</Text>
-                          </TouchableOpacity>
-
-                          {menuIndex === index && (
-                            <View style={styles.dropdown}>
-                              {/* <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={async () => {
+                      <View
+                        key={index}
+                        style={[
+                          styles.card_inner,
+                          menuIndex === index && { zIndex: 9999, elevation: 9999 }
+                        ]}
+                      >
+                       <TouchableOpacity
+                      activeOpacity={0.8}
+                        onPress={() => {
+                          if (menuIndex === index) return;   
                           const uri = buildFileUri(file.file_path);
                           setSelectedFile({ ...file, uri });
                           setIsPDF(file.file_type === "application/pdf");
                           setModalVisible(true);
-                          setMenuIndex(null);
                         }}
-                      >
-                        <Text style={styles.dropdownText}>👁  View</Text>
-                      </TouchableOpacity> */}
+                      style={styles.cardLeft}
+                    >
+                        <Image
+                          source={require("../../assets/pdf_others.png")}
+                          style={styles.iconImage_others}
+                        />
+                        <Text style={[GlobalFont.CustomFont, styles.cardTitle]}>{file.file_name}</Text>
+                      </TouchableOpacity>
+                      
+                      <View style={styles.menuWrapper}>
+                        <TouchableOpacity
+                          onPress={() => setMenuIndex(menuIndex === index ? null : index)}
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                          style={styles.menuButton}
+                        >
+                          <Text style={styles.menuDots}>⋮</Text>
+                        </TouchableOpacity>
 
-                              <TouchableOpacity
-                                style={styles.dropdownItem}
-                                onPress={() => {
-                                  downloadFile(file.file_path, file.file_name);
-                                  setMenuIndex(null);
-                                }}
-                              >
-                                <Image
-                                  source={require("../../assets/DownloadVault.png")}
-                                  style={styles.download}
-                                />
-                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Download</Text>
-                              </TouchableOpacity>
+                          {menuIndex === index && (
+                            <TouchableWithoutFeedback>
+                              <View style={styles.dropdown}>
 
-                              <TouchableOpacity
-                                style={styles.dropdownItem}
-                                onPress={() => {
-                                  setRenameIndex(index);
-                                  setRenameText(file.file_name);
-                                  setRenameModalVisible(true);
-                                  setMenuIndex(null);
-                                }}
-                              >
-                                <Image
-                                  source={require("../../assets/RenameVault.png")}
-                                  style={styles.download}
-                                />
-                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Rename</Text>
-                              </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={styles.dropdownItem}
+                                  onPress={() => {
+                                    downloadFile(file.file_path, file.file_name);
+                                    setMenuIndex(null);
+                                  }}
+                                >
+                                  <Image source={require("../../assets/DownloadVault.png")} style={styles.downloadIcon} />
+                                  <Text style={styles.dropdownText}>Download</Text>
+                                </TouchableOpacity>
 
-                              <TouchableOpacity
-                                style={styles.dropdownItem}
-                                onPress={() => {
-                                  deleteDocument(file._id || file.id, index, "Others");
-                                  setMenuIndex(null);
-                                }}
-                              >
-                                <Image
-                                  source={require("../../assets/DeleteVault.png")}
-                                  style={styles.download}
-                                />
-                                <Text style={[GlobalFont.CustomFont, styles.dropdownText]}> Delete</Text>
-                              </TouchableOpacity>
-                            </View>
+                                <TouchableOpacity
+                                  style={styles.dropdownItem}
+                                  onPress={() => {
+                                    setRenameIndex(index);
+                                    setRenameText(file.file_name);
+                                    setRenameModalVisible(true);
+                                    setMenuIndex(null);
+                                  }}
+                                >
+                                  <Image source={require("../../assets/RenameVault.png")} style={styles.downloadIcon} />
+                                  <Text style={styles.dropdownText}>Rename</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={styles.dropdownItem}
+                                  onPress={() => {
+                                    deleteDocument(file._id, index, "Others");
+                                    setMenuIndex(null);
+                                  }}
+                                >
+                                  <Image source={require("../../assets/DeleteVault.png")} style={styles.downloadIcon} />
+                                  <Text style={styles.dropdownText}>Delete</Text>
+                                </TouchableOpacity>
+
+                              </View>
+                            </TouchableWithoutFeedback>
                           )}
-                        </View>
                       </View>
-                    ))}
-                  </View>)}
-              </>
-            )}
-            <View style={{ height: 140 }} />
-          </ScrollView>
-          <Modal
-            visible={modalVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.overlay}>
-              <LinearGradient colors={["#00213F", "#002C56"]} style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{selectedFile?.file_name}</Text>
-                  <TouchableOpacity onPress={() => setModalVisible(false)}>
-                    <Text style={styles.closeBtn}>✖</Text>
-                  </TouchableOpacity>
+                    </View>
+                  ))}
                 </View>
+              )}
+            </>
+          )}
+          <View style={{ height: 140 }} />
+        </ScrollView>
 
-                <View style={{ height: 450, marginTop: 10 }}>
-                  {!selectedFile ? (
-                    <Text style={[GlobalFont.CustomFont, { color: "#fff" }]}>No File Available</Text>
-                  ) : isPDF ? (
-                    <Pdf
-                      source={{ uri: selectedFile.uri }}
-                      trustAllCerts={false}
-                      style={{ width: "100%", height: "100%", borderRadius: 12 }}
-                      onError={err => console.log("PDF Error:", err)}
-                    />
-                  ) : (
-                    <Image
-                      source={{ uri: selectedFile.uri }}
-                      style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-                    />
-                  )}
-                </View>
-              </LinearGradient>
-            </View>
-          </Modal>
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.overlay}>
+            <LinearGradient colors={["#00213F", "#002C56"]} style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>{selectedFile?.file_name}</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.closeBtn}>✖</Text>
+                </TouchableOpacity>
+              </View>
 
-          <Modal transparent={true} visible={renameModalVisible} animationType="fade">
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalBox}>
-                <Text style={[GlobalFont.CustomFont, styles.modalTitle]}>Rename File</Text>
+              <View style={{ height: 450, marginTop: 10 }}>
+                {!selectedFile ? (
+                  <Text style={[GlobalFont.CustomFont, { color: "#fff" }]}>No File Available</Text>
+                ) : isPDF ? (
+                  <Pdf
+                    source={{ uri: selectedFile.uri }}
+                    trustAllCerts={false}
+                    style={{ width: "100%", height: "100%", borderRadius: 12 }}
+                    onError={err => console.log("PDF Error:", err)}
+                  />
+                ) : (
+                  <Image
+                    source={{ uri: selectedFile.uri }}
+                    style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+                  />
+                )}
+              </View>
+            </LinearGradient>
+          </View>
+        </Modal>
 
-                <TextInput
-                  value={renameText}
-                  onChangeText={setRenameText}
-                  style={styles.input}
-                  placeholder="Enter new name"
-                  placeholderTextColor="#ccc"
-                />
+        <Modal transparent={true} visible={renameModalVisible} animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={[GlobalFont.CustomFont, styles.modalTitle]}>Rename File</Text>
 
-                <View style={styles.modalBtns}>
-                  <TouchableOpacity style={styles.cancelBtn} onPress={() => setRenameModalVisible(false)}>
-                    <Text style={[GlobalFont.CustomFont, styles.cancelText]}>Cancel</Text>
-                  </TouchableOpacity>
+              <TextInput
+                value={renameText}
+                onChangeText={setRenameText}
+                style={styles.input}
+                placeholder="Enter new name"
+                placeholderTextColor="#ccc"
+              />
 
-                  <TouchableOpacity style={styles.saveBtn} onPress={renameFile}>
-                    <Text style={[GlobalFont.CustomFont, styles.saveText]}>Save</Text>
-                  </TouchableOpacity>
-                </View>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => setRenameModalVisible(false)}>
+                  <Text style={[GlobalFont.CustomFont, styles.cancelText]}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.saveBtn} onPress={renameFile}>
+                  <Text style={[GlobalFont.CustomFont, styles.saveText]}>Save</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </Modal>
+          </View>
+        </Modal>
 
-
-          <StatusPopup
-            visible={popupConfig.visible}
-            type={popupConfig.type}
-            title={popupConfig.title}
-            message={popupConfig.message}
-            onClose={() =>
-              setPopupConfig(prev => ({ ...prev, visible: false }))
-            }
-          />
-        </SafeAreaView>
-        <BottomNavigation rights={rights} />
-      </LinearGradient>
-    </TouchableWithoutFeedback>
-  );
+        <StatusPopup
+          visible={popupConfig.visible}
+          type={popupConfig.type}
+          title={popupConfig.title}
+          message={popupConfig.message}
+          onClose={() =>
+            setPopupConfig(prev => ({ ...prev, visible: false }))
+          }
+        />
+      </SafeAreaView>
+      <BottomNavigation rights={rights} />
+    </LinearGradient>
+  </View>
+);
 
 };
 
 export default DocumentVaultScreen;
-
-// const styles = StyleSheet.create({
-//   gradient: { flex: 1 },
-//   container: { flex: 1, paddingHorizontal: 15 },
-//   header: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     marginBottom: 16,
-//   },
-//   loaderOverlay: {
-//     position: "absolute",
-//     top: 0,
-//     left: 0,
-//     right: 0,
-//     bottom: 0,
-//     backgroundColor: "rgba(0,0,0,0.5)",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     zIndex: 100,
-//   },
-
-//   tabRow: {
-//     flexDirection: "row",
-//     backgroundColor: "#0f1b33",
-//     borderRadius: 15,
-//     // marginTop: -450,
-//     zIndex: 50,
-//     elevation: 6,
-//     padding: 10,
-//   },
-//   tabButton: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: 20 },
-//   tabButtonActive: { backgroundColor: "#1c68be", borderRadius: 20 },
-//   tabText: { color: "#788a9e", fontWeight: "600" },
-//   tabTextActive: { color: "#fff" },
-
-
-//   titleRow: {
-//     marginTop: 12,
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     zIndex: 40,
-//     elevation: 4,
-//   },
-//   sectionTitle: { color: "#fff", fontSize: 15, fontWeight: "700" },
-//   uploadBtn: {
-//     backgroundColor: "rgba(255,255,255,0.2)",
-//     borderRadius: 12,
-//     paddingHorizontal: 16,
-//     paddingVertical: 6,
-//   },
-//   uploadText: { color: "#fff", fontSize: 13, fontWeight: "600" },
-
-
-//   fileScroll: {
-//     flex: 1,
-//     marginTop: 8,
-//     zIndex: 1,
-//   },
-//   fileScrollContent: {
-//     paddingBottom: 20,
-//   },
-
-//   card: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     backgroundColor: "rgba(255,255,255,0.08)",
-//     padding: 15,
-//     borderRadius: 12,
-//     marginTop: 12,
-//     borderWidth: 1,
-//     borderColor: "rgba(255,255,255,0.1)",
-//   },
-//   cardLeft: { flexDirection: "row", alignItems: "center", marginTop:5},
-//   cardIcon: { fontSize: 22, marginRight: 10, color: "#fff" },
-//   cardTitle: { color: "#fff", fontSize: 15, fontWeight: "600" },
-
-//   menuDots: { color: "#fff", fontSize: 22, padding: 5 },
-
-//   dropdown: {
-//     position: "absolute",
-//     top: 28,
-//     right: 0,
-//     backgroundColor: "#1c1c2b",
-//     padding: 8,
-//     borderRadius: 6,
-//     width: 140,
-//     zIndex: 999,
-//     elevation: 20,
-//     shadowColor: "#000",
-//     shadowOpacity: 0.25,
-//     shadowRadius: 6,
-//     shadowOffset: { width: 0, height: 3 },
-//   },
-//   dropdownItem: { paddingVertical: 8 },
-//   dropdownText: { color: "#fff", fontSize: 14 },
-
-
-//   overlay: {
-//     flex: 1,
-//     backgroundColor: "rgba(0,0,0,0.6)",
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   modalContainer: {
-//     width: "90%",
-//     borderRadius: 20,
-//     padding: 20,
-//     maxHeight: "85%",
-//   },
-//   modalHeader: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     borderBottomWidth: 1,
-//     borderBottomColor: "#fff",
-//     paddingBottom: 8,
-//   },
-//   tabContainer: {
-//     flexDirection: "row",
-//     marginTop: 10,
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     borderRadius: 15,
-//     padding: 4,
-//   },
-//   tab: {
-//     flex: 1,
-//     paddingVertical: 10,
-//     borderRadius: 12,
-//     alignItems: "center",
-//   },
-//   activeTab: {
-//     backgroundColor: "#0D213A",
-//   },
-//   activeTabText: {
-//     color: "#fff",
-//     fontWeight: "500",
-//   },
-//   inactiveTabText: {
-//     color: "#bbb",
-//   },
-//   modalTitle: { color: "#fff", fontSize: 16, fontWeight: "600" },
-//   closeBtn: { color: "red", fontSize: 20, fontWeight: "bold" },
-
-//   modalOverlay: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.6)" },
-//   modalBox: { width: "80%", backgroundColor: "#1c1c2b", padding: 20, borderRadius: 10 },
-//   modalBtns: { flexDirection: "row", justifyContent: "flex-end" },
-//   cancelBtn: { marginRight: 15 },
-//   saveBtn: { backgroundColor: "#1c68be", paddingHorizontal: 15, paddingVertical: 8, borderRadius: 6 },
-//   saveText: { color: "#fff", fontWeight: "600" },
-//   cancelText: { color: "#bbb", fontSize: 15 },
-//   input: { backgroundColor: "#303045", color: "#fff", padding: 10, borderRadius: 8, marginBottom: 15 },
-// });
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
@@ -1058,27 +893,28 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 12,
     alignItems: "center",
-    gap: 5
+    gap: 5,
   },
+
   header_iconImage: {
     width: 35,
-    padding: 20,
     height: 20,
     marginLeft: -5,
   },
+
   loaderOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    // backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
   },
 
-  /* Tabs */
+
   tabContainer: {
     flexDirection: "row",
     marginTop: 12,
@@ -1108,7 +944,7 @@ const styles = StyleSheet.create({
     color: "#bbb",
   },
 
-  /* Title row */
+
   titleRow: {
     marginTop: 14,
     flexDirection: "row",
@@ -1119,7 +955,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: "#fff",
     fontSize: 15,
-    // fontWeight: "700",
   },
 
   uploadBtn: {
@@ -1135,7 +970,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* File list */
+
   fileScroll: {
     flex: 1,
     marginTop: 8,
@@ -1145,30 +980,34 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
+
   card: {
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    rowGap: 10
-  },
+  alignItems: "center",
+  backgroundColor: "#1E3A5F",
+  paddingVertical: 8,
+  paddingHorizontal: 14,
+  borderRadius: 12,
+  marginTop: 12,
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.1)",
+  rowGap: 10,
+
+  overflow: "visible",   // ✅ VERY IMPORTANT FIX
+},
+
   card_inner: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 6,
-    // marginLeft:4,
-    // margin:"auto",
-    alignItems: "center",
-    borderRadius: 8,
-    // marginBottom:10,
-    height: 50,
-    width: width * .87
-  },
+  backgroundColor: "#2A4D73",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  padding: 6,
+  alignItems: "center",
+  borderRadius: 8,
+  height: 50,
+  width: width * 0.87,
+
+  overflow: "visible",   // ✅ IMPORTANT
+  zIndex: 1,
+},
   cardLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -1177,21 +1016,14 @@ const styles = StyleSheet.create({
 
   iconImage: {
     width: 35,
-    padding: 23,
-    height: 20,
-    marginLeft: 5,
-  },
-  iconImage_others: {
-    width: 35,
-    padding: 21,
     height: 20,
     marginLeft: 5,
   },
 
-  cardIcon: {
-    fontSize: 22,
-    marginRight: 10,
-    color: "#fff",
+  iconImage_others: {
+    width: 35,
+    height: 20,
+    marginLeft: 5,
   },
 
   cardTitle: {
@@ -1199,33 +1031,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     flexShrink: 1,
-    marginLeft: 10
+    marginLeft: 10,
+  },
+
+
+  menuWrapper: {
+    position: "relative",
+    zIndex: 9999, 
+    elevation: 9999,
+  },
+
+  menuButton: {
+    padding: 8,
   },
 
   menuDots: {
     color: "#fff",
     fontSize: 22,
-    paddingHorizontal: 6,
   },
+
 
   dropdown: {
-    position: "absolute",
-    top: 30,
-    right: 0,
-    backgroundColor: "#1c1c2b",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    width: 150,
-    zIndex: 999,
-    elevation: 20,
-  },
+  position: "absolute",
+  top: 40,
+  right: 0,
+  backgroundColor: "#2c2c3e",
+  borderRadius: 8,
+  width: 140,
 
+  zIndex: 99999,     // ✅ MAX
+  elevation: 99999,  // ✅ ANDROID FIX
+
+  overflow: "visible",
+},
   dropdownItem: {
-    display: "flex",
     flexDirection: "row",
-    paddingVertical: 8,
-    gap: 8
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    gap: 10,
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
   },
 
   dropdownText: {
@@ -1233,7 +1079,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  /* Preview modal */
+  downloadIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: "contain",
+  },
+
+
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -1271,7 +1123,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  /* Rename modal */
+
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -1289,7 +1141,7 @@ const styles = StyleSheet.create({
   modalBtns: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 10
+    gap: 10,
   },
 
   cancelBtn: {
@@ -1323,10 +1175,4 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 15,
   },
-  download: {
-    width: 20,
-    padding: 10,
-    height: 10,
-    // marginLeft: -5,
-  }
 });

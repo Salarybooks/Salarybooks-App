@@ -30,7 +30,11 @@ const AddressForm = () => {
   const [userData, setUserData] = useState(null);
   const isHydratedRef = useRef(false);
   const [employee_id, setemployee_id] = useState(null);
-
+  const [pincodeError, setPincodeError] = useState('');
+  const [currPincodeError, setCurrPincodeError] = useState('');
+  const [rights, setRights] = useState(false);
+  const [updateButton, setUpdateButton] = useState(false);
+  
   const [form, setForm] = useState({
     resident_no: '',
     residential_name: '',
@@ -61,7 +65,7 @@ const AddressForm = () => {
       const emp_unapprove_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_address"));
       const emp_unapprove_curr_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_curr_address"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-      //    console.log("authToken");
+        //  console.log(emp_unapprove_address,"emp_unapprove_address");
       if (true) {
 
         setToken(t);
@@ -69,9 +73,11 @@ const AddressForm = () => {
         // console.log(employee_address,"employee_address");
 
         setAddress(employee_address);
+        setUpdateButton(emp_unapprove_address.address_details_submit_status);
         setCurAddress(employee_curr_address);
         setUnApproveAddress(emp_unapprove_address);
         setCurUnApproveAddress(emp_unapprove_curr_address);
+        setRights(JSON.parse(await AsyncStorage.getItem("rights")));
 
         if (emp_unapprove_address.address_details_status) {
           setAddressDetailsStatus(emp_unapprove_address.address_details_status);
@@ -162,7 +168,6 @@ const AddressForm = () => {
 
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
-      // formData.append('address_details_status', 'pending');
 
       const empAddressPayload = {};
 
@@ -178,6 +183,7 @@ const AddressForm = () => {
       if (Object.keys(empAddressPayload).length > 0) {
         const addressPayload = {
           address_details_status: 'pending',
+          address_details_submit_status: 'inactive',
           ...empAddressPayload
         };
         formData.append(
@@ -250,6 +256,7 @@ const AddressForm = () => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.containerall}>
         <View style={styles.header}>
           <Image
             source={require('../../assets/home-address.png')}
@@ -261,18 +268,22 @@ const AddressForm = () => {
           <View
             style={[
               styles.notificationBox,
-              addressDetailsStatus === 'reject'
+              addressDetailsStatus === 'rejected'
                 ? styles.rejectedBox
                 : styles.pendingBox
             ]}
           >
             <Text style={styles.notificationTitle}>
-              {addressDetailsStatus === 'reject'
+              {addressDetailsStatus === 'rejected'
                 ? 'Details Rejected'
-                : ' Details Approved'}
+                : addressDetailsStatus === 'pending'
+                  ? 'Details Pending for Approval'
+                  : addressDetailsStatus === 'approved'
+                    ? 'Details Approved'
+                    : ''}
             </Text>
 
-            {addressDetailsStatus === 'reject' && (
+            {addressDetailsStatus === 'rejected' && (
               <Text style={styles.remarkText}>
                 Remark: {rejectedRemark}
               </Text>
@@ -356,16 +367,36 @@ const AddressForm = () => {
         </View>
 
         <Text style={styles.label}>Pincode</Text>
+
         <TextInput
           style={styles.input}
           keyboardType="numeric"
+          maxLength={6}
           value={form.pincode}
           editable={!address?.pincode}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, pincode: text }))
-          }
-        />
+          onChangeText={(text) => {
+            const cleaned = text.replace(/[^0-9]/g, '');
 
+            setForm(prev => ({ ...prev, pincode: cleaned }));
+
+            if (cleaned.length > 0 && cleaned.length < 6) {
+              setPincodeError('Pincode must be 6 digits');
+            } else if (cleaned.length === 6) {
+              if (/^0/.test(cleaned)) {
+                setPincodeError('Invalid pincode');
+              } else {
+                setPincodeError('');
+              }
+            } else {
+              setPincodeError('');
+            }
+          }}
+        />
+        {pincodeError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {pincodeError}
+          </Text>
+        ) : null}
         <Text style={styles.label}>Country</Text>
         <TextInput
           style={styles.input}
@@ -489,16 +520,39 @@ const AddressForm = () => {
 
 
             <Text style={styles.label}>Current Pincode</Text>
+
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                currPincodeError && { borderColor: 'red' } 
+              ]}
               keyboardType="numeric"
+              maxLength={6}
               value={form.curr_pincode}
               editable={!curaddress?.pincode}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_pincode: text }))
-              }
-            />
+              onChangeText={(text) => {
+                const cleaned = text.replace(/[^0-9]/g, '');
 
+                setForm(prev => ({ ...prev, curr_pincode: cleaned }));
+
+                if (cleaned.length > 0 && cleaned.length < 6) {
+                  setCurrPincodeError('Pincode must be 6 digits');
+                } else if (cleaned.length === 6) {
+                  if (/^0/.test(cleaned)) {
+                    setCurrPincodeError('Invalid pincode');
+                  } else {
+                    setCurrPincodeError('');
+                  }
+                } else {
+                  setCurrPincodeError('');
+                }
+              }}
+            />
+            {currPincodeError ? (
+              <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+                {currPincodeError}
+              </Text>
+            ) : null}
             <Text style={styles.label}>Current Country</Text>
             <TextInput
               style={styles.input}
@@ -510,13 +564,15 @@ const AddressForm = () => {
             />
           </>
         )}
-
-        <TouchableOpacity style={styles.button} onPress={onSubmit}>
-          <Text style={styles.buttonText}>UPDATE</Text>
-        </TouchableOpacity>
+        </View>
+        {updateButton !== "inactive" && (
+                  <TouchableOpacity style={styles.button} onPress={onSubmit}>
+                    <Text style={styles.buttonText}>Update</Text>
+                  </TouchableOpacity>
+                )}
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };
@@ -527,6 +583,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 13 },
   scrollContainer: {
     top: 15
+  },
+  containerall:{
+    marginBottom:100
   },
   header: {
     flexDirection: "row",

@@ -22,6 +22,7 @@ const HR_Details = () => {
   const [employee_id, setemployee_id] = useState(null);
   const [masterdata, SetMasterData] = useState(null);
   const [token,setToken] = useState(null);
+  const [rights, setRights] = useState(false);
   const [form, setForm] = useState({
     department: '',
     designation: '',
@@ -35,21 +36,21 @@ const HR_Details = () => {
     gross_salary: '',
   });
 
-  const selectedDepartment = masterdata?.masters?.department?.find(
-        d => d._id === hrDetails.department
-      );
-  const selectedDesignation = masterdata?.masters?.designation?.find(
-        d => d._id === hrDetails.designation
-      );
-  const selectedBranch = masterdata?.masters?.branch?.company_branch?.find(
-        d => d._id === hrDetails.branch
-      );
-  const selectedHod = masterdata?.masters?.hod?.find(
-        d => d._id === hrDetails.hod
-      );
-  const selectedClient = masterdata?.masters?.clients?.find(
-        d => d._id === hrDetails.client
-      );
+  // const selectedDepartment = masterdata?.masters?.department?.find(
+  //       d => d._id === hrDetails.department
+  //     );
+  // const selectedDesignation = masterdata?.masters?.designation?.find(
+  //       d => d._id === hrDetails.designation
+  //     );
+  // const selectedBranch = masterdata?.masters?.branch?.company_branch?.find(
+  //       d => d._id === hrDetails.branch
+  //     );
+  // const selectedHod = masterdata?.masters?.hod?.find(
+  //       d => d._id === hrDetails.hod
+  //     );
+  // const selectedClient = masterdata?.masters?.clients?.find(
+  //       d => d._id === hrDetails.client
+  //     );
   useEffect(() => {
     const loadTokenAndFetch = async () => {
       const t = await AsyncStorage.getItem("authToken");
@@ -65,8 +66,9 @@ const HR_Details = () => {
         setHrDetails(employee_hr_details);
         SetEmpId(emp_id);
         SetMasterData(masterdata);
-        console.log("employee_id==true",masterdata);
-        
+        // console.log("employee_id==true",masterdata);
+        setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+
       }
 
     };
@@ -75,28 +77,67 @@ const HR_Details = () => {
     // fetchUpdatedDetails(token);
   }, [token]);
 
-  useEffect(() => {
-    // console.log(hrDetails.gross_salary,"hrDetails");
+  // useEffect(() => {
+  //   // console.log(hrDetails.gross_salary,"hrDetails");
     
-    if (!hrDetails || !employee_id) return;
-    console.log(hrDetails.branch_name, "hrDetails");
-    setForm(prev => ({
-      ...prev,
-      employee_id,
-    //   emp_id: userData.emp_id || '',
-      department:selectedDepartment?.department_name || '',
-      designation: selectedDesignation?.designation_name  || '',
-      branch: selectedBranch?.branch_name || '',
-      date_of_join:hrDetails?.date_of_join?.split('T')[0] || '',
-      hod: (selectedHod?.first_name + " " + selectedHod.last_name) || '',
-      client: selectedClient?.client_name || '',
-      emp_type: hrDetails?.emp_type || '',
-      pension_applicable: hrDetails?.pension_applicable || '',
-      emp_id: empid || '',
-      gross_salary: String(hrDetails?.gross_salary || ''),
-    }));
-  }, [hrDetails, employee_id]);
+  //   if (!hrDetails || !employee_id) return;
+  //   console.log(hrDetails.branch_name, "hrDetails");
+  //   setForm(prev => ({
+  //     ...prev,
+  //     employee_id,
+  //   //   emp_id: userData.emp_id || '',
+  //     department:selectedDepartment?.department_name || '',
+  //     designation: selectedDesignation?.designation_name  || '',
+  //     branch: selectedBranch?.branch_name || '',
+  //     date_of_join:hrDetails?.date_of_join?.split('T')[0] || '',
+  //     hod: (selectedHod?.first_name + " " + selectedHod.last_name) || '',
+  //     client: selectedClient?.client_name || '',
+  //     emp_type: hrDetails?.emp_type || '',
+  //     pension_applicable: hrDetails?.pension_applicable || '',
+  //     emp_id: empid || '',
+  //     gross_salary: String(hrDetails?.gross_salary || ''),
+  //   }));
+  // }, [hrDetails, employee_id]);
+  useEffect(() => {
+  if (!hrDetails || !employee_id || !masterdata) return;
 
+  const selectedDepartment = masterdata?.masters?.department?.find(
+    d => d._id === hrDetails.department
+  );
+
+  const selectedDesignation = masterdata?.masters?.designation?.find(
+    d => d._id === hrDetails.designation
+  );
+
+  const selectedBranch = masterdata?.masters?.branch?.company_branch?.find(
+    d => d._id === hrDetails.branch
+  );
+
+  const selectedHod = masterdata?.masters?.hod?.find(
+    d => d._id === hrDetails.hod
+  );
+
+  const selectedClient = masterdata?.masters?.clients?.find(
+    d => d._id === hrDetails.client
+  );
+
+  setForm(prev => ({
+    ...prev,
+    employee_id,
+    department: selectedDepartment?.department_name || '',
+    designation: selectedDesignation?.designation_name || '',
+    branch: selectedBranch?.branch_name || '',
+    date_of_join: hrDetails?.date_of_join?.split('T')[0] || '',
+    hod: selectedHod
+      ? `${selectedHod.first_name} ${selectedHod.last_name}`
+      : '',
+    client: selectedClient?.client_name || '',
+    emp_type: hrDetails?.emp_type || '',
+    pension_applicable: hrDetails?.pension_applicable || '',
+    emp_id: empid || '',
+    gross_salary: String(hrDetails?.gross_salary || ''),
+  }));
+}, [hrDetails, employee_id, masterdata]);
   const onChange = (key, value) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
@@ -220,7 +261,7 @@ const HR_Details = () => {
 
       </ScrollView>
 
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };

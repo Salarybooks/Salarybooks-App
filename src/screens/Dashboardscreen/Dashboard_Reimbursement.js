@@ -38,7 +38,7 @@ const Reimbursement = () => {
             const t = await AsyncStorage.getItem("authToken");
             setToken(t);
             setRights( JSON.parse(await AsyncStorage.getItem("rights")))
-            console.log("TOKEN LOADEDaa:", t);
+            // console.log("TOKEN LOADEDaa:", t);
         };
         loadToken();
     }, []);
@@ -76,7 +76,7 @@ const Reimbursement = () => {
          navigation.navigate('Expense',{ title: "Expense Management" });
     }
     const fetchClaimsData = async () => {
-        console.log("Expense", token)
+        // console.log("Expense", token)
         if (!token) return;
         try {
             // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
@@ -99,7 +99,7 @@ const Reimbursement = () => {
 
             if (response.data.status === "success") {
                 const docs = response.data.data.docs || [];
-                console.log("docsexpense", docs);
+                // console.log("docsexpense", docs);
 
                 // const formattedData = docs.map((item) => ({
                 //     id: item._id,
@@ -125,7 +125,7 @@ const Reimbursement = () => {
                 setPending(pendingCount);
                 setRejected(rejectedCount);
 
-                console.log("latestClaim", latestClaim);
+                // console.log("latestClaim", latestClaim);
 
                 setClaimsData(docs);
             } else {

@@ -31,21 +31,14 @@ const { width } = Dimensions.get('window');
 const Expense = () => {
   const insets = useSafeAreaInsets();
   const [claimsData, setClaimsData] = useState([]);
-  const [activeTab, setActiveTab] = useState("previous");
+  const [activeTab, setActiveTab] = useState("status");
   const [modalVisible, setModalVisible] = useState(false);
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [loading, setLoading] = useState(true);
-  const [imageName, setImageName] = useState(true);
-  // const [branch, setBranch] = useState("");
-  // const [dept, setDept] = useState("");
-  // const [designation, setDesignation] = useState("");
-  // const [hod, setHod] = useState("");
-
   const [headId, setHeadId] = useState('');
   const [amount, setAmount] = useState('');
   const [remark, setRemark] = useState('');
-  const [image, setImage] = useState(null);
   const [token, setToken] = useState(null);
   const [file, setFile] = useState(false);
   const [rights,setRights]=useState(false);
@@ -208,20 +201,14 @@ const Expense = () => {
         setClaimsData(formattedData);
       } else {
         showPopup("error", "Error", response.data.message || "Failed to load data");
-        // Alert.alert("Error", response.data.message || "Failed to load data");
       }
     } catch (error) {
-      // Alert.alert("Error", token);
-      // console.error("API Error:", error);
       if (error.response) {
         showPopup("error", "Server Error", JSON.stringify(error.response.data));
-        // Alert.alert("Server Error", JSON.stringify(error.response.data));
       } else if (error.request) {
         showPopup("error", "Network Error", "No response from backend.");
-        // Alert.alert("Network Error", "No response from backend.");
       } else {
         showPopup("error", "Error", error.message);
-        // Alert.alert("Error", error.message);
       }
     } finally {
       setLoading(false);
@@ -232,7 +219,6 @@ const Expense = () => {
     try {
       if (!token) {
         showPopup("error", "Error", "Token not found");
-        // Alert.alert("Error", "Token not found");
         return;
       }
 
@@ -244,8 +230,6 @@ const Expense = () => {
       formData.append("wage_month", month);
       formData.append("wage_year", year);
       formData.append("type", "reimbursement");
-      // If image selected, attach to formData
-      // console.log(file,"file");
       
       if (file) {
          formData.append("expense_document", {
@@ -254,7 +238,6 @@ const Expense = () => {
         type: file.type || "application/octet-stream",
       });
       }
-      console.log("formData", formData,"API_BASE_URL",API_BASE_URL);
 
       const response = await axios.post(
         `${API_BASE_URL}employee/add-extra-earning-data`,
@@ -271,18 +254,14 @@ const Expense = () => {
 
       if (response.data.status === "success") {
         showPopup("success", "Success", response.data.message);
-        // Alert.alert("Success", response.data.message);
         setModalVisible(false);
         fetchClaimsData();
       } else {
         showPopup("error", "Error", response.data.message);
-        // Alert.alert("Error", response.data.message);
       }
 
     } catch (error) {
-      // console.error("Upload Error:", error);
       showPopup("error", "Upload Failed",  error.message);
-      // Alert.alert("Upload Failed", error.message);
     }
   };
   const route = useRoute();
@@ -305,49 +284,15 @@ const Expense = () => {
         </View>
 
 
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "previous" && styles.activeTab]}
-          onPress={() => setActiveTab("previous")}
-        >
-          <Text
-            style={
-              [GlobalFont.CustomFont,
-              activeTab === "previous"
-                ? styles.activeTabText
-                : styles.inactiveTabText
-            ]}
-          >
-            Previous Claims
-          </Text>
-        </TouchableOpacity>
+     
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "status" && styles.activeTab]}
-          onPress={() => setActiveTab("status")}
-        >
-          <Text
-            style={
-              [GlobalFont.CustomFont,
-              activeTab === "status"
-                ? styles.activeTabText
-                : styles.inactiveTabText
-            ]}
-          >
-            Claim Status
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Section Header */}
-      {activeTab === "previous" && (
+   
+      {/* {activeTab === "previous" && (
         <>
 
           <View style={styles.sectionHeader}>
             <Text style={[GlobalFont.semiBold,styles.sectionTitle]}>Previous Claims</Text>
-            {/* <TouchableOpacity style={styles.newClaimBtn}>
-              <Text style={styles.newClaimText}>File New Claim</Text>
-            </TouchableOpacity> */}
+          
             <TouchableOpacity
               style={styles.newClaimBtn}
               onPress={() => setModalVisible(true)}
@@ -357,16 +302,7 @@ const Expense = () => {
           </View>
 
 
-          {/* <ScrollView style={styles.list}>
-            {expenses.map((item, index) => (
-              <View key={index} style={styles.expenseCard}>
-                <Text style={styles.expenseTitle}>{item.title}</Text>
-                <View style={styles.amountTag}>
-                  <Text style={styles.amountText}>₹ {item.amount}</Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView> */}
+        
           {loading ? (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
               <Text style={[GlobalFont.CustomFont]}>Loading...</Text>
@@ -385,18 +321,17 @@ const Expense = () => {
                     <Text style={[GlobalFont.semiBold,styles.amountText]}>₹ {item.amount}</Text>
                   </View>
 
-                  {/* <Text style={styles.dateText}>{item.date}</Text>
-                  <Text style={styles.statusText}>Status: {item.status}</Text> */}
+               
                 </View>
               ))}
             </ScrollView>
           )}
         </>
-      )}
+      )} */}
       {activeTab === "status" && (
         <>
           <View style={styles.sectionHeader}>
-            <Text style={[GlobalFont.semiBold,styles.sectionTitle]}>Previous Claims</Text>
+            {/* <Text style={[GlobalFont.semiBold,styles.sectionTitle]}>Previous Claims</Text> */}
             {/* <TouchableOpacity style={styles.newClaimBtn}>
               <Text style={styles.newClaimText}>File New Claim</Text>
             </TouchableOpacity> */}
@@ -407,6 +342,40 @@ const Expense = () => {
               <Text style={[GlobalFont.semiBold,styles.newClaimText]}>File New Claim</Text>
             </TouchableOpacity>
           </View>
+           <View style={styles.tabContainer}>
+        {/* <TouchableOpacity
+          style={[styles.tab, activeTab === "previous" && styles.activeTab]}
+          onPress={() => setActiveTab("previous")}
+        >
+          <Text
+            style={
+              [GlobalFont.CustomFont,
+              activeTab === "previous"
+                ? styles.activeTabText
+                : styles.inactiveTabText
+            ]}
+          >
+            Previous Claims
+          </Text>
+        </TouchableOpacity> */}
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "status" && styles.activeTab]}
+          onPress={() => setActiveTab("status")}
+        >
+          <Text
+            style={
+              [GlobalFont.CustomFont,
+              activeTab === "status"
+                ? styles.activeTabText
+                : styles.inactiveTabText
+            ]}
+            
+          >
+            Claim Status
+          </Text>
+        </TouchableOpacity>
+      </View>
           {/* <ScrollView style={styles.list}>
             {claimsData.map((item, index) => (
               <View key={index} style={styles.expenseCard}>
@@ -531,7 +500,7 @@ const Expense = () => {
                 </View>
                 <Text style={[GlobalFont.semiBold,styles.label]}>Upload Image:</Text>
                 
-                <View style={styles.imageUploadContainer}>
+                    {/* <View style={styles.imageUploadContainer}>
                   <Text style={[GlobalFont.CustomFont,{ color: "#ccc", marginBottom: 10 }]}>
                     {image ? image.name : "No file selected"}
                   </Text>
@@ -539,8 +508,23 @@ const Expense = () => {
                   <TouchableOpacity style={styles.uploadBtn} onPress={pickDocument}>
                     <Text style={[GlobalFont.bold,styles.uploadBtnText]}>Choose Image</Text>
                   </TouchableOpacity>
-                </View>
+                </View> */}
+                    <View style={styles.imageUploadContainer}>
+                      {file ? (
+                        <Image
+                          source={{ uri: file.uri }}
+                          style={{ width: "100%", height: 150, resizeMode: "contain", marginBottom: 10 }}
+                        />
+                      ) : (
+                        <Text style={[GlobalFont.CustomFont, { color: "#ccc", marginBottom: 10 }]}>
+                          No file selected
+                        </Text>
+                      )}
 
+                      <TouchableOpacity style={styles.uploadBtn} onPress={pickDocument}>
+                        <Text style={[GlobalFont.bold, styles.uploadBtnText]}>Choose Image</Text>
+                      </TouchableOpacity>
+                    </View>
                 <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
                   <Text style={[GlobalFont.CustomFont,styles.submitText]}>Submit</Text>
                 </TouchableOpacity>
@@ -829,7 +813,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginTop: 20,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     // margin:"auto"
   },
@@ -845,6 +829,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 6,
+    
   },
 
   newClaimText: {

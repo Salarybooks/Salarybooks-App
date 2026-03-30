@@ -27,71 +27,623 @@ const { PdfPicker } = NativeModules;
 const { width } = Dimensions.get("window");
 import StatusPopup from "../StatusPopup/StatusPopup";
 import GlobalFont from "../../theme/GlobalFont";
-const AdvanceManagement =() => {
+// const AdvanceManagement =() => {
+//   const progress = 0.75;
+//   const navigation = useNavigation();
+//   const [modalVisible, setModalVisible] = useState(false);
+//   const [advanceAmount, setAdvanceAmount] = useState("");
+//   const [recoveryFrom, setRecoveryFrom] = useState("");
+//   const [installments, setInstallments] = useState("");
+//   const [frequency, setFrequency] = useState("Select Year");
+//   const [month, setMonth] = useState("Select Month");
+//   const [year, setYear] = useState("");
+//   const [reason, setReason] = useState("");
+//   const [advanceList, setAdvanceList] = useState([]);
+//   const [token, setToken] = useState(null);
+//   const [uploading, setUploading] = useState(false);
+//   const [file, setFile] = useState(false);
+//   const [percentage, setPercentage] = useState(0);
+//   const [prog, setProgress] = useState(0);
+//   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+//   const [rights,setRights]=useState(false);
+//   useEffect(() => {
+//     const loadToken = async () => {
+//       const t = await AsyncStorage.getItem("authToken");
+     
+//       setToken(t);
+//        const storedProgress =await AsyncStorage.getItem("progress");
+//       const storedpercentage =await AsyncStorage.getItem("percentage");
+//       const Progress = storedProgress? JSON.parse(storedProgress): 0;
+//       const percentage = storedpercentage? JSON.parse(storedpercentage): 0;
+//       setPercentage(percentage);
+//       setProgress(Progress);
+//       setRights( JSON.parse(await AsyncStorage.getItem("rights")))
+//       console.log("TOKEN LOADED:", t);
+//     };
+//     loadToken();
+//   }, []);
+
+//   const fetchAdvanceList = async () => {
+//     // console.log("Advancepage", token)
+//     if (!token) return;
+//     console.log("Advancepage1")
+//     try {
+//       // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
+//       const payload = {
+//         pageno: 1,
+//       };
+//       // const res = await axios.post("http://10.0.2.2:8080/employee/employee-get-advance-list",
+//       const res = await axios.post(`${API_BASE_URL}employee/employee-get-advance-list`,
+//         payload,
+//         {
+//           headers: {
+//             "x-access-token": token,
+//             "Content-Type": "application/json",
+//           },
+//         });
+
+//       if (res.data?.status === "success") {
+//         // console.log(res.data,"res.data");
+        
+//         setAdvanceList(res.data.advance_data.docs || []);
+//       }
+//     } catch (error) {
+//       console.log("Advance list error:", error);
+//     }
+//   };
+
+
+//   useEffect(() => {
+//     fetchAdvanceList();
+//   }, [token]);
+
+//   const currentAdvance = advanceList.length > 0 ? advanceList[0] : null;
+
+//   const pickDocument = async () => {
+//     // console.log(field,"field");
+
+//     try {
+//       const file = await PdfPicker.pickFile();
+//       let extractedName = "Unknown File";
+//       if (file.uri) {
+//         const parts = file.uri.split("/");
+//         extractedName = parts[parts.length - 1];
+//       }
+//       const fileObj = {
+//         name: extractedName,
+//         uri: file.uri,
+//         type: file.type,
+//         size: file.size,
+//       };
+//       setFile(fileObj);
+
+//     } catch (error) {
+//       console.log("File picking cancelled or failed", error);
+//     }
+//   };
+
+//   const showPopup = (type, title, message) => {
+//     setPopupConfig({
+//       visible: true,
+//       type,
+//       title,
+//       message,
+//     });
+//   };
+
+//   const submitAdvanceRequest = async () => {
+//     console.log(advanceAmount,"advanceAmount", installments, "installments", frequency,"frequency", month,"month", year,'year',recoveryFrom,"recoveryFrom" );
+    
+//     if (!token) return;
+//     try {
+//       if (!advanceAmount || !installments || !frequency || !month || !year || !recoveryFrom) {
+//         showPopup("error", "Error", "Please fill all required fields.");
+//         // Alert.alert("Error", "Please fill all required fields.");
+//         return;
+//       }
+//       const monthMap = {
+//         January: 1, February: 2, March: 3, April: 4,
+//         May: 5, June: 6, July: 7, August: 8,
+//         September: 9, October: 10, November: 11, December: 12,
+//       };
+
+//       const startMonthNum = monthMap[month];
+
+
+//       const emi = Number(advanceAmount) / Number(installments);
+
+//       let instalment_history = [];
+//       let currentMonth = startMonthNum;
+//       let currentYear = Number(year);
+
+//       for (let i = 0; i < Number(installments); i++) {
+//         instalment_history.push({
+//           advance_amount: emi.toFixed(2),
+//           instalment_month: currentMonth,
+//           instalment_year: currentYear,
+//           payment_status: "pending",
+//           recovery_from: recoveryFrom,
+//           // balance_amount: emi.toFixed(2),
+
+//         });
+
+//         currentMonth++;
+//         if (currentMonth > 12) {
+//           currentMonth = 1;
+//           currentYear++;
+//         }
+//       }
+
+
+//       // const payload = {
+//       //   advance_amount: advanceAmount,
+//       //   advance_outstanding: advanceAmount,
+//       //   no_of_instalments: installments,
+//       //   recovery_frequency: frequency,
+//       //   recovery_from: recoveryFrom,
+//       //   payment_start_month: startMonthNum.toString(),
+//       //   payment_start_year: year,
+//       //   upload_file:file,
+//       //   instalment_history,
+//       //   remarks: reason || "",
+//       // };
+//       // console.log(API_BASE_URL,"API_BASE_URL");
+
+//       // console.log("Payload =>", payload, "token", token);
+//       const formData = new FormData();
+
+//       formData.append("advance_amount", advanceAmount);
+//       formData.append("advance_outstanding", advanceAmount);
+//       formData.append("no_of_instalments", installments);
+//       formData.append("recovery_frequency", frequency);
+//       formData.append("recovery_from", recoveryFrom);
+//       formData.append("payment_start_month", startMonthNum.toString());
+//       formData.append("payment_start_year", year);
+//       formData.append("remarks", reason || "");
+//       instalment_history.forEach((item, index) => {
+//         formData.append(`instalment_history[${index}][instalment_month]`, item.instalment_month);
+//         formData.append(`instalment_history[${index}][instalment_year]`, item.instalment_year);
+//         formData.append(`instalment_history[${index}][recovery_from]`, item.recovery_from);
+//         formData.append(`instalment_history[${index}][advance_amount]`, item.advance_amount);
+//         formData.append(`instalment_history[${index}][payment_status]`, item.payment_status);
+//       });
+
+//       if (file) {
+//         formData.append("upload_file", {
+//           uri: file.uri,
+//           name: file.name,
+//           type: file.type,
+//         });
+//       }
+//       // console.log(formData,"formdata");
+
+//       // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
+//       const response = await axios.post(`${API_BASE_URL}employee/employee-advance-request`,
+//         formData,
+//         {
+//           headers: {
+//             "x-access-token": token,
+//             "Content-Type": "multipart/form-data",
+//           },
+//         }
+//       );
+
+//       // const data = await response.json();
+//       const data = response.data;
+
+//       console.log("API Response for advance:", data);
+
+//       if (data.status === "success") {
+//         showPopup("success", "Success",  "Advance request submitted");
+//         // Alert.alert("Success", "Advance request submitted");
+//         fetchAdvanceList();
+//         setModalVisible(false);
+//       } else {
+//         showPopup("error", "Error",  data.message || "Something went wrong");
+//         // Alert.alert("Error", data.message || "Something went wrong");
+//       }
+
+//     } catch (err) {
+//       console.log(err);
+//        showPopup("error", "Error",  "Failed to submit advance request");
+//       // Alert.alert("Error", "Failed to submit advance request");
+//     }
+//   };
+//   const isFutureDate = (date) => {
+//   const today = new Date();
+//   today.setHours(0, 0, 0, 0);
+
+//   const targetDate = new Date(date);
+//   targetDate.setHours(0, 0, 0, 0);
+
+//   return targetDate > today;
+// };
+
+
+//   const route = useRoute();
+//   const screenTitle = route.params?.title;
+//   const upcomingList = advanceList.filter(item =>
+//   isFutureDate(item.created_at)
+// );
+
+//   return (
+//     <LinearGradient
+//                 colors={["#000000ff", "#1c68beff"]}
+//                 start={{ x: 0, y: 0 }}
+//                 end={{ x: 1, y: 1 }}
+//                 style={styles.container}
+//               >
+//       <ScrollView contentContainerStyle={styles.scrollContainer}>
+
+//         <View style={styles.header}>
+//           <Image
+//               source={require("../../assets/Advance_management.png")}
+//               style={styles.header_iconImage}
+//             />
+//           <Navbar title={screenTitle} />
+//         </View>
+//         {/* <View style={styles.dropdownRow}>
+//           <TouchableOpacity style={styles.dropdown}>
+//             <Text style={styles.dropdownText}>September</Text>
+//             <Icon name="chevron-down" color="#fff" />
+//           </TouchableOpacity>
+//           <TouchableOpacity style={styles.dropdown}>
+//             <Text style={styles.dropdownText}>2025</Text>
+//             <Icon name="chevron-down" color="#fff" />
+//           </TouchableOpacity>
+//         </View> */}
+
+//         <View style={styles.overviewHeader}>
+//           <Text style={styles.sectionTitle}>Advance Overview</Text>
+//           <View style={styles.container1}>
+//             <TouchableOpacity
+//               style={styles.addBtn}
+//               onPress={() => setModalVisible(true)}
+//             >
+//               <Text style={styles.addBtnText}>+ Advance Request</Text>
+//             </TouchableOpacity>
+
+
+//             <Modal visible={modalVisible} transparent animationType="fade">
+//               <View style={styles.overlay}>
+//                 <View style={styles.modalBox}>
+//                 <ScrollView style={styles.formContainer}>
+//                   <View style={styles.modalHeader}>
+//                     <Text style={styles.modalTitle}>Enter the following details</Text>
+//                     <TouchableOpacity onPress={() => setModalVisible(false)}>
+//                       <Text style={styles.closeBtn}>✖</Text>
+//                     </TouchableOpacity>
+//                   </View>
+
+//                   <View style={styles.field}>
+//                     <Text style={styles.label}>Advance Amount :</Text>
+//                     <TextInput
+//                       style={styles.input}
+//                       placeholder="Enter amount"
+//                       placeholderTextColor="#ccc"
+//                       keyboardType="numeric"
+//                       value={advanceAmount}
+//                       onChangeText={setAdvanceAmount}
+//                     />
+//                   </View>
+
+//                   <View style={styles.field}>
+//                     <Text style={styles.label}>Recovery From :</Text>
+//                     <View style={styles.pickerWrapper}>
+//                       <Picker
+//                         selectedValue={recoveryFrom}
+//                         onValueChange={setRecoveryFrom}
+//                         dropdownIconColor="#fff"
+//                         style={styles.picker}
+//                       >
+//                         <Picker.Item label="Select One" value="" style={styles.options}/>
+//                         {/* <Picker.Item label="Annual Earning" value="salary" style={styles.options}/> */}
+//                         {/* <Picker.Item label="Reimbursement" value="reimbursement" style={styles.options}/> */}
+//                         <Picker.Item label="Incentive" value="incentive" style={styles.options}/>
+//                         <Picker.Item label="Gross Earning" value="gross_earning" style={styles.options}/>
+//                         <Picker.Item label="Bonus" value="bonus" style={styles.options}/>
+
+//                       </Picker>
+//                     </View>
+//                   </View>
+
+//                   <View style={styles.field}>
+//                     <Text style={styles.label}>No. of Installments :</Text>
+//                     <TextInput
+//                       style={styles.input}
+//                       keyboardType="numeric"
+//                       value={installments}
+//                       onChangeText={setInstallments}
+//                     />
+//                   </View>
+
+//                   <View style={styles.field}>
+//                     <Text style={styles.label}>Recovery Frequency :</Text>
+//                     <View style={styles.pickerWrapper}>
+//                       <Picker
+//                         selectedValue={frequency}
+//                         onValueChange={setFrequency}
+//                         dropdownIconColor="#fff"
+//                         style={styles.picker}
+//                       >
+//                         <Picker.Item label="Select One" value="" />
+//                         <Picker.Item label="Monthly" value="monthly" />
+//                         <Picker.Item label="Quaterly" value="quaterly" />
+//                         <Picker.Item label="Half Yearly" value="halfYearly" />
+//                         <Picker.Item label="Annually" value="annually" />
+
+//                       </Picker>
+//                     </View>
+//                   </View>
+
+
+//                   <View style={styles.row}>
+//                     <View style={styles.column}>
+//                       <Text style={styles.label}>Month :</Text>
+//                       <View style={styles.pickerWrapper}>
+//                         <Picker
+//                           selectedValue={month}
+//                           onValueChange={setMonth}
+//                           dropdownIconColor="#fff"
+//                           style={styles.picker}
+//                         > 
+//                            <Picker.Item label="January" value="January" />
+//                           <Picker.Item label="February" value="February" />
+//                           <Picker.Item label="March" value="March" />
+//                           <Picker.Item label="April" value="April" />
+//                           <Picker.Item label="May" value="May" />
+//                           <Picker.Item label="June" value="June" />
+//                           <Picker.Item label="July" value="July" />
+//                           <Picker.Item label="August" value="August" />
+//                           <Picker.Item label="September" value="September" />
+//                           <Picker.Item label="October" value="October" />
+//                           <Picker.Item label="November" value="November" />
+//                           <Picker.Item label="December" value="December" />
+//                         </Picker>
+//                       </View>
+//                     </View>
+
+//                     <View style={styles.column}>
+//                       <Text style={styles.label}>Year :</Text>
+//                       <View style={styles.pickerWrapper}>
+//                         <Picker
+//                           selectedValue={year}
+//                           onValueChange={setYear}
+//                           dropdownIconColor="#fff"
+//                           style={styles.picker}
+//                         >
+//                           <Picker.Item label="2025" value="2025" />
+//                           <Picker.Item label="2026" value="2026" />
+//                         </Picker>
+//                       </View>
+//                     </View>
+//                   </View>
+//                   <View style={styles.titleRow}>
+//                     <Text style={styles.sectionTitle}>Uploaded Document</Text>
+
+//                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickDocument()}>
+//                       <Text style={[GlobalFont.CustomFont,styles.uploadText]}>Upload File</Text>
+//                     </TouchableOpacity>
+//                   </View>
+//                   {uploading && (
+//                     <View style={styles.loaderOverlay}>
+//                       <ActivityIndicator size="large" color="#fff" />
+//                       <Text style={{ color: "white", marginTop: 5 }}>Uploading...</Text>
+//                     </View>
+//                   )}
+//                   <View style={styles.field}>
+//                     <Text style={styles.label}>Reason :</Text>
+//                     <TextInput
+//                       style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+//                       multiline
+//                       placeholder="Enter reason"
+//                       placeholderTextColor="#ccc"
+//                       value={reason}
+//                       onChangeText={setReason}
+//                     />
+//                   </View>
+
+
+//                   <TouchableOpacity
+//                     style={styles.submitBtn}
+//                     onPress={() => {
+//                       setModalVisible(false);
+//                       submitAdvanceRequest();
+//                     }}
+//                   >
+//                     <Text style={[GlobalFont.semiBold,styles.submitText]}>Submit</Text>
+//                   </TouchableOpacity>
+//                   </ScrollView>
+//                 </View>
+//               </View>
+//             </Modal>
+//           </View>
+//         </View>
+//         <View style={styles.overviewBox}>
+//           <Text style={styles.percentage}>{percentage}%</Text>
+//           <View style={styles.progressRow}>
+            
+//             <View style={styles.progressBarContainer}>
+//               <View style={styles.progressBarBackground}>
+//                 <View
+//                   style={[
+//                     styles.progressBarFill,
+//                     { width: `${prog * 100}%` }
+//                   ]}
+//                 />
+//               </View>
+//             </View>
+
+            
+//           </View>
+//           <View style={[styles.progressFill, {
+//             width: currentAdvance ? `${(currentAdvance.advance_recovered / currentAdvance.advance_amount) * 100}%` : "0%"
+//           }]} />
+
+//           <View style={styles.amountRow}>
+//             <Text style={[GlobalFont.CustomFont,styles.amountLabel1]}>
+//               ₹{currentAdvance?.advance_amount || 0}{"\n"}
+//               <Text style={[GlobalFont.CustomFont,styles.amountSub]}>Total Advance</Text>
+//             </Text>
+
+//             <Text style={styles.amountLabel2}>
+//               ₹{currentAdvance?.advance_outstanding || 0}{"\n"}
+//               <Text style={[GlobalFont.CustomFont,styles.amountSub]}>Remaining</Text>
+//             </Text>
+//           </View>
+
+
+//           <Text style={[GlobalFont.CustomFont,styles.emiText]}>
+//             EMI: ₹
+//             {currentAdvance ? (currentAdvance.advance_amount / currentAdvance.no_of_instalments).toFixed(2) : "0.00"}
+//             / month
+//           </Text>
+
+//         </View>
+
+
+//         <View style={styles.section1}>
+//           <Text style={styles.sectionTitle1}>Upcoming Deduction</Text>
+//             {upcomingList.length === 0 && (
+//                 <Text style={styles.noDataText}>No data found</Text>
+//               )}
+//           {upcomingList.map((item) => (
+//             <TouchableOpacity
+//               key={item._id}
+//               onPress={() => navigation.navigate("AdvanceInstallmentScreen", { data: item })}
+//               style={styles.card}
+//             >
+             
+//               <View style={styles.card_inner}>
+//               <Text style={[GlobalFont.CustomFont,styles.cardDate]}>
+//                 {new Date(item.created_at).toDateString().slice(4, 10)}
+//               </Text>
+              
+//               <View style={styles.cardRight}>
+//                 <Text style={[GlobalFont.CustomFont,styles.cardAmount]}>₹{item.advance_amount}</Text>
+//                 <Text
+//                   style={[GlobalFont.CustomFont,
+//                     styles.status,
+//                     { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
+//                   ]}
+//                 >
+//                   {item.status}
+//                 </Text>
+//               </View>
+//               </View>
+           
+//             </TouchableOpacity>
+//           ))}
+//         </View>
+
+
+//         <View style={styles.section}>
+//           <Text style={styles.sectionTitle1}>Advance History</Text>
+
+//           {advanceList.map((item) => (
+//             <TouchableOpacity
+//               key={item._id}
+//               onPress={() => navigation.navigate("AdvanceInstallmentScreen", { data: item })}
+//               style={styles.card}
+//             >
+//               <View style={styles.card_inner}>
+//               <Text style={[GlobalFont.CustomFont,styles.cardDate]}>
+//                 {new Date(item.created_at).toDateString().slice(4, 10)}
+//               </Text>
+              
+//               <View style={styles.cardRight}>
+//                 <Text style={[GlobalFont.CustomFont,styles.cardAmount]}>₹{item.advance_amount}</Text>
+//                 <Text
+//                   style={[GlobalFont.CustomFont,
+//                     styles.status,
+//                     { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
+//                   ]}
+//                 >
+//                   {item.status}
+//                 </Text>
+//               </View>
+//               </View>
+//             </TouchableOpacity>
+//           ))}
+//         </View>
+
+
+//       </ScrollView>
+//       <StatusPopup
+//           visible={popupConfig.visible}
+//           type={popupConfig.type}
+//           title={popupConfig.title}
+//           message={popupConfig.message}
+//           onClose={() =>
+//             setPopupConfig(prev => ({ ...prev, visible: false }))
+//           }
+//         />
+//       <BottomNavigation rights={rights}/>
+//     </LinearGradient>
+//   );
+// };
+
+
+const AdvanceManagement = () => {
   const progress = 0.75;
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [advanceAmount, setAdvanceAmount] = useState("");
-  const [recoveryFrom, setRecoveryFrom] = useState("");
-  const [installments, setInstallments] = useState("");
-  const [frequency, setFrequency] = useState("Select Year");
-  const [month, setMonth] = useState("Select Month");
-  const [year, setYear] = useState("");
-  const [reason, setReason] = useState("");
+
+  const [form, setForm] = useState({
+    advanceAmount: "",
+    recoveryFrom: "",
+    installments: "",
+    frequency: "",
+    month: "January",
+    year: "2025",
+    reason: "",
+  });
+
   const [advanceList, setAdvanceList] = useState([]);
   const [token, setToken] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState(false);
   const [percentage, setPercentage] = useState(0);
   const [prog, setProgress] = useState(0);
-  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
-  const [rights,setRights]=useState(false);
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "" });
+  const [rights, setRights] = useState(false);
+
+  const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
-     
       setToken(t);
-       const storedProgress =await AsyncStorage.getItem("progress");
-      const storedpercentage =await AsyncStorage.getItem("percentage");
-      const Progress = storedProgress? JSON.parse(storedProgress): 0;
-      const percentage = storedpercentage? JSON.parse(storedpercentage): 0;
+      const storedProgress = await AsyncStorage.getItem("progress");
+      const storedpercentage = await AsyncStorage.getItem("percentage");
+      const Progress = storedProgress ? JSON.parse(storedProgress) : 0;
+      const percentage = storedpercentage ? JSON.parse(storedpercentage) : 0;
       setPercentage(percentage);
       setProgress(Progress);
-      setRights( JSON.parse(await AsyncStorage.getItem("rights")))
+      setRights(JSON.parse(await AsyncStorage.getItem("rights")));
       console.log("TOKEN LOADED:", t);
     };
     loadToken();
   }, []);
 
   const fetchAdvanceList = async () => {
-    // console.log("Advancepage", token)
     if (!token) return;
-    console.log("Advancepage1")
+    console.log("Advancepage1");
     try {
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
-      const payload = {
-        pageno: 1,
-      };
-      // const res = await axios.post("http://10.0.2.2:8080/employee/employee-get-advance-list",
-      const res = await axios.post(`${API_BASE_URL}employee/employee-get-advance-list`,
-        payload,
-        {
-          headers: {
-            "x-access-token": token,
-            "Content-Type": "application/json",
-          },
-        });
-
+      const payload = { pageno: 1 };
+      const res = await axios.post(`${API_BASE_URL}employee/employee-get-advance-list`, payload, {
+        headers: {
+          "x-access-token": token,
+          "Content-Type": "application/json",
+        },
+      });
       if (res.data?.status === "success") {
-        // console.log(res.data,"res.data");
-        
         setAdvanceList(res.data.advance_data.docs || []);
       }
     } catch (error) {
       console.log("Advance list error:", error);
     }
   };
-
 
   useEffect(() => {
     fetchAdvanceList();
@@ -100,8 +652,6 @@ const AdvanceManagement =() => {
   const currentAdvance = advanceList.length > 0 ? advanceList[0] : null;
 
   const pickDocument = async () => {
-    // console.log(field,"field");
-
     try {
       const file = await PdfPicker.pickFile();
       let extractedName = "Unknown File";
@@ -116,40 +666,36 @@ const AdvanceManagement =() => {
         size: file.size,
       };
       setFile(fileObj);
-
     } catch (error) {
       console.log("File picking cancelled or failed", error);
     }
   };
 
   const showPopup = (type, title, message) => {
-    setPopupConfig({
-      visible: true,
-      type,
-      title,
-      message,
-    });
+    setPopupConfig({ visible: true, type, title, message });
   };
 
   const submitAdvanceRequest = async () => {
+    const { advanceAmount, recoveryFrom, installments, frequency, month, year, reason } = form;
+    console.log(advanceAmount, "advanceAmount", installments, "installments", frequency, "frequency", month, "month", year, "year", recoveryFrom, "recoveryFrom");
+
     if (!token) return;
     try {
       if (!advanceAmount || !installments || !frequency || !month || !year || !recoveryFrom) {
         showPopup("error", "Error", "Please fill all required fields.");
-        // Alert.alert("Error", "Please fill all required fields.");
         return;
       }
+
       const monthMap = {
-        January: 1, February: 2, March: 3, April: 4,
-        May: 5, June: 6, July: 7, August: 8,
-        September: 9, October: 10, November: 11, December: 12,
+        January: 0, February: 1, March: 2, April: 3,
+        May: 4, June: 5, July: 6, August: 7,
+        September: 8, October: 9, November: 10, December: 11,
       };
 
       const startMonthNum = monthMap[month];
-
-
       const emi = Number(advanceAmount) / Number(installments);
-
+      console.log(startMonthNum,"startMonthNum");
+      
       let instalment_history = [];
       let currentMonth = startMonthNum;
       let currentYear = Number(year);
@@ -161,8 +707,6 @@ const AdvanceManagement =() => {
           instalment_year: currentYear,
           payment_status: "pending",
           recovery_from: recoveryFrom,
-          // balance_amount: emi.toFixed(2),
-
         });
 
         currentMonth++;
@@ -172,24 +716,7 @@ const AdvanceManagement =() => {
         }
       }
 
-
-      // const payload = {
-      //   advance_amount: advanceAmount,
-      //   advance_outstanding: advanceAmount,
-      //   no_of_instalments: installments,
-      //   recovery_frequency: frequency,
-      //   recovery_from: recoveryFrom,
-      //   payment_start_month: startMonthNum.toString(),
-      //   payment_start_year: year,
-      //   upload_file:file,
-      //   instalment_history,
-      //   remarks: reason || "",
-      // };
-      // console.log(API_BASE_URL,"API_BASE_URL");
-
-      // console.log("Payload =>", payload, "token", token);
       const formData = new FormData();
-
       formData.append("advance_amount", advanceAmount);
       formData.append("advance_outstanding", advanceAmount);
       formData.append("no_of_instalments", installments);
@@ -198,10 +725,14 @@ const AdvanceManagement =() => {
       formData.append("payment_start_month", startMonthNum.toString());
       formData.append("payment_start_year", year);
       formData.append("remarks", reason || "");
-      formData.append(
-        "instalment_history",
-        JSON.stringify(instalment_history)
-      );
+
+      instalment_history.forEach((item, index) => {
+        formData.append(`instalment_history[${index}][instalment_month]`, item.instalment_month);
+        formData.append(`instalment_history[${index}][instalment_year]`, item.instalment_year);
+        formData.append(`instalment_history[${index}][recovery_from]`, item.recovery_from);
+        formData.append(`instalment_history[${index}][advance_amount]`, item.advance_amount);
+        formData.append(`instalment_history[${index}][payment_status]`, item.payment_status);
+      });
 
       if (file) {
         formData.append("upload_file", {
@@ -210,83 +741,67 @@ const AdvanceManagement =() => {
           type: file.type,
         });
       }
-      // console.log(formData,"formdata");
 
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
-      const response = await axios.post(`${API_BASE_URL}employee/employee-advance-request`,
-        formData,
-        {
-          headers: {
-            "x-access-token": token,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}employee/employee-advance-request`, formData, {
+        headers: {
+          "x-access-token": token,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      // const data = await response.json();
       const data = response.data;
-
       console.log("API Response for advance:", data);
 
       if (data.status === "success") {
-        showPopup("success", "Success",  "Advance request submitted");
-        // Alert.alert("Success", "Advance request submitted");
+        showPopup("success", "Success", "Advance request submitted");
         fetchAdvanceList();
         setModalVisible(false);
+        setForm({
+          advanceAmount: "",
+          recoveryFrom: "",
+          installments: "",
+          frequency: "",
+          month: "January",
+          year: "2025",
+          reason: "",
+        });
       } else {
-        showPopup("error", "Error",  data.message || "Something went wrong");
-        // Alert.alert("Error", data.message || "Something went wrong");
+        showPopup("error", "Error", data.message || "Something went wrong");
       }
-
     } catch (err) {
       console.log(err);
-       showPopup("error", "Error",  "Failed to submit advance request");
-      // Alert.alert("Error", "Failed to submit advance request");
+      showPopup("error", "Error", "Failed to submit advance request");
     }
   };
+
   const isFutureDate = (date) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const targetDate = new Date(date);
-  targetDate.setHours(0, 0, 0, 0);
-
-  return targetDate > today;
-};
-
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    return targetDate > today;
+  };
 
   const route = useRoute();
   const screenTitle = route.params?.title;
-  const upcomingList = advanceList.filter(item =>
-  isFutureDate(item.created_at)
-);
+  const upcomingList = advanceList.filter(item => isFutureDate(item.created_at));
 
   return (
     <LinearGradient
-                colors={["#000000ff", "#1c68beff"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.container}
-              >
+      colors={["#000000ff", "#1c68beff"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
         <View style={styles.header}>
           <Image
-              source={require("../../assets/Advance_management.png")}
-              style={styles.header_iconImage}
-            />
+            source={require("../../assets/Advance_management.png")}
+            style={styles.header_iconImage}
+          />
           <Navbar title={screenTitle} />
         </View>
-        {/* <View style={styles.dropdownRow}>
-          <TouchableOpacity style={styles.dropdown}>
-            <Text style={styles.dropdownText}>September</Text>
-            <Icon name="chevron-down" color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.dropdown}>
-            <Text style={styles.dropdownText}>2025</Text>
-            <Icon name="chevron-down" color="#fff" />
-          </TouchableOpacity>
-        </View> */}
 
         <View style={styles.overviewHeader}>
           <Text style={styles.sectionTitle}>Advance Overview</Text>
@@ -298,166 +813,158 @@ const AdvanceManagement =() => {
               <Text style={styles.addBtnText}>+ Advance Request</Text>
             </TouchableOpacity>
 
-
             <Modal visible={modalVisible} transparent animationType="fade">
               <View style={styles.overlay}>
                 <View style={styles.modalBox}>
-                <ScrollView style={styles.formContainer}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Enter the following details</Text>
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
-                      <Text style={styles.closeBtn}>✖</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.field}>
-                    <Text style={styles.label}>Advance Amount :</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter amount"
-                      placeholderTextColor="#ccc"
-                      keyboardType="numeric"
-                      value={advanceAmount}
-                      onChangeText={setAdvanceAmount}
-                    />
-                  </View>
-
-                  <View style={styles.field}>
-                    <Text style={styles.label}>Recovery From :</Text>
-                    <View style={styles.pickerWrapper}>
-                      <Picker
-                        selectedValue={recoveryFrom}
-                        onValueChange={setRecoveryFrom}
-                        dropdownIconColor="#fff"
-                        style={styles.picker}
-                      >
-                        <Picker.Item label="Select One" value="" style={styles.options}/>
-                        <Picker.Item label="Annual Earning" value="salary" style={styles.options}/>
-                        <Picker.Item label="Reimbursement" value="reimbursement" style={styles.options}/>
-                        <Picker.Item label="Incentive" value="incentive" style={styles.options}/>
-                        <Picker.Item label="Gross Earning" value="gross_earning" style={styles.options}/>
-                        <Picker.Item label="Bonus" value="bonus" style={styles.options}/>
-
-                      </Picker>
+                  <ScrollView style={styles.formContainer}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Enter the following details</Text>
+                      <TouchableOpacity onPress={() => setModalVisible(false)}>
+                        <Text style={styles.closeBtn}>✖</Text>
+                      </TouchableOpacity>
                     </View>
-                  </View>
 
-                  <View style={styles.field}>
-                    <Text style={styles.label}>No. of Installments :</Text>
-                    <TextInput
-                      style={styles.input}
-                      keyboardType="numeric"
-                      value={installments}
-                      onChangeText={setInstallments}
-                    />
-                  </View>
-
-                  <View style={styles.field}>
-                    <Text style={styles.label}>Recovery Frequency :</Text>
-                    <View style={styles.pickerWrapper}>
-                      <Picker
-                        selectedValue={frequency}
-                        onValueChange={setFrequency}
-                        dropdownIconColor="#fff"
-                        style={styles.picker}
-                      >
-                        <Picker.Item label="Select One" value="" />
-                        <Picker.Item label="Monthly" value="monthly" />
-                        <Picker.Item label="Quaterly" value="quaterly" />
-                        <Picker.Item label="Half Yearly" value="halfYearly" />
-                        <Picker.Item label="Annually" value="annually" />
-
-                      </Picker>
+                    <View style={styles.field}>
+                      <Text style={styles.label}>Advance Amount :</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter amount"
+                        placeholderTextColor="#ccc"
+                        keyboardType="numeric"
+                        value={form.advanceAmount}
+                        onChangeText={(val) => setField("advanceAmount", val)}
+                      />
                     </View>
-                  </View>
 
-
-                  <View style={styles.row}>
-                    <View style={styles.column}>
-                      <Text style={styles.label}>Month :</Text>
+                    <View style={styles.field}>
+                      <Text style={styles.label}>Recovery From :</Text>
                       <View style={styles.pickerWrapper}>
                         <Picker
-                          selectedValue={month}
-                          onValueChange={setMonth}
-                          dropdownIconColor="#fff"
-                          style={styles.picker}
-                        > 
-                           <Picker.Item label="January" value="January" />
-                          <Picker.Item label="February" value="February" />
-                          <Picker.Item label="March" value="March" />
-                          <Picker.Item label="April" value="April" />
-                          <Picker.Item label="May" value="May" />
-                          <Picker.Item label="June" value="June" />
-                          <Picker.Item label="July" value="July" />
-                          <Picker.Item label="August" value="August" />
-                          <Picker.Item label="September" value="September" />
-                          <Picker.Item label="October" value="October" />
-                          <Picker.Item label="November" value="November" />
-                          <Picker.Item label="December" value="December" />
-                        </Picker>
-                      </View>
-                    </View>
-
-                    <View style={styles.column}>
-                      <Text style={styles.label}>Year :</Text>
-                      <View style={styles.pickerWrapper}>
-                        <Picker
-                          selectedValue={year}
-                          onValueChange={setYear}
+                          selectedValue={form.recoveryFrom}
+                          onValueChange={(val) => setField("recoveryFrom", val)}
                           dropdownIconColor="#fff"
                           style={styles.picker}
                         >
-                          <Picker.Item label="2025" value="2025" />
-                          <Picker.Item label="2026" value="2026" />
+                          <Picker.Item label="Select One" value="" style={styles.options} />
+                          <Picker.Item label="Incentive" value="incentive" style={styles.options} />
+                          <Picker.Item label="Gross Earning" value="gross_earning" style={styles.options} />
+                          <Picker.Item label="Bonus" value="bonus" style={styles.options} />
                         </Picker>
                       </View>
                     </View>
-                  </View>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.sectionTitle}>Uploaded Document</Text>
 
-                    <TouchableOpacity style={styles.uploadBtn} onPress={() => pickDocument()}>
-                      <Text style={[GlobalFont.CustomFont,styles.uploadText]}>Upload File</Text>
-                    </TouchableOpacity>
-                  </View>
-                  {uploading && (
-                    <View style={styles.loaderOverlay}>
-                      <ActivityIndicator size="large" color="#fff" />
-                      <Text style={{ color: "white", marginTop: 5 }}>Uploading...</Text>
+                    <View style={styles.field}>
+                      <Text style={styles.label}>No. of Installments :</Text>
+                      <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={form.installments}
+                        onChangeText={(val) => setField("installments", val)}
+                      />
                     </View>
-                  )}
-                  <View style={styles.field}>
-                    <Text style={styles.label}>Reason :</Text>
-                    <TextInput
-                      style={[styles.input, { height: 80, textAlignVertical: "top" }]}
-                      multiline
-                      placeholder="Enter reason"
-                      placeholderTextColor="#ccc"
-                      value={reason}
-                      onChangeText={setReason}
-                    />
-                  </View>
 
+                    <View style={styles.field}>
+                      <Text style={styles.label}>Recovery Frequency :</Text>
+                      <View style={styles.pickerWrapper}>
+                        <Picker
+                          selectedValue={form.frequency}
+                          onValueChange={(val) => setField("frequency", val)}
+                          dropdownIconColor="#fff"
+                          style={styles.picker}
+                        >
+                          <Picker.Item label="Select One" value="" />
+                          <Picker.Item label="Monthly" value="monthly" />
+                          <Picker.Item label="Quaterly" value="quaterly" />
+                          <Picker.Item label="Half Yearly" value="halfYearly" />
+                          <Picker.Item label="Annually" value="annually" />
+                        </Picker>
+                      </View>
+                    </View>
 
-                  <TouchableOpacity
-                    style={styles.submitBtn}
-                    onPress={() => {
-                      setModalVisible(false);
-                      submitAdvanceRequest();
-                    }}
-                  >
-                    <Text style={[GlobalFont.semiBold,styles.submitText]}>Submit</Text>
-                  </TouchableOpacity>
+                    <View style={styles.row}>
+                      <View style={styles.column}>
+                        <Text style={styles.label}>Month :</Text>
+                        <View style={styles.pickerWrapper}>
+                          <Picker
+                            selectedValue={form.month}
+                            onValueChange={(val) => setField("month", val)}
+                            dropdownIconColor="#fff"
+                            style={styles.picker}
+                          >
+                            <Picker.Item label="January" value="January" />
+                            <Picker.Item label="February" value="February" />
+                            <Picker.Item label="March" value="March" />
+                            <Picker.Item label="April" value="April" />
+                            <Picker.Item label="May" value="May" />
+                            <Picker.Item label="June" value="June" />
+                            <Picker.Item label="July" value="July" />
+                            <Picker.Item label="August" value="August" />
+                            <Picker.Item label="September" value="September" />
+                            <Picker.Item label="October" value="October" />
+                            <Picker.Item label="November" value="November" />
+                            <Picker.Item label="December" value="December" />
+                          </Picker>
+                        </View>
+                      </View>
+
+                      <View style={styles.column}>
+                        <Text style={styles.label}>Year :</Text>
+                        <View style={styles.pickerWrapper}>
+                          <Picker
+                            selectedValue={form.year}
+                            onValueChange={(val) => setField("year", val)}
+                            dropdownIconColor="#fff"
+                            style={styles.picker}
+                          >
+                            <Picker.Item label="2025" value="2025" />
+                            <Picker.Item label="2026" value="2026" />
+                          </Picker>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={styles.titleRow}>
+                      <Text style={styles.sectionTitle}>Uploaded Document</Text>
+                      <TouchableOpacity style={styles.uploadBtn} onPress={() => pickDocument()}>
+                        <Text style={[GlobalFont.CustomFont, styles.uploadText]}>Upload File</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {uploading && (
+                      <View style={styles.loaderOverlay}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={{ color: "white", marginTop: 5 }}>Uploading...</Text>
+                      </View>
+                    )}
+
+                    <View style={styles.field}>
+                      <Text style={styles.label}>Reason :</Text>
+                      <TextInput
+                        style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                        multiline
+                        placeholder="Enter reason"
+                        placeholderTextColor="#ccc"
+                        value={form.reason}
+                        onChangeText={(val) => setField("reason", val)}
+                      />
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.submitBtn}
+                      onPress={() => submitAdvanceRequest()}
+                    >
+                      <Text style={[GlobalFont.semiBold, styles.submitText]}>Submit</Text>
+                    </TouchableOpacity>
                   </ScrollView>
                 </View>
               </View>
             </Modal>
           </View>
         </View>
+
         <View style={styles.overviewBox}>
           <Text style={styles.percentage}>{percentage}%</Text>
           <View style={styles.progressRow}>
-            
             <View style={styles.progressBarContainer}>
               <View style={styles.progressBarBackground}>
                 <View
@@ -468,73 +975,61 @@ const AdvanceManagement =() => {
                 />
               </View>
             </View>
-
-            
           </View>
           <View style={[styles.progressFill, {
             width: currentAdvance ? `${(currentAdvance.advance_recovered / currentAdvance.advance_amount) * 100}%` : "0%"
           }]} />
 
           <View style={styles.amountRow}>
-            <Text style={[GlobalFont.CustomFont,styles.amountLabel1]}>
+            <Text style={[GlobalFont.CustomFont, styles.amountLabel1]}>
               ₹{currentAdvance?.advance_amount || 0}{"\n"}
-              <Text style={[GlobalFont.CustomFont,styles.amountSub]}>Total Advance</Text>
+              <Text style={[GlobalFont.CustomFont, styles.amountSub]}>Total Advance</Text>
             </Text>
-
             <Text style={styles.amountLabel2}>
               ₹{currentAdvance?.advance_outstanding || 0}{"\n"}
-              <Text style={[GlobalFont.CustomFont,styles.amountSub]}>Remaining</Text>
+              <Text style={[GlobalFont.CustomFont, styles.amountSub]}>Remaining</Text>
             </Text>
           </View>
 
-
-          <Text style={[GlobalFont.CustomFont,styles.emiText]}>
+          <Text style={[GlobalFont.CustomFont, styles.emiText]}>
             EMI: ₹
             {currentAdvance ? (currentAdvance.advance_amount / currentAdvance.no_of_instalments).toFixed(2) : "0.00"}
             / month
           </Text>
-
         </View>
-
 
         <View style={styles.section1}>
           <Text style={styles.sectionTitle1}>Upcoming Deduction</Text>
-            {upcomingList.length === 0 && (
-                <Text style={styles.noDataText}>No data found</Text>
-              )}
+          {upcomingList.length === 0 && (
+            <Text style={styles.noDataText}>No data found</Text>
+          )}
           {upcomingList.map((item) => (
             <TouchableOpacity
               key={item._id}
               onPress={() => navigation.navigate("AdvanceInstallmentScreen", { data: item })}
               style={styles.card}
             >
-             
               <View style={styles.card_inner}>
-              <Text style={[GlobalFont.CustomFont,styles.cardDate]}>
-                {new Date(item.created_at).toDateString().slice(4, 10)}
-              </Text>
-              
-              <View style={styles.cardRight}>
-                <Text style={[GlobalFont.CustomFont,styles.cardAmount]}>₹{item.advance_amount}</Text>
-                <Text
-                  style={[GlobalFont.CustomFont,
-                    styles.status,
-                    { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
-                  ]}
-                >
-                  {item.status}
+                <Text style={[GlobalFont.CustomFont, styles.cardDate]}>
+                  {new Date(item.created_at).toDateString().slice(4, 10)}
                 </Text>
+                <View style={styles.cardRight}>
+                  <Text style={[GlobalFont.CustomFont, styles.cardAmount]}>₹{item.advance_amount}</Text>
+                  <Text
+                    style={[GlobalFont.CustomFont, styles.status,
+                      { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
+                    ]}
+                  >
+                    {item.status}
+                  </Text>
+                </View>
               </View>
-              </View>
-           
             </TouchableOpacity>
           ))}
         </View>
 
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle1}>Advance History</Text>
-
           {advanceList.map((item) => (
             <TouchableOpacity
               key={item._id}
@@ -542,42 +1037,37 @@ const AdvanceManagement =() => {
               style={styles.card}
             >
               <View style={styles.card_inner}>
-              <Text style={[GlobalFont.CustomFont,styles.cardDate]}>
-                {new Date(item.created_at).toDateString().slice(4, 10)}
-              </Text>
-              
-              <View style={styles.cardRight}>
-                <Text style={[GlobalFont.CustomFont,styles.cardAmount]}>₹{item.advance_amount}</Text>
-                <Text
-                  style={[GlobalFont.CustomFont,
-                    styles.status,
-                    { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
-                  ]}
-                >
-                  {item.status}
+                <Text style={[GlobalFont.CustomFont, styles.cardDate]}>
+                  {new Date(item.created_at).toDateString().slice(4, 10)}
                 </Text>
-              </View>
+                <View style={styles.cardRight}>
+                  <Text style={[GlobalFont.CustomFont, styles.cardAmount]}>₹{item.advance_amount}</Text>
+                  <Text
+                    style={[GlobalFont.CustomFont, styles.status,
+                      { color: item.status === "active" ? "#FF4D4D" : "#2ECC71" },
+                    ]}
+                  >
+                    {item.status}
+                  </Text>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
         </View>
 
-
       </ScrollView>
+
       <StatusPopup
-          visible={popupConfig.visible}
-          type={popupConfig.type}
-          title={popupConfig.title}
-          message={popupConfig.message}
-          onClose={() =>
-            setPopupConfig(prev => ({ ...prev, visible: false }))
-          }
-        />
-      <BottomNavigation rights={rights}/>
+        visible={popupConfig.visible}
+        type={popupConfig.type}
+        title={popupConfig.title}
+        message={popupConfig.message}
+        onClose={() => setPopupConfig(prev => ({ ...prev, visible: false }))}
+      />
+      <BottomNavigation rights={rights} />
     </LinearGradient>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

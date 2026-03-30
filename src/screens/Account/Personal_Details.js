@@ -41,6 +41,14 @@ const PersonalDetails = () => {
   const [passportToDate, setPassportToDate] = useState(new Date());
   const [employee_vault, setEmployee_Vault] = useState(0);
   const [alreadyUploadedSize, setAlreadyUploadedSize] = useState(0);
+  const [mobileError, setMobileError] = useState('');
+  const [emergencyError, setEmergencyError] = useState('');
+  const [alternateError, setAlternateError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [panError, setPanError] = useState('');
+  const [aadharError, setAadharError] = useState('');
+  const [rights, setRights] = useState(false);
+  const [updateButton, setupdateButton] = useState(false);
   const MAX_SINGLE_FILE_KB = 200;
   const [form, setForm] = useState({
     employee_id: '',
@@ -118,11 +126,14 @@ const PersonalDetails = () => {
         setUserData(userData);
         setEmployeeDet(employee_det);
         setFetchDetails(personal_det);
+        setupdateButton(personal_det.personal_details_submit_status)
         setEmployee_Vault(employee_det.employee_vault || 0);
         setAlreadyUploadedSize(employee_det.total_file_size || 0);
+        setRights(JSON.parse(await AsyncStorage.getItem("rights")));
       }
       if (personal_det && personal_det?.personal_details_status) {
-        console.log(personal_det?.personal_details_status ,"personal_det.personal_details_status ");
+        // console.log(personal_det?.personal_details_status ,"personal_det.personal_details_status ");
+            console.log(alreadyUploadedSize,"alreadyUploadedSize");
 
         setPersonalDetailsStatus(personal_det?.personal_details_status);
        
@@ -158,7 +169,7 @@ const PersonalDetails = () => {
           fetchDetails?.mobile_no || EmployeeDet.mobile_no || '',
 
         emp_dob:
-          fetchDetails?.emp_dob || EmployeeDet.emp_dob || '',
+          formatDOB(fetchDetails?.emp_dob || EmployeeDet.emp_dob) || '',
         // fetchDetails?.emp_dob || EmployeeDet.emp_dob.split('T')[0] || '',
 
         sex:
@@ -242,6 +253,18 @@ const PersonalDetails = () => {
     attendence_image: null,
   });
 
+  const formatDOB = (dateString) => {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};
+
   const onChange = (key, value) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
@@ -283,51 +306,38 @@ const PersonalDetails = () => {
   //   }
   // };
   const pickFile = async (key) => {
-    try {
-      const file = await PdfPicker.pickFile();
-      if (!file) return;
+    
+  try {
+    const file = await PdfPicker.pickFile();
+    if (!file) return;
 
-      const fileSizeKB = file.size / 1024;
+    const fileSizeKB = file.size / 1024;
 
-      const selectedFilesSizeKB = getSelectedFilesSizeKB();
-      const totalRemainingSize =
-        employee_vault - (alreadyUploadedSize + selectedFilesSizeKB);
-
-      console.log(totalRemainingSize, "totalRemainingSize");
-
-      if (fileSizeKB > MAX_SINGLE_FILE_KB) {
-        Alert.alert(
-          "File Too Large",
-          `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
-        );
-        return;
-      }
-
-
-      if (fileSizeKB > totalRemainingSize) {
-        Alert.alert(
-          "Storage Limit Exceeded",
-          `Only ${totalRemainingSize.toFixed(2)} KB remaining in vault`
-        );
-        return;
-      }
-
-      const fileObj = {
-        name: file.name || file.fileName || "Selected File",
-        uri: file.uri,
-        type: file.type,
-        size: file.size,
-      };
-
-      setUploads(prev => ({
-        ...prev,
-        [key]: fileObj,
-      }));
-
-    } catch (err) {
-      console.log("File pick cancelled or failed", err);
+    if (fileSizeKB > MAX_SINGLE_FILE_KB) {
+      Alert.alert(
+        "File Too Large",
+        `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
+      );
+      return;
     }
-  };
+
+    const fileObj = {
+      name: file.name || file.fileName || "Selected File",
+      uri: file.uri,
+      type: file.type,
+      size: file.size,
+    };
+    // console.log(file.size,"file.size");
+    
+    setUploads(prev => ({
+      ...prev,
+      [key]: fileObj,
+    }));
+
+  } catch (err) {
+    console.log("File pick cancelled or failed", err);
+  }
+};
   // const fetchUpdatedDetails=async(token)=>{
   //   console.log(token,"fetchUpdatedDetails");
 
@@ -507,14 +517,30 @@ const PersonalDetails = () => {
 
 
   const onSubmit = async () => {
+    console.log(alreadyUploadedSize,"alreadyUploadedSize")
     try {
-      const formData = new FormData();
+      const selectedFilesSizeKB = getSelectedFilesSizeKB();
+       console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
+    const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
+      console.log(totalUsed,"totalUsed")
+      console.log(employee_vault-totalUsed,"remaining")
+    if (totalUsed > employee_vault) {
+      Alert.alert(
+        "Storage Limit Exceeded",
+        `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
+      );
+      return;
+    }
 
+    // console.log(totalUsed,"totalUsed")
+      const formData = new FormData();
+        formData.append("total_file_size", totalUsed);
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
       formData.append('corporate_id', userData?.corporate_id);
 
       formData.append('personal_details_status', 'pending');
+      formData.append('personal_details_submit_status', 'inactive');
 
 
       PERSONAL_FIELDS.forEach(field => {  
@@ -548,6 +574,7 @@ const PersonalDetails = () => {
           type: newImage.type,
         });
       });
+      
 
       if (formData._parts.length <= 2) {
         Alert.alert('No Changes', 'Nothing to update');
@@ -650,13 +677,29 @@ const PersonalDetails = () => {
         />
 
         <Label text="Mobile *" />
+
         <Input
           value={form.mobile_no}
           keyboardType="number-pad"
-          onChangeText={v => onChange('mobile_no', v)}
+          maxLength={10} 
+          onChangeText={(v) => {
+            const cleaned = v.replace(/[^0-9]/g, '');
+
+            onChange('mobile_no', cleaned);
+
+            if (cleaned.length > 10) {
+              setMobileError('Enter a valid contact number');
+            } else {
+              setMobileError('');
+            }
+          }}
           editable={!isApproved('mobile_no')}
         />
-
+        {mobileError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {mobileError}
+          </Text>
+        ) : null}
         <Label text="Date of Birth *" />
         <TouchableOpacity
           style={styles.dateInput}
@@ -709,25 +752,71 @@ const PersonalDetails = () => {
         <Input
           value={form.email_id}
           keyboardType="email-address"
-          onChangeText={v => onChange('email_id', v)}
+          autoCapitalize="none"
+          onChangeText={(v) => {
+            onChange('email_id', v);
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (v.length > 0 && !emailRegex.test(v)) {
+              setEmailError('Enter a valid email address');
+            } else {
+              setEmailError('');
+            }
+          }}
           editable={!isApproved('email_id')}
         />
-
+        {emailError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {emailError}
+          </Text>
+        ) : null}
         <Label text="Alternate Mobile" />
         <Input
           value={form.alternate_mob_no}
           keyboardType="number-pad"
-          onChangeText={v => onChange('alternate_mob_no', v)}
+          maxLength={10}
+          onChangeText={(v) => {
+            const cleaned = v.replace(/[^0-9]/g, '');
+
+            onChange('alternate_mob_no', cleaned);
+
+            if (cleaned.length > 0 && cleaned.length < 10) {
+              setAlternateError('Enter a valid contact number');
+            } else {
+              setAlternateError('');
+            }
+          }}
           editable={!isApproved('alternate_mob_no')}
         />
-
+        {alternateError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {alternateError}
+          </Text>
+        ) : null}
         <Label text="Emergency Contact Number" />
         <Input
           value={form.emergency_contact_no}
           keyboardType="number-pad"
-          onChangeText={v => onChange('emergency_contact_no', v)}
+          maxLength={10}
+          onChangeText={(v) => {
+            const cleaned = v.replace(/[^0-9]/g, '');
+
+            onChange('emergency_contact_no', cleaned);
+
+            if (cleaned.length < 10) {
+              setEmergencyError('Enter a valid contact number');
+            } else {
+              setEmergencyError('');
+            }
+          }}
           editable={!isApproved('emergency_contact_no')}
         />
+        {emergencyError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {emergencyError}
+          </Text>
+        ) : null}
 
         <Label text="Emergency Contact Name" />
         <Input
@@ -740,18 +829,57 @@ const PersonalDetails = () => {
         <Input
           value={form.aadhar_no}
           keyboardType="number-pad"
-          onChangeText={v => onChange('aadhar_no', v)}
+          maxLength={12}
+          onChangeText={(v) => {
+            const cleaned = v.replace(/[^0-9]/g, '');
+
+            onChange('aadhar_no', cleaned);
+
+            if (cleaned.length > 0 && cleaned.length < 12) {
+              setAadharError('Aadhaar must be 12 digits');
+            } else if (cleaned.length === 12) {
+              if (/^[01]/.test(cleaned)) {
+                setAadharError('Invalid Aadhaar number');
+              } else {
+                setAadharError('');
+              }
+            } else {
+              setAadharError('');
+            }
+          }}
           editable={!isApproved('aadhar_no')}
         />
+        {aadharError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {aadharError}
+          </Text>
+        ) : null}
 
         <Label text="PAN Card Number" />
         <Input
           value={form.pan_no}
           autoCapitalize="characters"
-          onChangeText={v => onChange('pan_no', v)}
+          maxLength={10}
+          onChangeText={(v) => {
+            const value = v.toUpperCase(); 
+
+            onChange('pan_no', value);
+
+            const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+            if (value.length > 0 && !panRegex.test(value)) {
+              setPanError('Enter a valid PAN (ABCDE1234F)');
+            } else {
+              setPanError('');
+            }
+          }}
           editable={!isApproved('pan_no')}
         />
-
+        {panError ? (
+          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+            {panError}
+          </Text>
+        ) : null}
         <Label text="Passport Number" />
         <Input
           value={form.passport_no}
@@ -937,7 +1065,7 @@ const PersonalDetails = () => {
             <Picker.Item label="No Religion" value="no_religion" />
           </Picker>
         </PickerWrapper>
-
+        <View style={styles.uploadBoxall}>
         {form.aadhar_no?.trim() !== '' && (
           <UploadBox
             label="Aadhar Card Image"
@@ -977,15 +1105,18 @@ const PersonalDetails = () => {
           file={uploads.attendence_image}
           onPress={() => pickFile('attendence_image')}
         />
+        </View>
         {/* {PersonalDetailsStatus !== 'pending' && ( */}
+        {updateButton !== "inactive" && (
           <TouchableOpacity style={styles.button} onPress={onSubmit}>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
+        )}
         {/* )} */}
       </ScrollView>
 
 
-      <BottomNavigation />
+      <BottomNavigation rights={rights}/>
     </LinearGradient>
   );
 };
@@ -1179,7 +1310,9 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 80,
   },
-
+  uploadBoxall:{
+    marginBottom:70
+  },
   buttonText: {
     color: '#fff',
     fontWeight: '600',

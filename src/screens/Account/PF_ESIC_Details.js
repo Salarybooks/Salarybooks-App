@@ -15,6 +15,7 @@ import axios from "axios";
 import LinearGradient from 'react-native-linear-gradient';
 import BottomNavigation from '../BottomNavigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DatePicker from 'react-native-date-picker';
 const { width } = Dimensions.get('window');
 import { API_BASE_URL } from "@env";
 
@@ -27,6 +28,16 @@ const PF_ESIC_Details = () => {
     const [userData, setUserData] = useState(true);
     const [PfEsicDetailsStatus, setPfEsicDetailsStatus] = useState(null);
     const [rejectedRemark, setrejectedRemark] = useState(null);
+    const [openExitDate, setOpenExitDate] = useState(false);
+    const [exitDate, setExitDate] = useState(new Date());
+    const [contactError, setContactError] = useState('');
+    const [openMembershipDate, setOpenMembershipDate] = useState(false);
+    const [membershipDate, setMembershipDate] = useState(new Date());
+    const [openEsicDate, setOpenEsicDate] = useState(false);
+    const [esicDate, setEsicDate] = useState(new Date());
+    const [rights, setRights] = useState(false);
+    const [updateButton, setUpdateButton] = useState(false);
+    
     const [form, setForm] = useState({
         pre_er_pf: '',
         er_name: '',
@@ -59,7 +70,6 @@ const PF_ESIC_Details = () => {
             const emp_id = await AsyncStorage.getItem("emp_id");
             const userData = JSON.parse(await AsyncStorage.getItem("userData"));
             const emp_unapprove_pfesic_details = JSON.parse(await AsyncStorage.getItem("emp_unapprove_pfesic_details"));
-
             const data = JSON.parse(
                 await AsyncStorage.getItem("employee_PF_ESIC_details")
             );
@@ -71,6 +81,9 @@ const PF_ESIC_Details = () => {
                 setUserData(userData);
                 setPfEsic(data);
                 setunapprovePfesic(emp_unapprove_pfesic_details)
+                setUpdateButton(emp_unapprove_pfesic_details.pfesic_details_submit_status)
+                setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+
             }
             if (emp_unapprove_pfesic_details.pfesic_details_status) {
                 setPfEsicDetailsStatus(emp_unapprove_pfesic_details.pfesic_details_status);
@@ -175,7 +188,7 @@ const PF_ESIC_Details = () => {
                     pfesic?.[map.section]?.[map.key] ?? '';
 
                 const newValue = form[formKey] ?? '';
-
+                
                 if (String(oldValue).trim() !== String(newValue).trim()) {
                     editableFields[map.section][map.key] = newValue;
                 }
@@ -189,6 +202,7 @@ const PF_ESIC_Details = () => {
             if (Object.keys(editableFields).length > 0) {
                 const pfesicPayload = {
                     pfesic_details_status: 'pending',
+                    pfesic_details_submit_status: 'inactive',
                     ...editableFields
                 };
                 formData.append(
@@ -196,7 +210,8 @@ const PF_ESIC_Details = () => {
                     JSON.stringify(pfesicPayload)
                 );
             }
-
+            // console.log(formData,"formDatanew");
+            
             const response = await axios.post(
                 `${API_BASE_URL}employee/request-update-pfesic-details`,
                 formData,
@@ -215,7 +230,12 @@ const PF_ESIC_Details = () => {
             console.log('Submit error:', e.message);
         }
     };
-
+     const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
     return (
         <LinearGradient
             colors={['#000000ff', '#1c68beff']}
@@ -233,18 +253,22 @@ const PF_ESIC_Details = () => {
                     <View
                         style={[
                             styles.notificationBox,
-                            PfEsicDetailsStatus === 'reject'
+                            PfEsicDetailsStatus === 'rejected'
                                 ? styles.rejectedBox
                                 : styles.pendingBox
                         ]}
                     >
                         <Text style={styles.notificationTitle}>
-                            {PfEsicDetailsStatus === 'reject'
+                            {PfEsicDetailsStatus === 'rejected'
                                 ? 'Details Rejected'
-                                : ' Details Approved'}
+                                : PfEsicDetailsStatus === 'pending'
+                                    ? 'Details Pending for Approval'
+                                    : PfEsicDetailsStatus === 'approved'
+                                        ? 'Details Approved'
+                                        : ''}
                         </Text>
 
-                        {PfEsicDetailsStatus === 'reject' && (
+                        {PfEsicDetailsStatus === 'rejected' && (
                             <Text style={styles.remarkText}>
                                 Remark: {rejectedRemark}
                             </Text>
@@ -276,22 +300,56 @@ const PF_ESIC_Details = () => {
 
                     <View style={styles.row}>
                         <Text style={styles.label}>Exit Date</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.exit_date}
-                            editable={!pfesic?.pre_er_details?.exit_date}
-                            onChangeText={t => setForm(p => ({ ...p, exit_date: t }))}
-                        />
+
+                        <TouchableOpacity
+                            style={styles.dateInput}
+                            disabled={!!pfesic?.pre_er_details?.exit_date}
+                            onPress={() => setOpenExitDate(true)}
+                        >
+                            <Text style={styles.dateTextDisplay}>
+                                {form.exit_date ? form.exit_date : 'Select Date'}
+                            </Text>
+                            <Text style={styles.calendarIcon}>📅</Text>
+                        </TouchableOpacity>
                     </View>
+
+                    <DatePicker
+                        modal
+                        mode="date"
+                        open={openExitDate}
+                        date={exitDate}
+                        onConfirm={(date) => {
+                            setOpenExitDate(false);
+                            setExitDate(date);
+
+                            // format to dd-mm-yyyy
+                            const formatted = formatDate(date);
+
+                            setForm(prev => ({
+                                ...prev,
+                                exit_date: formatted
+                            }));
+                        }}
+                        onCancel={() => setOpenExitDate(false)}
+                        theme="dark"
+                    />
 
                     <View style={styles.row}>
                         <Text style={styles.label}>Last Drawn Gross</Text>
+
                         <TextInput
                             style={styles.input}
                             keyboardType="numeric"
                             value={form.last_drawn_gross}
                             editable={!pfesic?.pre_er_details?.last_drawn_gross}
-                            onChangeText={t => setForm(p => ({ ...p, last_drawn_gross: t }))}
+                            onChangeText={(t) => {
+                                const cleaned = t.replace(/[^0-9]/g, ''); // ✅ allow only digits
+
+                                setForm(p => ({
+                                    ...p,
+                                    last_drawn_gross: cleaned
+                                }));
+                            }}
                         />
                     </View>
 
@@ -317,13 +375,37 @@ const PF_ESIC_Details = () => {
 
                     <View style={styles.row}>
                         <Text style={styles.label}>Contact No</Text>
+
                         <TextInput
                             style={styles.input}
-                            keyboardType="numeric"
+                            keyboardType="number-pad"
+                            maxLength={10}
                             value={form.contact_no}
                             editable={!pfesic?.pre_er_details?.contact_no}
-                            onChangeText={t => setForm(p => ({ ...p, contact_no: t }))}
+                            onChangeText={(t) => {
+                                const cleaned = t.replace(/[^0-9]/g, ''); // only digits
+
+                                setForm(p => ({
+                                    ...p,
+                                    contact_no: cleaned
+                                }));
+
+                                // validation
+                                if (cleaned.length > 10) {
+                                    setContactError('Enter a valid contact number');
+                                } else if (cleaned.length > 0 && cleaned.length < 10) {
+                                    setContactError('Contact number must be 10 digits');
+                                } else {
+                                    setContactError('');
+                                }
+                            }}
                         />
+
+                        {contactError ? (
+                            <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+                                {contactError}
+                            </Text>
+                        ) : null}
                     </View>
 
                     <Text style={styles.subTitle}>EPFO Details</Text>
@@ -434,14 +516,38 @@ const PF_ESIC_Details = () => {
 
                     <View style={styles.row}>
                         <Text style={styles.label}>Membership Date (PF)</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.membership_date_pf}
-                            editable={!pfesic?.curr_er_epfo_details?.membership_date}
-                            onChangeText={t => setForm(p => ({ ...p, membership_date_pf: t }))}
-                        />
-                    </View>
 
+                        <TouchableOpacity
+                            style={styles.dateInput}
+                            disabled={!!pfesic?.curr_er_epfo_details?.membership_date}
+                            onPress={() => setOpenMembershipDate(true)}
+                        >
+                            <Text style={styles.dateTextDisplay}>
+                                {form.membership_date_pf || 'Select Date'}
+                            </Text>
+
+                            <Text style={styles.calendarIcon}>📅</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <DatePicker
+                        modal
+                        mode="date"
+                        open={openMembershipDate}
+                        date={membershipDate}
+                        onConfirm={(date) => {
+                            setOpenMembershipDate(false);
+                            setMembershipDate(date);
+
+                            const formatted = formatDate(date); 
+
+                            setForm(p => ({
+                                ...p,
+                                membership_date_pf: formatted
+                            }));
+                        }}
+                        onCancel={() => setOpenMembershipDate(false)}
+                        theme="dark"
+                    />
                     <Text style={styles.subTitle}>ESIC Details</Text>
 
                     <View style={styles.row}>
@@ -476,22 +582,48 @@ const PF_ESIC_Details = () => {
 
                     <View style={styles.row}>
                         <Text style={styles.label}>Membership Date (ESIC)</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.membership_date_esic}
-                            editable={!pfesic?.curr_er_esic_details?.membership_date}
-                            onChangeText={t => setForm(p => ({ ...p, membership_date_esic: t }))}
-                        />
-                    </View>
 
-                    <TouchableOpacity style={styles.button} onPress={onSubmit}>
-                        <Text style={styles.buttonText}>UPDATE</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.dateInput}
+                            disabled={!!pfesic?.curr_er_esic_details?.membership_date}
+                            onPress={() => setOpenEsicDate(true)}
+                        >
+                            <Text style={styles.dateTextDisplay}>
+                                {form.membership_date_esic || 'Select Date'}
+                            </Text>
+
+                            <Text style={styles.calendarIcon}>📅</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <DatePicker
+                        modal
+                        mode="date"
+                        open={openEsicDate}
+                        date={esicDate}
+                        onConfirm={(date) => {
+                            setOpenEsicDate(false);
+                            setEsicDate(date);
+
+                            const formatted = formatDate(date); 
+
+                            setForm(p => ({
+                                ...p,
+                                membership_date_esic: formatted
+                            }));
+                        }}
+                        onCancel={() => setOpenEsicDate(false)}
+                        theme="dark"
+/>
+                    {updateButton !== "inactive" && (
+                                     <TouchableOpacity style={styles.button} onPress={onSubmit}>
+                                       <Text style={styles.buttonText}>Update</Text>
+                                     </TouchableOpacity>
+                                   )}
 
                 </View>
 
             </ScrollView>
-            <BottomNavigation />
+            <BottomNavigation rights={rights}/>
         </LinearGradient>
     );
 };
@@ -576,7 +708,20 @@ const styles = StyleSheet.create({
     row: {
         marginBottom: 10,
     },
-
+    dateInput: {
+    flexDirection: "row",
+    justifyContent: 'left',
+    alignItems: "center",
+    backgroundColor: "#5BA3C7",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 12,
+    height: 40,
+  },
+  dateTextDisplay: {
+    color: "#fff"
+  },
     label: {
         fontSize: 12,
         color: '#fff',

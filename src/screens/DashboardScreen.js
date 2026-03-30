@@ -72,7 +72,7 @@ const Dashboard = () => {
 
       if (res.data?.status === "success") {
         const employeeData = res.data.employee_data;
-        console.log("API_BASE_URL",API_BASE_URL);
+        // console.log("API_BASE_URL",API_BASE_URL);
         // console.log("employeeData",employeeData[0].employee_details.employee_id,"API_BASE_URL",API_BASE_URL);
         await AsyncStorage.setItem("employee_id", employeeData[0].employee_details.employee_id);
         await AsyncStorage.setItem("employee_mongose_id", employeeData[0]._id);
@@ -96,10 +96,10 @@ const Dashboard = () => {
         saveImageUrl(profilePic);
         const attendencePic = employeeData?.[0]?.attendence_pic;
         saveAttendenceImageUrl(attendencePic);
-        console.log("employeeData",employeeData);
+        // console.log("employeeData",employeeData);
         
         const rightsData = employeeData?.[0]?.employee_details?.employment_hr_details?.emp_role_data?.rights;
-        console.log("rightsData", rightsData);
+        // console.log("rightsData", rightsData);
 
         setRights(rightsData);
         AsyncStorage.setItem('rights',JSON.stringify(rightsData))
@@ -116,7 +116,7 @@ const Dashboard = () => {
       : null;
 
     setImageUrl(url);
-    console.log("urlurl",url);
+    // console.log("urlurl",url);
     
     await AsyncStorage.setItem("imageUrl", url);
   };
@@ -183,7 +183,7 @@ const Dashboard = () => {
   };
 
   const screenAttendace=()=>{
-    console.log("tree");
+    // console.log("tree");
     
     if (!canApplyAttendance) {
       showPopup("error", "Permission Denied", "you don't have This functionality");
@@ -234,7 +234,7 @@ const Dashboard = () => {
               source={
                 imageUrl
                   ? { uri: imageUrl }
-                  : require("../assets/photo.jpg")
+                  : require("../assets/user.png")
               }
               style={styles.profileImage}
             />

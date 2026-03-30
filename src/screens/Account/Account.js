@@ -366,7 +366,7 @@ const Account = ({ navigation }) => {
               source={
                 profilepic
                   ? { uri: profilepic }
-                  : require("../../assets/photo.jpg")
+                  : require("../../assets/user.png")
               }
               style={styles.profileImage}
             />

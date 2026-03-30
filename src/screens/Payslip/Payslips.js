@@ -172,12 +172,6 @@ const PayslipScreen = () => {
     }
   };
 
-<<<<<<< HEAD
- 
-  const viewPayslipInOverlay = async (monthKey, year) => {
-    console.log(monthKey,year,"year");
-    
-=======
 //   const viewPayslipInOverlay = async (monthKey, year) => {
 //   if (!payslipData) {
 //     showPopup("error", "Error", "Payslip data not loaded");
@@ -325,7 +319,6 @@ const PayslipScreen = () => {
   // };
 
 const viewPayslipInOverlay = async (monthKey, year) => {
->>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
   if (!payslipData) {
     showPopup("error", "Error", "Payslip data not loaded");
     return;
@@ -358,19 +351,10 @@ const viewPayslipInOverlay = async (monthKey, year) => {
         responseType: "arraybuffer", // ⭐ IMPORTANT
       }
     );
-<<<<<<< HEAD
-    console.log(res.data,"res.data");
-    
-    if (!res.data?.file_url) {
-      showPopup("error", "Error", "Payslip not available");
-      return;
-    }
-=======
 
     const base64Data = RNBlobUtil.base64.encode(
       String.fromCharCode(...new Uint8Array(res.data))
     );
->>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
 
     const tempPath = `${RNBlobUtil.fs.dirs.CacheDir}/payslip_preview.pdf`;
 
@@ -386,11 +370,6 @@ const viewPayslipInOverlay = async (monthKey, year) => {
 };
     const download_payslip = async (monthKey, year) => {
 
-<<<<<<< HEAD
-  const download_payslip = async (monthKey, year) => {
-
-=======
->>>>>>> 193281d0d1875ca9ecf715e3051b698fdff51efa
     console.log("API_BASE_URL", monthKey,year);
     if (!payslipData) {
       showPopup("error", "Error", "Payslip data not loaded");

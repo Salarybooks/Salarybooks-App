@@ -164,7 +164,7 @@ export default function LeaveManagementScreen() {
     
 
     if (!token) return;
-    console.log(API_BASE_URL, "API_BASE_URL11");
+    // console.log(API_BASE_URL, "API_BASE_URL11");
 
     try {
       const payload = {}
@@ -280,6 +280,7 @@ export default function LeaveManagementScreen() {
       formData.append("remaining_leaves", remainingLeaves);
       formData.append("emp_reason", reason);
       formData.append("available", selectedLeave.available);
+      formData.append("leave_approval_status", "pending");
       console.log(formData,"formData");
       
       const response = await axios.post(
@@ -325,7 +326,7 @@ export default function LeaveManagementScreen() {
 
       if (response.data.success) {
         setLeavedata(response.data.data)
-        console.log(response.data.data, "response.data1");
+        // console.log(response.data.data, "response.data1");
 
       }
     } catch (error) {
@@ -836,7 +837,7 @@ return (
 
               <View style={styles.leave_head}>
                 <Text style={[GlobalFont.CustomFont, styles.upcomingStatusText]}>
-                  {item.leave_head}
+                  {item.leave_temp_head}
                 </Text>
               </View>
 
@@ -888,7 +889,7 @@ return (
 
                 <View style={styles.leave_head}>
                   <Text style={[GlobalFont.CustomFont, styles.upcomingStatusText]}>
-                    {item.leave_head}
+                    {item.leave_temp_head}
                   </Text>
                 </View>
 
