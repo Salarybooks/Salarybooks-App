@@ -58,7 +58,7 @@ const HR_Details = () => {
       const employee_hr_details = JSON.parse(await AsyncStorage.getItem("employee_hr_details"));
       const masterdata = JSON.parse(await AsyncStorage.getItem("masterdata"));
       //   const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-      console.log("setHrDetails==true", employee_hr_details);
+      // console.log("setHrDetails==true", employee_hr_details);
       
       setemployee_id(await AsyncStorage.getItem("employee_id"));
       if (t && employee_hr_details) {

@@ -65,7 +65,7 @@ const AddressForm = () => {
       const emp_unapprove_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_address"));
       const emp_unapprove_curr_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_curr_address"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-        //  console.log(emp_unapprove_address,"emp_unapprove_address");
+        
       if (true) {
 
         setToken(t);
@@ -93,10 +93,9 @@ const AddressForm = () => {
     // fetchUpdatedDetails(token);
   }, [token]);
 
-  console.log(addressDetailsStatus,'addressDetailsStatus');
-  
+//  console.log(unApproveAddress,"emp_unapprove_address");  
   useEffect(() => {
-    // console.log(address, "null", curaddress);
+    console.log(address, "null", curaddress);
 
     if (address && curaddress) {
       if (!address && !curaddress) return;

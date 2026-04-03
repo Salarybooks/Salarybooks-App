@@ -116,7 +116,7 @@ const Dashboard = () => {
       : null;
 
     setImageUrl(url);
-    // console.log("urlurl",url);
+    console.log("urlurl",url);
     
     await AsyncStorage.setItem("imageUrl", url);
   };

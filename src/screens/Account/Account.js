@@ -211,10 +211,11 @@ const Account = ({ navigation }) => {
         // AsyncStorage.setItem('emp_unapprove_curr_address', JSON.stringify(response.data.employee_details.emp_curr_address))
         // AsyncStorage.setItem('emp_unapprove_bank_details', JSON.stringify(response.data.employee_details.bank_details))
         // AsyncStorage.setItem('emp_unapprove_pfesic_details', JSON.stringify(response.data.employee_details.pfesic_details))
-        console.log(response.data, "response");
+        // console.log(response.data, "response");
 
         const employee = response?.data?.employee_details;
-
+        console.log(response?.data?.employee_details,"employee");
+        
         if (employee) {
           await AsyncStorage.setItem(
             'personal_det',

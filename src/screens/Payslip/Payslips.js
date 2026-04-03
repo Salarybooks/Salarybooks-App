@@ -117,7 +117,7 @@ const PayslipScreen = () => {
         unchecked_row_ids: "[]",
       };
 
-      console.log("Calling API for:", selectedMonth, selectedYear);
+      // console.log("Calling API for:", selectedMonth, selectedYear);
 
       const response = await axios.post(
         `${API_BASE_URL}employee/get-generated-payslip-data`,
@@ -129,7 +129,7 @@ const PayslipScreen = () => {
           },
         }
       );
-      console.log("API Response:", response.data);
+      console.log("API Response payshilp:", response.data);
 
       if (response.data.status === "success") {
         setPayslipData(response.data);
@@ -318,205 +318,160 @@ const PayslipScreen = () => {
   //   }
   // };
 
-const viewPayslipInOverlay = async (monthKey, year) => {
+  const viewPayslipInOverlay = async (monthKey, year) => {
+    if (!payslipData) {
+      showPopup("error", "Error", "Payslip data not loaded");
+      return;
+    }
+
+    const matched = payslipData.master_data.docs.find(
+      (item) => item.wage_month === monthKey
+    );
+
+    if (!matched) {
+      showPopup("error", "Error", "Payslip not found");
+      return;
+    }
+
+    try {
+      // Step 1: Get the file_url from API
+      const res = await axios.post(
+        `${API_BASE_URL}employee/download-payslip-data`,
+        {
+          row_checked_all: false,
+          pageno: 1,
+          perpage: 1,
+          wage_month: monthKey,
+          wage_year: parseInt(year),
+          checked_row_ids: JSON.stringify([matched._id]),
+          unchecked_row_ids: "[]",
+          type: "view",
+        },
+        { headers: { "x-access-token": token } }
+      );
+
+      console.log("API response:", res.data);
+
+      if (!res.data?.file_url) {
+        showPopup("error", "Error", "File URL not found in response");
+        return;
+      }
+
+      // Step 2: Build the full PDF URL
+      // file_url = '/storage/company/payslip/payslip-VBL-TEST035-1-2026.pdf'
+      const fileUrl = API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
+      console.log("Full PDF URL:", fileUrl);
+
+      // Step 3: Download the actual PDF file using RNBlobUtil
+      const tempPath = `${RNBlobUtil.fs.dirs.CacheDir}/payslip_preview.pdf`;
+
+      // Delete old cached file if exists
+      const exists = await RNBlobUtil.fs.exists(tempPath);
+      if (exists) await RNBlobUtil.fs.unlink(tempPath);
+
+      const downloadRes = await RNBlobUtil.config({
+        fileCache: true,
+        path: tempPath,
+      }).fetch("GET", fileUrl, {
+        "x-access-token": token,
+      });
+
+      const savedPath = downloadRes.path();
+      console.log("PDF saved to:", savedPath);
+
+      // Step 4: Verify file is valid
+      const stat = await RNBlobUtil.fs.stat(savedPath);
+      console.log("PDF file size:", stat.size);
+
+      if (stat.size < 100) {
+        showPopup("error", "Error", "Downloaded file is invalid or empty");
+        return;
+      }
+
+      // Step 5: Show in modal
+      setPdfUrl(`file://${savedPath}`);
+      setModalVisible(true);
+
+    } catch (err) {
+      console.log("View error:", err);
+      showPopup("error", "View Failed", err.message || "Unable to open payslip");
+    }
+  };
+  const download_payslip = async (monthKey, year) => {
   if (!payslipData) {
     showPopup("error", "Error", "Payslip data not loaded");
     return;
   }
 
-  const matched = payslipData.master_data.docs.find(
-    item => item.wage_month === monthKey
-  );
+  const hasPermission = await requestStoragePermission();
+  if (!hasPermission) {
+    showPopup("error", "Permission Denied", "Storage permission is required");
+    return;
+  }
 
+  const matched = payslipData.master_data.docs.find(
+    (item) => item.wage_month === monthKey
+  );
   if (!matched) {
-    showPopup("error", "Error", "Payslip not found");
+    showPopup("error", "Error", "No payslip found for this month");
     return;
   }
 
   try {
+    // Step 1: Get file_url from API
     const res = await axios.post(
       `${API_BASE_URL}employee/download-payslip-data`,
       {
         row_checked_all: false,
         pageno: 1,
-        perpage: 1,
+        perpage: 20,
         wage_month: monthKey,
         wage_year: parseInt(year),
         checked_row_ids: JSON.stringify([matched._id]),
         unchecked_row_ids: "[]",
-        type: "view",
+        type: "download",
       },
-      {
-        headers: { "x-access-token": token },
-        responseType: "arraybuffer", // ⭐ IMPORTANT
-      }
+      { headers: { "x-access-token": token } }
     );
 
-    const base64Data = RNBlobUtil.base64.encode(
-      String.fromCharCode(...new Uint8Array(res.data))
-    );
+    console.log("Download API response:", res.data);
 
-    const tempPath = `${RNBlobUtil.fs.dirs.CacheDir}/payslip_preview.pdf`;
+    if (!res.data?.file_url) {
+      showPopup("error", "Error", "File URL not found");
+      return;
+    }
 
-    await RNBlobUtil.fs.writeFile(tempPath, base64Data, "base64");
+    // Step 2: Build full URL
+    // file_url = '/storage/company/payslip/payslip-VBL-TEST035-1-2026.pdf'
+    const fileUrl = API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
+    console.log("Downloading from:", fileUrl);
 
-    setPdfUrl(`file://${tempPath}`);
-    setModalVisible(true);
+    const downloadPath =
+      RNBlobUtil.fs.dirs.DownloadDir + `/payslip_${monthKey}_${year}.pdf`;
+
+    // Step 3: Download the actual PDF file
+    await RNBlobUtil.config({
+      fileCache: true,
+      path: downloadPath,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        path: downloadPath,
+        mime: "application/pdf",
+        description: "Payslip downloaded",
+        mediaScannable: true,
+      },
+    }).fetch("GET", fileUrl, {
+      "x-access-token": token,
+    });
+
+    showPopup("success", "Success", "Payslip downloaded successfully");
 
   } catch (err) {
-    console.log(err);
-    showPopup("error", "View Failed", "Unable to open payslip");
+    console.log("Download error:", err);
+    showPopup("error", "Download Failed", err.message);
   }
 };
-    const download_payslip = async (monthKey, year) => {
-
-    console.log("API_BASE_URL", monthKey,year);
-    if (!payslipData) {
-      showPopup("error", "Error", "Payslip data not loaded");
-      // Alert.alert("Error", "Payslip data not loaded");
-      return;
-    }
-
-    const hasPermission = await requestStoragePermission();
-    if (!hasPermission) {
-      showPopup("error", "Permission Denied", "Storage permission is required");
-      // Alert.alert("Permission Denied", "Storage permission is required");
-      return;
-    }
-
-    
-
-    const docs = payslipData.master_data.docs;
-    const matched = docs.find((item) => item.wage_month === monthKey);
-    if (!matched) {
-      showPopup("error", "Error", "No payslip found for this month");
-      // Alert.alert("Error", "No payslip found for this month");
-      return;
-    }
-    const emp_id = await AsyncStorage.getItem("employee_mongose_id");
-    // console.log("emp_id", emp_id);
-
-    const payload = {
-      row_checked_all: false,
-      pageno: 1,
-      perpage: 20,
-      wage_month: monthKey,
-      wage_year: parseInt(year),
-      // checked_row_ids: JSON.stringify([matched._id]),
-      // checked_row_ids: emp_id,
-      checked_row_ids: JSON.stringify([matched._id]),
-      unchecked_row_ids: "[]",
-      type: "download",
-    };
-
-    console.log("payload", payload);
-
-    // try {
-    //   const { fs, config } = RNBlobUtil;
-
-    //   const downloadPath =
-    //     fs.dirs.DownloadDir + `/payslip_${monthKey}_${year}.pdf`;
-
-    //   // await config({
-    //   //   fileCache: true,
-    //   //   appendExt: "pdf",
-    //   //   path: downloadPath,
-    //   //   addAndroidDownloads: {
-    //   //     useDownloadManager: true,
-    //   //     notification: true,
-    //   //     path: downloadPath,
-    //   //     description: "Payslip downloaded",
-    //   //     mime: "application/pdf",
-    //   //     mediaScannable: true,
-    //   //   },
-    //   // }).fetch(
-    //   //   "POST",
-    //   //   `${API_BASE_URL}employee/download-payslip-data`,
-    //   //   {
-    //   //     "Content-Type": "application/json",
-    //   //     "x-access-token": token,
-    //   //   },
-    //   //   JSON.stringify(payload)
-    //   // );
-
-
-    //   const res = await axios.post(
-    //     `${API_BASE_URL}employee/download-payslip-data`,
-    //     payload,
-    //     {
-    //       headers: {
-    //         "x-access-token": token,
-    //       },
-    //     }
-    //   );
-    //   console.log("payslipDatapayslipData", res.data);
-
-    //   if (!res.data?.file_url) {
-
-    //     showPopup("error", "Error", "Payslip not found");
-    //     // Alert.alert("Error", "Payslip not found");
-    //     return;
-    //   }
-
-    //   // const fileUrl = res.data.file_url;
-    //   // const fileUrl = normalizeUrl(API_BASE_URL, matched.pdf_link);
-    //   // const fileUrl =API_BASE_URL.replace(/\/$/, "") +matched.pdf_link;
-    //   const fileUrl =
-    //     API_BASE_URL.replace(/\/$/, "") +
-    //     res.data.file_url;
-    //   console.log("fileUrl", fileUrl, res.data.file_url, API_BASE_URL);
-
-
-    //   await RNBlobUtil.config({
-    //     fileCache: true,
-    //     appendExt: "pdf",
-    //     addAndroidDownloads: {
-    //       useDownloadManager: true,
-    //       notification: true,
-    //       path: downloadPath,
-    //       mime: "application/pdf",
-    //       description: "Payslip downloaded",
-    //       mediaScannable: true,
-    //     },
-    //   }).fetch("GET", fileUrl);
-    //   // Alert.alert(
-    //   //   "Success",
-    //   //   "Payslip downloaded to Downloads folder 📂"
-    //   // );
-    // } catch (err) {
-    //   // console.log("Download Error:", err);
-    //   showPopup("error","Download Failed", err.message);
-    //   // Alert.alert("Download Failed", err.message);
-    // }
-    try {
-  const { fs } = RNBlobUtil;
-
-  const downloadPath =
-    fs.dirs.DownloadDir + `/payslip_${monthKey}_${year}.pdf`;
-
-  const res = await axios.post(
-    `${API_BASE_URL}employee/download-payslip-data`,
-    payload,
-    {
-      headers: {
-        "x-access-token": token,
-      },
-      responseType: "arraybuffer",
-    }
-  );
-
-  const base64Data = RNBlobUtil.base64.encode(
-    String.fromCharCode(...new Uint8Array(res.data))
-  );
-
-  await RNBlobUtil.fs.writeFile(downloadPath, base64Data, "base64");
-
-  showPopup("success", "Success", "Payslip downloaded successfully");
-
-} catch (err) {
-  showPopup("error","Download Failed", err.message);
-}
-  };
 
   const route = useRoute();
   const screenTitle = route.params?.title;

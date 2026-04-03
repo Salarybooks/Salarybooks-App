@@ -315,7 +315,7 @@ export default function LeaveManagementScreen() {
 
 
   const fetch_applied_leave_data = async () => {
-    //  console.log(userData,"hi i am abir");
+
     setloading(true);
     try {
       const response = await axios.post(
