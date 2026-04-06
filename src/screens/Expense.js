@@ -40,14 +40,20 @@ const Expense = () => {
   const [amount, setAmount] = useState('');
   const [remark, setRemark] = useState('');
   const [token, setToken] = useState(null);
+  const [employee_id, setEmployee_id] = useState(null);
   const [file, setFile] = useState(false);
   const [rights,setRights]=useState(false);
+  const [expandedId, setExpandedId] = useState(null);
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
+      const employee_id=await AsyncStorage.getItem("employee_id");
       setRights( JSON.parse(await AsyncStorage.getItem("rights")))
       setToken(t);
+      if(employee_id){
+      setEmployee_id(employee_id);
+      }
       console.log("TOKEN LOADED:", t);
     };
     loadToken();
@@ -188,7 +194,8 @@ const Expense = () => {
         const docs = response.data.data.docs || [];
         // Alert.alert("apisuccess");
         // transform data to match your UI
-        // console.log("docsexpense",docs);
+        console.log("docsexpense",docs
+        );
         
         const formattedData = docs.map((item) => ({
           id: item._id,
@@ -196,6 +203,8 @@ const Expense = () => {
           type: item.head_id || "N/A",
           amount: `${item.amount}`,
           status: capitalize(item.status),
+           wage_month: item.wage_month,
+          wage_year: item.wage_year,
         }));
 
         setClaimsData(formattedData);
@@ -221,9 +230,10 @@ const Expense = () => {
         showPopup("error", "Error", "Token not found");
         return;
       }
-
+      console.log(employee_id,"employee_id");
+      
       const formData = new FormData();
-
+      formData.append("employee_id",employee_id)
       formData.append("head_id", headId);
       formData.append("amount", amount);
       formData.append("remark", remark);
@@ -266,6 +276,9 @@ const Expense = () => {
   };
   const route = useRoute();
   const screenTitle = route.params?.title;
+  const toggleExpand = (id) => {
+  setExpandedId(prev => (prev === id ? null : id));
+};
   return (
     <LinearGradient
       colors={["#000000ff", "#1c68beff"]}
@@ -396,18 +409,71 @@ const Expense = () => {
             </View>
           ) : (
             <ScrollView style={styles.list}>
-              {claimsData.map((item) => (
-                <View key={item.id} style={styles.expenseCard}>
-                  <Text style={[GlobalFont.CustomFont,styles.expenseTitle]}>{item.type}</Text>
+                    {claimsData.map((item) => {
+                      const isExpanded = expandedId === item.id;
 
-                  <View style={styles.amountTag}>
-                    <Text style={[GlobalFont.semiBold,styles.amountText]}>₹ {item.amount}</Text>
-                  </View>
+                      return (
+                        <View key={item.id} style={styles.expenseCard}>
 
-                  <Text style={[GlobalFont.CustomFont,styles.dateText]}>{item.date}</Text>
-                  <Text style={[GlobalFont.CustomFont,styles.statusText]}>Status: {item.status}</Text>
-                </View>
-              ))}
+                          <TouchableOpacity
+                            style={styles.cardHeaderRow}
+                            onPress={() => toggleExpand(item.id)}
+                            activeOpacity={0.8}
+                          >
+                            <Text style={[GlobalFont.semiBold, styles.idText]}>
+                              {item.type}
+                            </Text>
+                            <View style={styles.amountTag}>
+                            <Text style={styles.amountCenter}>
+                              ₹ {item.amount}
+                            </Text>
+                            </View>
+                            <Icon
+                              name={isExpanded ? "chevron-up" : "chevron-down"}
+                              size={20}
+                              color="#ccc"
+                            />
+                          </TouchableOpacity>
+
+                          {isExpanded && (
+                            <View style={styles.expandSection}>
+                              <View style={styles.rowItem}>
+                                <Text style={styles.label}>Month</Text>
+                                <Text style={styles.value}>
+                                  {monthName(Number(item.wage_month))} {item.wage_year}
+                                </Text>
+                              </View>
+
+                              <View style={styles.rowItem}>
+                                <Text style={styles.label}>Date</Text>
+                                <Text style={styles.value}>{item.date}</Text>
+                              </View>
+
+                              <View style={styles.rowItem}>
+                                <Text style={styles.label}>Status</Text>
+                                <Text
+                                  style={[
+                                    styles.value,
+                                    {
+                                      color:
+                                        item.status?.toLowerCase() === "active"
+                                          ? "#4ADE80"   
+                                          : item.status?.toLowerCase() === "rejected"
+                                            ? "#fa7171"   
+                                            : "#FACC15",  
+                                    },
+                                  ]}
+                                >
+                                  {item.status?.toLowerCase() === "active"
+                                    ? "Approved"
+                                    : item.status}
+                                </Text>
+                              </View>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })}
             </ScrollView>
           )}
 
@@ -498,7 +564,7 @@ const Expense = () => {
 
 
                 </View>
-                <Text style={[GlobalFont.semiBold,styles.label]}>Upload Image:</Text>
+                <Text style={[GlobalFont.semiBold,styles.label1]}>Upload Image:</Text>
                 
                     {/* <View style={styles.imageUploadContainer}>
                   <Text style={[GlobalFont.CustomFont,{ color: "#ccc", marginBottom: 10 }]}>
@@ -548,7 +614,16 @@ const Expense = () => {
     </LinearGradient>
   );
 };
+function monthName(monthNo) {
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
 
+  const index = Number(monthNo); // convert safely
+
+  return months[index] || "";
+}
 export default Expense;
 
 // const styles = StyleSheet.create({
@@ -842,16 +917,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  expenseCard: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 14,
-    gap:7,
-    marginBottom: 10,
-  },
+  // expenseCard: {
+  //   backgroundColor: "rgba(255,255,255,0.1)",
+  //   borderRadius: 14,
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   alignItems: "center",
+  //   padding: 14,
+  //   gap:7,
+  //   marginBottom: 10,
+  // },
 
   expenseTitle: {
     color: "#fff",
@@ -931,7 +1006,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  label: {
+  label1: {
     color: "#fff",
     marginTop: 10,
     marginBottom: 4,
@@ -985,4 +1060,57 @@ const styles = StyleSheet.create({
     fontSize: 15,
     // fontWeight: "bold",
   },
+  expenseCard: {
+  backgroundColor: "rgba(255,255,255,0.08)",
+  borderRadius: 16,
+  marginBottom: 12,
+  overflow: "hidden",
+},
+
+/* HEADER ROW */
+cardHeaderRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: 16,
+},
+
+idText: {
+  color: "#fff",
+  fontSize: 14,
+  flex: 1,
+},
+
+amountCenter: {
+  color: "#fff",
+  fontSize: 14,
+  fontWeight: "600",
+  textAlign: "center",
+  flex: 1,
+},
+
+/* EXPAND SECTION */
+expandSection: {
+  borderTopWidth: 1,
+  borderTopColor: "rgba(255,255,255,0.1)",
+  padding: 12,
+  backgroundColor: "rgba(255,255,255,0.03)",
+},
+
+rowItem: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 6,
+},
+
+label: {
+  color: "#aaa",
+  fontSize: 12,
+},
+
+value: {
+  color: "#fff",
+  fontSize: 13,
+  fontWeight: "500",
+},
 });

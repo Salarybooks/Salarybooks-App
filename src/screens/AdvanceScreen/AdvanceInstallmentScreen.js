@@ -10,12 +10,13 @@ import BottomNavigation from "../BottomNavigation";
 
 export default function InstallmentHistoryScreen({ route }) {
   const data = route?.params?.data;
+  console.log(data, "data");
 
   // progress percentage
   const pct = data.advance_amount
     ? (data.advance_recovered / data.advance_amount) * 100
     : 0;
-  
+
   return (
     <LinearGradient
       colors={["#062945", "#0A355A", "#0E4A7A"]}
@@ -79,7 +80,16 @@ export default function InstallmentHistoryScreen({ route }) {
               <Text style={styles.td}>{`${index + 1}.`}</Text>
               <Text style={styles.td}>{monthName(row.instalment_month)}</Text>
               <Text style={styles.td}>{row.instalment_year}</Text>
-              <Text style={styles.td2}>Incentive</Text>
+              {/* <Text style={styles.td2}>{row.recovery_from}</Text> */}
+              <Text style={styles.td2}>
+                {row.recovery_from === "incentive"
+                  ? "Incentive"
+                  : row.recovery_from === "gross_earning"
+                    ? "Gross Earning"
+                    : row.recovery_from === "bonus"
+                      ? "Bonus"
+                      : row.recovery_from}
+              </Text>
               <Text style={styles.td}>{row.advance_amount}</Text>
               <Text
                 style={[
@@ -104,7 +114,6 @@ export default function InstallmentHistoryScreen({ route }) {
 // Month function
 function monthName(monthNo) {
   return [
-    "",
     "Jan",
     "Feb",
     "Mar",
