@@ -607,7 +607,7 @@ const AdvanceManagement = () => {
   const [prog, setProgress] = useState(0);
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "" });
   const [rights, setRights] = useState(false);
-
+  const MAX_SINGLE_FILE_KB = 200;
   const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   useEffect(() => {
@@ -654,6 +654,16 @@ const AdvanceManagement = () => {
   const pickDocument = async () => {
     try {
       const file = await PdfPicker.pickFile();
+        if (!file) return;
+            const fileSizeKB = file.size / 1024;
+            
+                  if (fileSizeKB > MAX_SINGLE_FILE_KB) {
+                    Alert.alert(
+                      "File Too Large",
+                      `File must be less than ${MAX_SINGLE_FILE_KB} KB`
+                    );
+                    return;
+                  }
       let extractedName = "Unknown File";
       if (file.uri) {
         const parts = file.uri.split("/");

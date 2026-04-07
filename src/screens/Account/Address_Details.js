@@ -73,7 +73,7 @@ const AddressForm = () => {
         // console.log(employee_address,"employee_address");
 
         setAddress(employee_address);
-        setUpdateButton(emp_unapprove_address.address_details_submit_status);
+        setUpdateButton(emp_unapprove_address.address_details_status);
         setCurAddress(employee_curr_address);
         setUnApproveAddress(emp_unapprove_address);
         setCurUnApproveAddress(emp_unapprove_curr_address);
@@ -93,7 +93,11 @@ const AddressForm = () => {
     // fetchUpdatedDetails(token);
   }, [token]);
 
-//  console.log(unApproveAddress,"emp_unapprove_address");  
+ console.log(address,"address");  
+ console.log(curaddress,"curaddress");  
+ console.log(unApproveAddress,"unApproveAddress");  
+ console.log(curUnApproveAddress,"curUnApproveAddress");  
+ console.log(updateButton,"updateButton");  
   useEffect(() => {
     console.log(address, "null", curaddress);
 
@@ -173,7 +177,10 @@ const AddressForm = () => {
       ADDRESS_FIELDS.forEach(field => {
         const oldValue = address?.[field] ?? '';
         const newValue = form?.[field] ?? '';
-
+        if (field === "diff_current_add") {
+          empAddressPayload[field] = newValue;
+          return;
+        }
         if (String(oldValue).trim() === String(newValue).trim()) return;
 
         empAddressPayload[field] = newValue;
@@ -192,19 +199,18 @@ const AddressForm = () => {
       }
 
       const empCurrAddressPayload = {};
-      console.log(form.diff_current_add, 'form.diff_current_add');
 
-      // if (form.diff_current_add === 'yes') {
+      if (form.diff_current_add === 'yes') {
       CURRENT_ADDRESS_FIELDS.forEach(field => {
         const apiField = field.replace('curr_', '');
         const oldValue = curaddress?.[apiField] ?? '';
-        const newValue = form?.[field] ?? '';
+        const newValue = form?.[field] ?? ''; 
 
         if (String(oldValue).trim() === String(newValue).trim()) return;
 
         empCurrAddressPayload[field] = newValue;
       });
-      // }
+      }
 
       if (Object.keys(empCurrAddressPayload).length > 0) {
         formData.append(
@@ -246,6 +252,33 @@ const AddressForm = () => {
     }
   };
 
+  const isAnyAddressMissing = () => {
+  if (!address && !curaddress) return false;
+
+  const isPermanentMissing = ADDRESS_FIELDS.some(field => {
+    const value =
+      address?.[field] ?? unApproveAddress?.[field];
+
+    return !value || String(value).trim() === '';
+  });
+
+  let isCurrentMissing = false;
+
+  // if (
+  //   (address?.diff_current_add ?? unApproveAddress?.diff_current_add) === 'yes'
+  // ) {
+    isCurrentMissing = CURRENT_ADDRESS_FIELDS.some(field => {
+      const apiField = field.replace('curr_', '');
+
+      const value =
+        curaddress?.[apiField] ?? curUnApproveAddress?.[field];
+
+      return !value || String(value).trim() === '';
+    });
+  // }
+
+  return isPermanentMissing || isCurrentMissing;
+};
 
   return (
     <LinearGradient
@@ -564,7 +597,7 @@ const AddressForm = () => {
           </>
         )}
         </View>
-        {updateButton !== "inactive" && (
+        {(updateButton !== "approved" || isAnyAddressMissing()) && (
                   <TouchableOpacity style={styles.button} onPress={onSubmit}>
                     <Text style={styles.buttonText}>Update</Text>
                   </TouchableOpacity>

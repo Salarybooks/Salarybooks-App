@@ -113,41 +113,39 @@ const PersonalDetails = () => {
     profile_image: true,
     attendence_image: true,
   };
-
   useEffect(() => {
-    const loadTokenAndFetch = async () => {
-      const t = await AsyncStorage.getItem("authToken");
-      const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-      const employee_det = JSON.parse(await AsyncStorage.getItem("employee_det"));
-      const personal_det = JSON.parse(await AsyncStorage.getItem("personal_det"));
-      setemployee_id(await AsyncStorage.getItem("employee_id"));
-      if (t && employee_det) {
-        setToken(t);
-        setUserData(userData);
-        setEmployeeDet(employee_det);
-        setFetchDetails(personal_det);
-        setupdateButton(personal_det.personal_details_submit_status)
-        setEmployee_Vault(employee_det.employee_vault || 0);
-        setAlreadyUploadedSize(employee_det.total_file_size || 0);
-        setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+  const loadTokenAndFetch = async () => {
+    const t = await AsyncStorage.getItem("authToken");
+    const userData = JSON.parse(await AsyncStorage.getItem("userData"));
+    const employee_det = JSON.parse(await AsyncStorage.getItem("employee_det"));
+    const personal_det = JSON.parse(await AsyncStorage.getItem("personal_det"));
+    setemployee_id(await AsyncStorage.getItem("employee_id"));
+    if (t && employee_det) {
+      setToken(t);
+      setUserData(userData);
+      setEmployeeDet(employee_det);
+      setFetchDetails(personal_det);
+      setupdateButton(personal_det.personal_details_status)
+      setEmployee_Vault(employee_det.employee_vault || 0);
+      setAlreadyUploadedSize(employee_det.total_file_size || 0);
+      setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+    }
+    if (personal_det && personal_det?.personal_details_status) {
+      console.log(personal_det.personal_details_status, "personal_det.personal_details_submit_status");
+      // console.log(EmployeeDet,"EmployeeDet");
+
+      setPersonalDetailsStatus(personal_det?.personal_details_status);
+
+
+      if (personal_det?.rejected_remark) {
+        setrejectedRemark(personal_det?.rejected_remark);
       }
-      if (personal_det && personal_det?.personal_details_status) {
-        // console.log(personal_det?.personal_details_status ,"personal_det.personal_details_status ");
-            console.log(alreadyUploadedSize,"alreadyUploadedSize");
-
-        setPersonalDetailsStatus(personal_det?.personal_details_status);
-       
-        
-        if (personal_det?.rejected_remark) {
-          setrejectedRemark(personal_det?.rejected_remark);
-        }
-      }
-    };
-
-
+    }
+  };
 
     loadTokenAndFetch();
   }, [token]);
+
 
 
   useEffect(() => {
@@ -228,7 +226,7 @@ const PersonalDetails = () => {
           fetchDetails?.marital_status || EmployeeDet?.marital_status || '',
 
         marriage_date:
-          fetchDetails?.marriage_date || EmployeeDet?.marriage_date || '',
+          formatDOB(fetchDetails?.marriage_date || EmployeeDet?.marriage_date) || '',
 
         domicile:
           fetchDetails?.domicile || EmployeeDet?.domicile || '',
@@ -254,16 +252,16 @@ const PersonalDetails = () => {
   });
 
   const formatDOB = (dateString) => {
-  if (!dateString) return '';
+    if (!dateString) return '';
 
-  const date = new Date(dateString);
+    const date = new Date(dateString);
 
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
 
-  return `${day}-${month}-${year}`;
-};
+    return `${day}-${month}-${year}`;
+  };
 
   const onChange = (key, value) =>
     setForm(prev => ({ ...prev, [key]: value }));
@@ -306,38 +304,38 @@ const PersonalDetails = () => {
   //   }
   // };
   const pickFile = async (key) => {
-    
-  try {
-    const file = await PdfPicker.pickFile();
-    if (!file) return;
 
-    const fileSizeKB = file.size / 1024;
+    try {
+      const file = await PdfPicker.pickFile();
+      if (!file) return;
 
-    if (fileSizeKB > MAX_SINGLE_FILE_KB) {
-      Alert.alert(
-        "File Too Large",
-        `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
-      );
-      return;
+      const fileSizeKB = file.size / 1024;
+
+      if (fileSizeKB > MAX_SINGLE_FILE_KB) {
+        Alert.alert(
+          "File Too Large",
+          `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
+        );
+        return;
+      }
+
+      const fileObj = {
+        name: file.name || file.fileName || "Selected File",
+        uri: file.uri,
+        type: file.type,
+        size: file.size,
+      };
+      // console.log(file.size,"file.size");
+
+      setUploads(prev => ({
+        ...prev,
+        [key]: fileObj,
+      }));
+
+    } catch (err) {
+      console.log("File pick cancelled or failed", err);
     }
-
-    const fileObj = {
-      name: file.name || file.fileName || "Selected File",
-      uri: file.uri,
-      type: file.type,
-      size: file.size,
-    };
-    // console.log(file.size,"file.size");
-    
-    setUploads(prev => ({
-      ...prev,
-      [key]: fileObj,
-    }));
-
-  } catch (err) {
-    console.log("File pick cancelled or failed", err);
-  }
-};
+  };
   // const fetchUpdatedDetails=async(token)=>{
   //   console.log(token,"fetchUpdatedDetails");
 
@@ -517,24 +515,24 @@ const PersonalDetails = () => {
 
 
   const onSubmit = async () => {
-    console.log(alreadyUploadedSize,"alreadyUploadedSize")
+    console.log(alreadyUploadedSize, "alreadyUploadedSize")
     try {
-      const selectedFilesSizeKB = getSelectedFilesSizeKB();
-       console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
-    const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
-      console.log(totalUsed,"totalUsed")
-      console.log(employee_vault-totalUsed,"remaining")
-    if (totalUsed > employee_vault) {
-      Alert.alert(
-        "Storage Limit Exceeded",
-        `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
-      );
-      return;
-    }
+      //   const selectedFilesSizeKB = getSelectedFilesSizeKB();
+      //    console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
+      // const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
+      //   console.log(totalUsed,"totalUsed")
+      //   console.log(employee_vault-totalUsed,"remaining")
+      // if (totalUsed > employee_vault) {
+      //   Alert.alert(
+      //     "Storage Limit Exceeded",
+      //     `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
+      //   );
+      //   return;
+      // }
 
-    // console.log(totalUsed,"totalUsed")
+      // console.log(totalUsed,"totalUsed")
       const formData = new FormData();
-        formData.append("total_file_size", totalUsed);
+      // formData.append("total_file_size", totalUsed);
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
       formData.append('corporate_id', userData?.corporate_id);
@@ -543,7 +541,7 @@ const PersonalDetails = () => {
       formData.append('personal_details_submit_status', 'inactive');
 
 
-      PERSONAL_FIELDS.forEach(field => {  
+      PERSONAL_FIELDS.forEach(field => {
         const oldValue =
           EmployeeDet?.[field]?.value ?? EmployeeDet?.[field] ?? '';
 
@@ -574,7 +572,7 @@ const PersonalDetails = () => {
           type: newImage.type,
         });
       });
-      
+
 
       if (formData._parts.length <= 2) {
         Alert.alert('No Changes', 'Nothing to update');
@@ -594,14 +592,25 @@ const PersonalDetails = () => {
 
       if (response?.data?.status === 'success') {
         setPersonalDetailsStatus('pending');
+        // await loadTokenAndFetch(); 
         Alert.alert('Success', 'Details sent for approval');
+        
       }
     } catch (error) {
       console.log(error.message);
     }
   };
 
+  const isAnyFieldEmptyFromAPI = () => {
+    if (!EmployeeDet && !fetchDetails) return false;
 
+    return PERSONAL_FIELDS.some(field => {
+      const value =
+        fetchDetails?.[field] ?? EmployeeDet?.[field];
+
+      return !value || String(value).trim() === '';
+    });
+  };
 
 
   const formatDate = (date) => {
@@ -681,7 +690,7 @@ const PersonalDetails = () => {
         <Input
           value={form.mobile_no}
           keyboardType="number-pad"
-          maxLength={10} 
+          maxLength={10}
           onChangeText={(v) => {
             const cleaned = v.replace(/[^0-9]/g, '');
 
@@ -861,7 +870,7 @@ const PersonalDetails = () => {
           autoCapitalize="characters"
           maxLength={10}
           onChangeText={(v) => {
-            const value = v.toUpperCase(); 
+            const value = v.toUpperCase();
 
             onChange('pan_no', value);
 
@@ -1043,7 +1052,7 @@ const PersonalDetails = () => {
         <Label text="Height" />
         <Input
           value={form.height}
-          keyboardType="numeric"
+          keyboardType="characters"
           onChangeText={v => onChange('height', v)}
           editable={!isApproved('height')}
         />
@@ -1066,48 +1075,48 @@ const PersonalDetails = () => {
           </Picker>
         </PickerWrapper>
         <View style={styles.uploadBoxall}>
-        {form.aadhar_no?.trim() !== '' && (
-          <UploadBox
-            label="Aadhar Card Image"
-            file={uploads.emp_aadhaar_image}
-            onPress={() => pickFile('emp_aadhaar_image')}
-          />
-        )}
-        {form.pan_no?.trim() !== '' && (
-          <UploadBox
-            label="PAN Card Image "
-            file={uploads.emp_pan_image}
-            onPress={() => pickFile('emp_pan_image')}
-          />
-        )}
-        {form.passport_no?.trim() !== '' && (
-          <UploadBox
-            label="Passport Image "
-            file={uploads.emp_passport_image}
-            onPress={() => pickFile('emp_passport_image')}
-          />
-        )}
+          {form.aadhar_no?.trim() !== '' && (
+            <UploadBox
+              label="Aadhar Card Image"
+              file={uploads.emp_aadhaar_image}
+              onPress={() => pickFile('emp_aadhaar_image')}
+            />
+          )}
+          {form.pan_no?.trim() !== '' && (
+            <UploadBox
+              label="PAN Card Image "
+              file={uploads.emp_pan_image}
+              onPress={() => pickFile('emp_pan_image')}
+            />
+          )}
+          {form.passport_no?.trim() !== '' && (
+            <UploadBox
+              label="Passport Image "
+              file={uploads.emp_passport_image}
+              onPress={() => pickFile('emp_passport_image')}
+            />
+          )}
 
-        <UploadBox
-          label="Additional ID"
-          file={uploads.additional_id_image}
-          onPress={() => pickFile('additional_id_image')}
-        />
+          <UploadBox
+            label="Additional ID"
+            file={uploads.additional_id_image}
+            onPress={() => pickFile('additional_id_image')}
+          />
 
-        <UploadBox
-          label="Profile Image"
-          file={uploads.profile_image}
-          onPress={() => pickFile('profile_image')}
-        />
+          <UploadBox
+            label="Profile Image"
+            file={uploads.profile_image}
+            onPress={() => pickFile('profile_image')}
+          />
 
-        <UploadBox
-          label="Attendance Image"
-          file={uploads.attendence_image}
-          onPress={() => pickFile('attendence_image')}
-        />
+          <UploadBox
+            label="Attendance Image"
+            file={uploads.attendence_image}
+            onPress={() => pickFile('attendence_image')}
+          />
         </View>
         {/* {PersonalDetailsStatus !== 'pending' && ( */}
-        {updateButton !== "inactive" && (
+        {(updateButton !== "approved" || isAnyFieldEmptyFromAPI()) && (
           <TouchableOpacity style={styles.button} onPress={onSubmit}>
             <Text style={styles.buttonText}>Update</Text>
           </TouchableOpacity>
@@ -1116,7 +1125,7 @@ const PersonalDetails = () => {
       </ScrollView>
 
 
-      <BottomNavigation rights={rights}/>
+      <BottomNavigation rights={rights} />
     </LinearGradient>
   );
 };
@@ -1310,8 +1319,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 80,
   },
-  uploadBoxall:{
-    marginBottom:70
+  uploadBoxall: {
+    marginBottom: 70
   },
   buttonText: {
     color: '#fff',
