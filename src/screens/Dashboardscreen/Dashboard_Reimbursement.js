@@ -30,14 +30,14 @@ const Reimbursement = () => {
     const [latestClaim, setLatestClaim] = useState(null);
     const [rights, setRights] = useState(null);
     const canApplyleave = rights?.apply?.includes("leave");
-    const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+    const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
     const canApplyreimburdement = rights?.apply?.includes("reimbursement");
 
     useEffect(() => {
         const loadToken = async () => {
             const t = await AsyncStorage.getItem("authToken");
             setToken(t);
-            setRights( JSON.parse(await AsyncStorage.getItem("rights")))
+            setRights(JSON.parse(await AsyncStorage.getItem("rights")))
             // console.log("TOKEN LOADEDaa:", t);
         };
         loadToken();
@@ -73,7 +73,7 @@ const Reimbursement = () => {
             showPopup("error", "Permission Denied", "you don't have This functionality");
             return;
         }
-         navigation.navigate('Expense',{ title: "Expense Management" });
+        navigation.navigate('Expense', { title: "Expense Management" });
     }
     const fetchClaimsData = async () => {
         // console.log("Expense", token)
@@ -210,7 +210,7 @@ const Reimbursement = () => {
                                 <Text style={styles.claimAmount}>  ₹{latestClaim?.amount || 0}</Text>
                             </View>
                         ) : (
-                            <Text style={{ color: "#9AA5C4", fontSize: 11, textAlign: "center",fontFamily:"Outfit-Regular" }}>
+                            <Text style={{ color: "#9AA5C4", fontSize: 11, textAlign: "center", fontFamily: "Outfit-Regular" }}>
                                 No claims available
                             </Text>
                         )}
@@ -223,7 +223,7 @@ const Reimbursement = () => {
                     <TouchableOpacity
                         style={styles.button}
                         // onPress={() => navigation.navigate('Expense',{ title: "Expense Management" }) }
-                        onPress={screenExpence }
+                        onPress={screenExpence}
                     >
                         <Text style={styles.buttonText}>Apply Claim</Text>
                     </TouchableOpacity>
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
         // fontWeight: "700",
         marginBottom: 10,
         textAlign: "center",
-        fontFamily:"Outfit-Bold"
+        fontFamily: "Outfit-Bold"
     },
     chartRow: {
         flexDirection: "row",
@@ -304,12 +304,12 @@ const styles = StyleSheet.create({
         color: "#9AA5C4",
         fontSize: 11,
         marginVertical: 2,
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
     value: {
         color: "#FFFFFF",
         fontWeight: "600",
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
     latestClaims: {
         marginTop: 6,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         marginTop: -2,
         textAlign: "center",
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
     claimRow: {
         flexDirection: "row",
@@ -335,14 +335,14 @@ const styles = StyleSheet.create({
         color: "#9AA5C4",
         fontSize: 11,
         marginLeft: 30,
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
     claimAmount: {
         color: "#FFFFFF",
         fontSize: 11,
         fontWeight: "600",
         marginRight: 29,
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
     button: {
         backgroundColor: "#005C99",
@@ -355,46 +355,52 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontSize: 11,
         fontWeight: "600",
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
 
 
-   card2: {
-    width: width * 0.48,
-    backgroundColor: "#1C2541",
-    borderRadius: 20,
-    padding: 10,
-    marginHorizontal: 1,
-    marginVertical: 5,
-    marginBottom: 50,
-    marginLeft: 1,
-},
+    card2: {
+        width: width * 0.48,
+        backgroundColor: "#1C2541",
+        borderRadius: 20,
+        padding: 10,
+        marginHorizontal: 1,
+        marginVertical: 5,
+        marginBottom: 50,
+        marginLeft: 1,
+    },
 
     title2: {
         color: "#FFFFFF",
         fontSize: 14,
         // fontWeight: "700",
-        marginBottom: -10,
+        marginBottom: 10,
         textAlign: "center",
-        fontFamily:"Outfit-Bold"
+        fontFamily: "Outfit-Bold"
     },
+    //     barchart: {
+    //     marginTop: -29, marginLeft: -40, margin: -20,
+    // },
     barchart: {
-    marginTop: -29, marginLeft: -40, margin: -20,
-},
+        width: "90%",
+         alignItems: "flex-start",
+        justifyContent: "left",
+         overflow: "hidden",
+    },
 
     button2: {
-    backgroundColor: "#005C99",
-    borderRadius: 15,
-    paddingVertical: 6,
-    alignItems: "center",
-    marginTop: "auto",          
-},
+        backgroundColor: "#005C99",
+        borderRadius: 15,
+        paddingVertical: 6,
+        alignItems: "center",
+        marginTop: "auto",
+    },
 
     buttonText2: {
         color: "#FFFFFF",
         fontSize: 11,
         fontWeight: "600",
-        fontFamily:"Outfit-Regular"
+        fontFamily: "Outfit-Regular"
     },
 
 });

@@ -20,7 +20,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import * as Progress from "react-native-progress";
 import { Picker } from '@react-native-picker/picker';
 import BottomNavigation from "../BottomNavigation";
-import LeaveManagement from "../Dashboardscreen/leave_balance";
+// import LeaveManagement from "../Dashboardscreen/leave_balance";
+import LeaveManagement from "./leave_balance";
 import DatePicker from 'react-native-date-picker';
 import axios from "axios";
 import { API_BASE_URL } from "@env";
@@ -586,7 +587,7 @@ return (
           {/* Body */}
           <View style={styles.summaryRow}>
             {/* Circular Progress */}
-            <View style={styles.circleWrap}>
+            {/* <View style={styles.circleWrap}>
 
               <Progress.Circle
                 size={78}
@@ -598,7 +599,7 @@ return (
                 strokeCap="round"
               />
               <Text style={[GlobalFont.CustomFont, styles.circleText]}>{getUsedLeavePercentage()}%</Text>
-            </View>
+            </View> */}
 
             {/* Bars + counts */}
             <View style={styles.barSection}>
@@ -1545,15 +1546,15 @@ const styles = StyleSheet.create({
   },
   barchart: {
 
-    marginTop: -40,
-    marginLeft: -10,
+    marginTop: -0,
+    marginLeft: -70,
     // margin: -20,
     height: 170,
     paddingVertical: -20
   },
   leaveList: {
     marginTop: 30,
-    marginLeft: -100,
+    marginLeft: -20,
     backgroundColor: "#194a7ea2",
     borderRadius: 17,
     paddingVertical: 10,

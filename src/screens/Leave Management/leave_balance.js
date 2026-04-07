@@ -1,116 +1,3 @@
-// import React from "react";
-// import {
-//     View,
-//     Text,
-//     StyleSheet,
-//     Dimensions,
-//     TouchableOpacity,
-//     ScrollView,
-// } from "react-native";
-// import { BarChart } from "react-native-gifted-charts";
-// const { width } = Dimensions.get("window");
-// const Leave_Balance = () => {
-//     return (
-//         <View style={styles.barchart}>
-//             <BarChart
-//                 stackData={[
-//                     {
-//                         label: "Paid",
-//                         stacks: [
-//                             { value: 7, color: "#4FC3F7" },
-//                         ],
-//                     },
-//                     {
-//                         label: "",
-//                         stacks: [
-//                             { value: 10, color: "#000000" },
-//                         ],
-//                     },
-//                     {
-//                         label: "Casual",
-//                         stacks: [
-//                             { value: 6, color: "#4FC3F7" },
-//                         ],
-//                     },
-//                     {
-//                         label: "",
-//                         stacks: [
-//                             { value: 9, color: "#000000" },
-//                         ],
-//                     },
-//                     {
-//                         label: "Sick",
-//                         stacks: [
-//                             { value: 4, color: "#4FC3F7" },
-//                         ],
-//                     },
-//                     {
-//                         label: "",
-//                         stacks: [
-//                             { value: 11, color: "#000000" },
-//                         ],
-//                     },
-//                 ]}
-//                 horizontal
-//                 height={110}
-//                 width={width * 0.38}
-//                 barWidth={16}
-//                 spacing={3}
-
-
-//                 maxValue={14}
-//                 noOfSections={7}
-//                 stepValue={2}
-
-//                 hideRules
-//                 yAxisThickness={0}
-//                 xAxisThickness={0}
-//                 showValuesAsTopLabel
-//                 topLabelComponent={(item) => {
-//                     const total =item.value
-//                         // item.stacks.reduce((sum, s) => sum + s.value, 0);
-//                     return (
-//                         <Text style={styles.number}>
-//                             {total}
-//                         </Text>
-//                     );
-//                 }}
-//                 xAxisLabelTextStyle={{
-//                     color: "#AFC3D6",
-//                     fontSize: 9,
-//                     left: 0
-//                 }}
-
-//                 labelTextStyle={{
-//                     color: "#FFFFFF",
-//                     fontSize: 12,
-//                     width: 48,
-//                     textAlign: "right",
-//                     marginRight: 8,
-//                 }}
-
-//                 yAxisTextStyle={{
-//                     color: "#AFC3D6",
-//                     fontSize: 10,
-//                 }}
-
-//                 isAnimated
-//                 animationDuration={700}
-//             />
-
-//         </View>
-//     );
-// }
-// const styles = StyleSheet.create({
-
-//     number:{
-//          color: "#f8f4f4ff", 
-//          fontSize: 12,
-//           left: -20
-//          }
-// })
-// export default Leave_Balance;
-
 import React, { useState, useEffect } from "react";
 import {
     View,
@@ -159,7 +46,7 @@ const Leave_Balance = () => {
             );
 
             if (response.data?.status === "success") {
-                // console.log(response.data, "response.data");
+                console.log(response.data, "response.data");
 
                 setLeaveList(response.data.leave_type || []);
             }
@@ -214,10 +101,10 @@ const Leave_Balance = () => {
     };
 
 
-    const limitedLeaves = LeaveList.slice(0, 3);
+    // const limitedLeaves = LeaveList.slice(0, 3);
 
     // const stackData = limitedLeaves.map(buildStack);
-    const stackData = limitedLeaves.map(item => ({
+    const stackData = LeaveList.map(item => ({
         label: item.abbreviation,
 
         stacks: [
@@ -264,35 +151,35 @@ const Leave_Balance = () => {
     if (!LeaveList.length) {
         return <Text style={styles.loading}>No leave data found</Text>;
     }
-    const chartWidth = stackData.length * 70;
+    const chartWidth = stackData.length * 50;
 
     return (
         <View>
 
             <View style={styles.barchart}>
 
-                <BarChart
-                    stackData={stackData}
-                    height={120}
-                    width={chartWidth}
-                    barWidth={20}
-                    spacing={20}
-                    hideRules={true}
-                    initialSpacing={4}   
-                    endSpacing={0} 
-
-                    // maxValue={Math.max(...stackData.map(i => i.total)) + 5}
-                    maxValue={
-                        Math.max(...stackData.map(i => i.stacks[0].value + i.stacks[1].value)) + 5
-                    }
-
-                    noOfSections={6}
-                    isAnimated
-                    animationDuration={800}
-
-                    xAxisLabelTextStyle={styles.xLabel}
-                    yAxisTextStyle={styles.yLabel}
-                />
+            <View style={styles.container}>
+    <View style={styles.barchart}>
+        <BarChart
+            stackData={stackData}
+            height={120}
+            width={chartWidth}
+            barWidth={20}
+            spacing={20}
+            hideRules
+            initialSpacing={20}
+            endSpacing={0}
+            maxValue={
+                Math.max(...stackData.map(i => i.stacks[0].value + i.stacks[1].value)) + 5
+            }
+            noOfSections={6}
+            isAnimated
+            animationDuration={800}
+            xAxisLabelTextStyle={styles.xLabel}
+            yAxisTextStyle={styles.yLabel}
+        />
+    </View>
+</View>
 
             </View>
         </View>
@@ -306,11 +193,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         left: -20
     },
-    barchart: {
-        width: "70%",
-        alignItems: "left",
-        justifyContent: "left",
-    },
+    
     title2: {
         color: "#FFFFFF",
         fontSize: 14,
@@ -343,7 +226,17 @@ const styles = StyleSheet.create({
     yLabel: {
         color: "#CFCFCF",
         fontSize: 12
-    }
+    },
+    container: {
+    alignItems: 'center',   // 🔥 centers horizontally
+    justifyContent: 'center',
+},
+
+barchart: {
+    height: 170,
+    justifyContent: 'center',
+    alignItems: 'center',   // 🔥 centers chart inside
+},
 
 });
 
