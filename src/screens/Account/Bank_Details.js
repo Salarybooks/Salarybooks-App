@@ -63,7 +63,7 @@ const BankDetailsForm = () => {
         setUserData(userData);
         setBankDetails(employee_bank_details)
         setUnapproveBankDetails(emp_unapprove_bank_details)
-        setUpdateButton(emp_unapprove_bank_details.bank_details_submit_status)
+        setUpdateButton(emp_unapprove_bank_details.bank_details_status)
         setEmployeeVault(employee_vault || 0);
         setAlreadyUploadedSize(total_file_size || 0);
         setRights(JSON.parse(await AsyncStorage.getItem("rights")));
@@ -259,7 +259,26 @@ const BankDetailsForm = () => {
       console.log(error.message);
     }
   }
+  const isAnyFieldMissing = () => {
+  const requiredFields = [
+    'bank_name',
+    'branch_name',
+    'branch_address',
+    'branch_pin',
+    'account_no',
+    'account_type',
+    'ifsc_code',
+    'micr_no'
+  ];
 
+  return requiredFields.some(field => {
+    const value =
+      bankDetails?.[field] ??
+      unapproveBankDetails?.[field];
+
+    return !value || String(value).trim() === '';
+  });
+};
   return (
     <LinearGradient
       colors={['#000000ff', '#1c68beff']}
@@ -388,7 +407,7 @@ const BankDetailsForm = () => {
           </Text>
         </View>
 
-        {updateButton !== "inactive" && (
+        {(updateButton !== "approved" || isAnyFieldMissing()) && (
                   <TouchableOpacity style={styles.button} onPress={onSubmit}>
                     <Text style={styles.buttonText}>Update</Text>
                   </TouchableOpacity>

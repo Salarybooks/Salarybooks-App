@@ -45,6 +45,7 @@ const Expense = () => {
   const [rights,setRights]=useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
+  const MAX_SINGLE_FILE_KB = 200;
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
@@ -129,6 +130,16 @@ const Expense = () => {
 
     try {
       const file = await PdfPicker.pickFile();
+       if (!file) return;
+      const fileSizeKB = file.size / 1024;
+      
+            if (fileSizeKB > MAX_SINGLE_FILE_KB) {
+              Alert.alert(
+                "File Too Large",
+                `File must be less than ${MAX_SINGLE_FILE_KB} KB`
+              );
+              return;
+            }
       let extractedName = "Unknown File";
       if (file.uri) {
         const parts = file.uri.split("/");

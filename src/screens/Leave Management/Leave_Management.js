@@ -183,7 +183,7 @@ export default function LeaveManagementScreen() {
       if (response.data.status === "success") {
         setLeaveList(response.data);
         // await AsyncStorage.setItem('Leavelist',response.data)
-        setRemainingLeaves(response.data.leave_type[0].available);
+        setRemainingLeaves(response.data?.leave_type[0]?.available);
       } else {
         showPopup("error", "Error", "Unable to load payslip data");
         // Alert.alert("Error", "Unable to load payslip data");
