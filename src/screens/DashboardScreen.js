@@ -210,11 +210,26 @@ const Dashboard = () => {
     fetchattendencedata();
   }, [token, imageUrl]);
 
-  const attendancePercentage =
-  present + absent === 0
-    ? 0
-    : Math.round((present / (present + absent)) * 100);
+  // const attendancePercentage =
+  // present + absent === 0
+  //   ? 0
+  //   : Math.round((present / (present + absent)) * 100);
 
+
+
+const now = new Date();
+const year = now.getFullYear();
+const month = now.getMonth();
+
+const totalDays = new Date(year, month + 1, 0).getDate();
+
+const presentDaySet = getDaySetFromDates(presentDates, year, month);
+const presentCount = presentDaySet.size;
+
+const progressValue =
+  totalDays === 0 ? 0 : presentCount / totalDays;
+
+const attendancePercentage = Math.round(progressValue * 100);
   return (
 
     <LinearGradient
@@ -341,7 +356,7 @@ const Dashboard = () => {
                 <View style={{ position: "relative", alignItems: "center", justifyContent: "center", marginLeft: -30 }}>
                   <Progress.Circle
                     size={70}
-                    progress={0.88}
+                    progress={progressValue}
                     color="#22b0dbff"
                     thickness={8}
                     borderWidth={0}
