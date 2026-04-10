@@ -59,63 +59,7 @@ const Expense = () => {
     };
     loadToken();
   }, []);
-  // const pickImage = () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     includeBase64: false,
-  //   };
-
-  //   launchImageLibrary(options, (response) => {
-  //     if (response.didCancel) {
-  //       console.log('User cancelled image picker');
-  //     } else if (response.errorCode) {
-  //       console.log('Image Picker Error: ', response.errorMessage);
-  //     } else {
-  //       const uri = response.assets[0].uri;
-  //       setImage(uri);
-  //     }
-  //   });
-  // };
-
-  // const pickImage = () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     includeBase64: true,
-  //   };
-
-  //   launchImageLibrary(options, (response) => {
-  //     if (response.didCancel || response.errorCode) return;
-
-  //     const asset = response.assets[0];
-
-  //     setImage({
-  //       uri: asset.uri,
-  //       type: asset.type,
-  //       name: asset.fileName ?? `photo_${Date.now()}.jpg`,
-  //       base64: asset.base64,
-  //     });
-  //   });
-  // };
-
-  // const pickImage = () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     includeBase64: false,   // you don’t need base64 unless required
-  //   };
-
-  //   launchImageLibrary(options, (response) => {
-  //     if (response.didCancel || response.errorCode) return;
-
-  //     const asset = response.assets[0];
-
-  //     setImage({
-  //       uri: asset.uri,
-  //       type: asset.type,
-  //       name: asset.fileName ?? `photo_${Date.now()}.jpg`,
-  //     });
-  //   });
-  // };
-
+ 
 
   const showPopup = (type, title, message) => {
     setPopupConfig({
@@ -276,6 +220,12 @@ const Expense = () => {
       if (response.data.status === "success") {
         showPopup("success", "Success", response.data.message);
         setModalVisible(false);
+        setHeadId('');
+        setAmount('');
+        setRemark('');
+        setFile('');
+        setMonth("");
+        setYear("");
         fetchClaimsData();
       } else {
         showPopup("error", "Error", response.data.message);
@@ -449,14 +399,14 @@ const Expense = () => {
                           {isExpanded && (
                             <View style={styles.expandSection}>
                               <View style={styles.rowItem}>
-                                <Text style={styles.label}>Month</Text>
+                                <Text style={styles.label}>Wage Month</Text>
                                 <Text style={styles.value}>
                                   {monthName(Number(item.wage_month))} {item.wage_year}
                                 </Text>
                               </View>
 
                               <View style={styles.rowItem}>
-                                <Text style={styles.label}>Date</Text>
+                                <Text style={styles.label}>Applied Date</Text>
                                 <Text style={styles.value}>{item.date}</Text>
                               </View>
 
@@ -569,6 +519,7 @@ const Expense = () => {
                       <Picker.Item label="2024" value="2024" />
                       <Picker.Item label="2025" value="2025" />
                       <Picker.Item label="2026" value="2026" />
+                      <Picker.Item label="2027" value="2027" />
                     </Picker>
                   </View>
 
