@@ -103,7 +103,7 @@ const BankDetailsForm = () => {
   }, [bankDetails, userData, employee_id]);
 
 
-  
+
   const Bank_Fields = [
     'bank_name',
     'branch_name',
@@ -118,9 +118,9 @@ const BankDetailsForm = () => {
 
   const getRemainingSizeKB = () => {
     const selectedSizeKB = file?.size ? file.size / 1024 : 0;
-    console.log(alreadyUploadedSize,"alreadyUploadedSize");
-    console.log(alreadyUploadedSize + selectedSizeKB,"alreadyUploadedSize + selectedSizeKB");
-    
+    console.log(alreadyUploadedSize, "alreadyUploadedSize");
+    console.log(alreadyUploadedSize + selectedSizeKB, "alreadyUploadedSize + selectedSizeKB");
+
     const remaining =
       employee_vault - (alreadyUploadedSize + selectedSizeKB);
 
@@ -152,9 +152,9 @@ const BankDetailsForm = () => {
       if (!picked) return;
 
       const fileSizeKB = picked.size / 1024;
-      
+
       // console.log(remainingSizeKB,"remainingSizeKB");
-      
+
       if (fileSizeKB > MAX_SINGLE_FILE_KB) {
         Alert.alert(
           "File Too Large",
@@ -175,7 +175,7 @@ const BankDetailsForm = () => {
         name: picked.name || picked.fileName || 'cancel_cheque.pdf',
         uri: picked.uri,
         type: picked.type || 'application/pdf',
-        size: picked.size, 
+        size: picked.size,
       };
 
       setFile(fileObj);
@@ -185,24 +185,24 @@ const BankDetailsForm = () => {
     }
   };
   const onSubmit = async () => {
-      console.log(alreadyUploadedSize,"alreadyUploadedSize");
+    console.log(alreadyUploadedSize, "alreadyUploadedSize");
     if (form.account_no != form.re_account_no) {
       Alert.alert('Error', 'Account No. not match');
       return;
     }
     try {
       const selectedFilesSizeKB = getRemainingSizeKB();
-             console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
-          const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
-            console.log(totalUsed,"totalUsed")
-            console.log(employee_vault-totalUsed,"remaining")
-          if (totalUsed > employee_vault) {
-            Alert.alert(
-              "Storage Limit Exceeded",
-              `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
-            );
-            return;
-          }
+      console.log(selectedFilesSizeKB, "selectedFilesSizeKB")
+      const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
+      console.log(totalUsed, "totalUsed")
+      console.log(employee_vault - totalUsed, "remaining")
+      if (totalUsed > employee_vault) {
+        Alert.alert(
+          "Storage Limit Exceeded",
+          `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
+        );
+        return;
+      }
       const formData = new FormData();
 
       formData.append('employee_id', employee_id);
@@ -222,11 +222,11 @@ const BankDetailsForm = () => {
       });
 
       if (Object.keys(bank_details).length > 0) {
-         const bankPayload = {
-        bank_details_status: 'pending',
-        bank_details_submit_status: 'inactive',
-        ...bank_details
-    };
+        const bankPayload = {
+          bank_details_status: 'pending',
+          bank_details_submit_status: 'inactive',
+          ...bank_details
+        };
         formData.append(
           'bank_details',
           JSON.stringify(bankPayload)
@@ -260,25 +260,25 @@ const BankDetailsForm = () => {
     }
   }
   const isAnyFieldMissing = () => {
-  const requiredFields = [
-    'bank_name',
-    'branch_name',
-    'branch_address',
-    'branch_pin',
-    'account_no',
-    'account_type',
-    'ifsc_code',
-    'micr_no'
-  ];
+    const requiredFields = [
+      'bank_name',
+      'branch_name',
+      'branch_address',
+      'branch_pin',
+      'account_no',
+      'account_type',
+      'ifsc_code',
+      'micr_no'
+    ];
 
-  return requiredFields.some(field => {
-    const value =
-      bankDetails?.[field] ??
-      unapproveBankDetails?.[field];
+    return requiredFields.some(field => {
+      const value =
+        bankDetails?.[field] ??
+        unapproveBankDetails?.[field];
 
-    return !value || String(value).trim() === '';
-  });
-};
+      return !value || String(value).trim() === '';
+    });
+  };
   return (
     <LinearGradient
       colors={['#000000ff', '#1c68beff']}
@@ -288,134 +288,139 @@ const BankDetailsForm = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.containerall}>
-        <View style={styles.header}>
-          <Image
-            source={require('../../assets/credit-card.png')}
-            style={styles.headerIcon}
-          />
-          <Text style={styles.title}>Employee Bank Details</Text>
-        </View>
-        {BankDetailsStatus && (
-          <View
-            style={[
-              styles.notificationBox,
-              BankDetailsStatus === 'rejected'
-                ? styles.rejectedBox
-                : styles.pendingBox
-            ]}
-          >
-            <Text style={styles.notificationTitle}>
-            {BankDetailsStatus === 'rejected'
-                ? 'Details Rejected'
-                : BankDetailsStatus === 'pending'
-                  ? 'Details Pending for Approval'
-                  : BankDetailsStatus === 'approved'
-                    ? 'Details Approved'
-                    : ''}
-            </Text>
-
-            {BankDetailsStatus === 'rejected' && (
-              <Text style={styles.remarkText}>
-                Remark: {rejectedRemark}
-              </Text>
-            )}
+          <View style={styles.header}>
+            <Image
+              source={require('../../assets/credit-card.png')}
+              style={styles.headerIcon}
+            />
+            <Text style={styles.title}>Employee Bank Details</Text>
           </View>
-        )}
-        <Text style={styles.label}>Bank Name</Text>
-        <TextInput
-          style={styles.input}
-          value={form.bank_name}
-          editable={!bankDetails?.bank_name}
-          onChangeText={t => setForm(p => ({ ...p, bank_name: t }))}
-        />
+          {BankDetailsStatus && (
+            <View
+              style={[
+                styles.notificationBox,
+                BankDetailsStatus === 'rejected'
+                  ? styles.rejectedBox
+                  : styles.pendingBox
+              ]}
+            >
+              <Text style={styles.notificationTitle}>
+                {BankDetailsStatus === 'rejected'
+                  ? 'Details Rejected'
+                  : BankDetailsStatus === 'pending'
+                    ? 'Details Pending for Approval'
+                    : BankDetailsStatus === 'approved'
+                      ? 'Details Approved'
+                      : ''}
+              </Text>
 
-        <Text style={styles.label}>Branch</Text>
-        <TextInput
-          style={styles.input}
-          value={form.branch_name}
-          editable={!bankDetails?.branch_name}
-          onChangeText={t => setForm(p => ({ ...p, branch_name: t }))}
-        />
+              {BankDetailsStatus === 'rejected' && (
+                <Text style={styles.remarkText}>
+                  Remark: {rejectedRemark}
+                </Text>
+              )}
+            </View>
+          )}
+          <Text style={styles.label}>Bank Name</Text>
+          <TextInput
+            style={styles.input}
+            value={form.bank_name}
+            editable={!bankDetails?.bank_name}
+            onChangeText={t => setForm(p => ({ ...p, bank_name: t }))}
+          />
 
-        <Text style={styles.label}>Branch Address</Text>
-        <TextInput
-          style={styles.input}
-          value={form.branch_address}
-          onChangeText={t => setForm(p => ({ ...p, branch_address: t }))}
-        />
+          <Text style={styles.label}>Branch</Text>
+          <TextInput
+            style={styles.input}
+            value={form.branch_name}
+            editable={!bankDetails?.branch_name}
+            onChangeText={t => setForm(p => ({ ...p, branch_name: t }))}
+          />
 
-        <Text style={styles.label}>Bank PIN</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={form.branch_pin}
-          onChangeText={t => setForm(p => ({ ...p, branch_pin: t }))}
-        />
+          <Text style={styles.label}>Branch Address</Text>
+          <TextInput
+            style={styles.input}
+            value={form.branch_address}
+            onChangeText={t => setForm(p => ({ ...p, branch_address: t }))}
+          />
 
-        <Text style={styles.label}>A/C No</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={form.account_no}
-          onChangeText={t => setForm(p => ({ ...p, account_no: t }))}
-        />
+          <Text style={styles.label}>Bank PIN</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={form.branch_pin}
+            onChangeText={t => setForm(p => ({ ...p, branch_pin: t }))}
+          />
 
-        <Text style={styles.label}>Re-enter A/C No</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={form.re_account_no}
-          onChangeText={t => setForm(p => ({ ...p, re_account_no: t }))}
-        />
+          <Text style={styles.label}>A/C No</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={form.account_no}
+            onChangeText={t => setForm(p => ({ ...p, account_no: t }))}
+          />
+
+          {!bankDetails?.account_no && (
+            <>
+              <Text style={styles.label}>Re-enter A/C No</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={form.re_account_no}
+                onChangeText={t => setForm(p => ({ ...p, re_account_no: t }))}
+              />
+
+            </>
+          )}
 
 
-        <Text style={styles.label}>A/C Type</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={form.account_type}
-            onValueChange={v =>
-              setForm(p => ({ ...p, account_type: v }))
-            }
-          >
-            <Picker.Item label="Choose Account Type" value="" />
-            <Picker.Item label="Savings Account" value="saving" />
-            <Picker.Item label="Current Account" value="current" />
-          </Picker>
+          <Text style={styles.label}>A/C Type</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={form.account_type}
+              onValueChange={v =>
+                setForm(p => ({ ...p, account_type: v }))
+              }
+            >
+              <Picker.Item label="Choose Account Type" value="" />
+              <Picker.Item label="Savings Account" value="saving" />
+              <Picker.Item label="Current Account" value="current" />
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>IFSC Code</Text>
+          <TextInput
+            style={styles.input}
+            value={form.ifsc_code}
+            onChangeText={t => setForm(p => ({ ...p, ifsc_code: t }))}
+          />
+
+          <Text style={styles.label}>MICR No</Text>
+          <TextInput
+            style={styles.input}
+            value={form.micr_no}
+            onChangeText={t => setForm(p => ({ ...p, micr_no: t }))}
+          />
+
+          <Text style={styles.label}>Upload Cheque / Passbook</Text>
+          <View style={styles.uploadBox}>
+            <TouchableOpacity onPress={pickFile}>
+              <Text style={styles.chooseText}>Choose file</Text>
+            </TouchableOpacity>
+            <Text style={styles.fileText}>
+              {file ? file.name : 'No file chosen'}
+            </Text>
+          </View>
+
+          {(updateButton !== "approved" || isAnyFieldMissing()) && (
+            <TouchableOpacity style={styles.button} onPress={onSubmit}>
+              <Text style={styles.buttonText}>Update</Text>
+            </TouchableOpacity>
+          )}
         </View>
-
-        <Text style={styles.label}>IFSC Code</Text>
-        <TextInput
-          style={styles.input}
-          value={form.ifsc_code}
-          onChangeText={t => setForm(p => ({ ...p, ifsc_code: t }))}
-        />
-
-        <Text style={styles.label}>MICR No</Text>
-        <TextInput
-          style={styles.input}
-          value={form.micr_no}
-          onChangeText={t => setForm(p => ({ ...p, micr_no: t }))}
-        />
-
-        <Text style={styles.label}>Upload Cheque / Passbook</Text>
-        <View style={styles.uploadBox}>
-          <TouchableOpacity onPress={pickFile}>
-            <Text style={styles.chooseText}>Choose file</Text>
-          </TouchableOpacity>
-          <Text style={styles.fileText}>
-            {file ? file.name : 'No file chosen'}
-          </Text>
-        </View>
-
-        {(updateButton !== "approved" || isAnyFieldMissing()) && (
-                  <TouchableOpacity style={styles.button} onPress={onSubmit}>
-                    <Text style={styles.buttonText}>Update</Text>
-                  </TouchableOpacity>
-                )}
-                </View>
       </ScrollView>
 
-      <BottomNavigation rights={rights}/>
+      <BottomNavigation rights={rights} />
     </LinearGradient>
   );
 };
@@ -430,8 +435,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  containerall:{
-    marginBottom:100
+  containerall: {
+    marginBottom: 100
   },
   headerIcon: {
     width: 28,
