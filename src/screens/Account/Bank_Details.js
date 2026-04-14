@@ -364,13 +364,18 @@ const BankDetailsForm = () => {
             onChangeText={t => setForm(p => ({ ...p, account_no: t }))}
           />
 
-          <Text style={styles.label}>Re-enter A/C No</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={form.re_account_no}
-            onChangeText={t => setForm(p => ({ ...p, re_account_no: t }))}
-          />
+          {!bankDetails?.account_no && (
+            <>
+              <Text style={styles.label}>Re-enter A/C No</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                value={form.re_account_no}
+                onChangeText={t => setForm(p => ({ ...p, re_account_no: t }))}
+              />
+
+            </>
+          )}
 
 
           <Text style={styles.label}>A/C Type</Text>

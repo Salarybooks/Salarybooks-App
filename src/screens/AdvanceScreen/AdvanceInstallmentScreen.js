@@ -10,12 +10,17 @@ import BottomNavigation from "../BottomNavigation";
 
 export default function InstallmentHistoryScreen({ route }) {
   const data = route?.params?.data;
-  console.log(data, "data");
+  // console.log(data, "data");
 
   // progress percentage
-  const pct = data.advance_amount
-    ? (data.advance_recovered / data.advance_amount) * 100
-    : 0;
+  // const pct = data.advance_amount
+  //   ? (data.advance_recovered / data.advance_amount) * 100
+  //   : 0;
+  // const pct = data.advance_amount
+  //  ? ((data.advance_amount - data.advance_recovered) / data.advance_amount) * 100
+  //   : 0;
+
+  const pct = ((data.advance_amount - data.advance_outstanding) / data.advance_amount) * 100;
 
   return (
     <LinearGradient
@@ -91,7 +96,7 @@ export default function InstallmentHistoryScreen({ route }) {
                       : row.recovery_from}
               </Text>
               <Text style={styles.td}>{row.advance_amount}</Text>
-              <Text
+              {/* <Text
                 style={[
                   styles.status,
                   row.payment_status === "paid"
@@ -100,6 +105,16 @@ export default function InstallmentHistoryScreen({ route }) {
                 ]}
               >
                 {row.payment_status === "paid" ? "Paid" : "Pending"}
+              </Text> */}
+              <Text
+                style={[
+                  styles.status,
+                  row.payment_status === "complete"
+                    ? styles.statusPaid
+                    : styles.statusPending,
+                ]}
+              >
+                {row.payment_status === "complete" ? "Complete" : "Pending"}
               </Text>
             </View>
           ))}

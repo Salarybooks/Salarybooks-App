@@ -395,9 +395,7 @@ const AddressForm = () => {
               setForm(prev => ({ ...prev, state: value }))
             }
           >
-              <Picker.Item label="Choose One" value="" />
-
-              <Picker.Item label="Andhra Pradesh" value="Andhra Pradesh" />
+            <Picker.Item label="Andhra Pradesh" value="Andhra Pradesh" />
               <Picker.Item label="Arunachal Pradesh" value="Arunachal Pradesh" />
               <Picker.Item label="Assam" value="Assam" />
               <Picker.Item label="Bihar" value="Bihar" />
