@@ -91,11 +91,13 @@ const PF_ESIC_Details = () => {
                     setrejectedRemark(emp_unapprove_pfesic_details.rejected_remark);
                 }
             }
+         
+            
         };
 
         loadData();
     }, []);
-
+    //    console.log(pfesic,unapprovePfesic,"pfesic","unapprovePfesic");
     useEffect(() => {
         if (!pfesic) return;
 
@@ -126,7 +128,7 @@ const PF_ESIC_Details = () => {
             membership_date_pf: pfesic?.curr_er_epfo_details?.membership_date || unapprovePfesic?.membership_date_pf || '',
             membership_date_esic: pfesic?.curr_er_esic_details?.membership_date || unapprovePfesic?.membership_date_esic || '',
         }));
-    }, [pfesic]);
+    }, [pfesic,unapprovePfesic]);
 
     const onSubmit = async () => {
         try {
@@ -236,6 +238,74 @@ const PF_ESIC_Details = () => {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
+    const isAnyFieldMissing = () => {
+        const requiredFields = [
+            'er_name',
+            'exit_date',
+            'last_drawn_gross',
+            'last_designation',
+            'contact_no',
+
+            'uan_no',
+            'last_member_id',
+            'last_ro',
+
+            'esic_no',
+            'ip_dispensary',
+            'family_dispensary',
+
+            'current_uan',
+            'current_member_id',
+            'current_ro',
+            'membership_date_pf',
+
+            'current_ip_esic',
+            'current_ip_dispensary',
+            'current_family_dispensary',
+            'membership_date_esic'
+        ];
+
+        const getValue = (field) => {
+            const keyMap = {
+                er_name: ['pre_er_details', 'er_name'],
+                exit_date: ['pre_er_details', 'exit_date'],
+                last_drawn_gross: ['pre_er_details', 'last_drawn_gross'],
+                last_designation: ['pre_er_details', 'last_designation'],
+                reporting_to: ['pre_er_details', 'reporting_to'],
+                contact_no: ['pre_er_details', 'contact_no'],
+
+                uan_no: ['pre_er_epfo_details', 'uan_no'],
+                last_member_id: ['pre_er_epfo_details', 'last_member_id'],
+                last_ro: ['pre_er_epfo_details', 'last_ro'],
+
+                esic_no: ['pre_er_esic_details', 'esic_no'],
+                ip_dispensary: ['pre_er_esic_details', 'ip_dispensary'],
+                family_dispensary: ['pre_er_esic_details', 'family_dispensary'],
+
+                current_uan: ['curr_er_epfo_details', 'uan_no'],
+                current_member_id: ['curr_er_epfo_details', 'last_member_id'],
+                current_ro: ['curr_er_epfo_details', 'last_ro'],
+                membership_date_pf: ['curr_er_epfo_details', 'membership_date'],
+
+                current_ip_esic: ['curr_er_esic_details', 'esic_no'],
+                current_ip_dispensary: ['curr_er_esic_details', 'ip_dispensary'],
+                current_family_dispensary: ['curr_er_esic_details', 'family_dispensary'],
+                membership_date_esic: ['curr_er_esic_details', 'membership_date'],
+            };
+
+            const [section, key] = keyMap[field] || [];
+
+            return (
+                pfesic?.[section]?.[key] ??
+                unapprovePfesic?.[field]
+            );
+        };
+
+        return requiredFields.some(field => {
+            const value = getValue(field);
+            return !value || String(value).trim() === '';
+        });
+    };
     return (
         <LinearGradient
             colors={['#000000ff', '#1c68beff']}
@@ -255,7 +325,11 @@ const PF_ESIC_Details = () => {
                             styles.notificationBox,
                             PfEsicDetailsStatus === 'rejected'
                                 ? styles.rejectedBox
-                                : styles.pendingBox
+                                : PfEsicDetailsStatus === 'pending'
+                                    ? styles.pendingBox
+                                    : PfEsicDetailsStatus === 'approved'
+                                        ? styles.approvedBox
+                                        : null
                         ]}
                     >
                         <Text style={styles.notificationTitle}>
@@ -614,7 +688,7 @@ const PF_ESIC_Details = () => {
                         onCancel={() => setOpenEsicDate(false)}
                         theme="dark"
 />
-                    {updateButton !== "inactive" && (
+                    {(updateButton !== "approved" || isAnyFieldMissing())  && (
                                      <TouchableOpacity style={styles.button} onPress={onSubmit}>
                                        <Text style={styles.buttonText}>Update</Text>
                                      </TouchableOpacity>
@@ -666,16 +740,24 @@ const styles = StyleSheet.create({
         borderLeftColor: '#ff3b30',
     },
 
+    
     pendingBox: {
-        backgroundColor: '#fff4e5',
+        backgroundColor: '#fff',
         borderLeftWidth: 5,
-        borderLeftColor: '#ff9500',
+        borderLeftColor: '#eefa46',
+    },
+
+    approvedBox: {
+        backgroundColor: '#d4edda',
+        borderLeftWidth: 5,
+        borderColor: '#28a745',
     },
 
     notificationTitle: {
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
+        color:"#000"
     },
 
     remarkText: {

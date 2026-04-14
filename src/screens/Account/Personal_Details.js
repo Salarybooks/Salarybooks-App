@@ -559,6 +559,8 @@ const PersonalDetails = () => {
         else if (field === 'passport_val_to' && newValue) {
           formData.append(field, convertToYMD(newValue));
         } else {
+          // console.log(field,newValue,"field","newValue");
+          
           formData.append(field, newValue);
         }
       });
@@ -650,7 +652,11 @@ const PersonalDetails = () => {
               styles.notificationBox,
               PersonalDetailsStatus === 'rejected'
                 ? styles.rejectedBox
-                : styles.pendingBox
+                : PersonalDetailsStatus === 'pending'
+                  ? styles.pendingBox
+                  : PersonalDetailsStatus === 'approved'
+                    ? styles.approvedBox
+                    : null
             ]}
           >
             <Text style={styles.notificationTitle}>
@@ -1238,15 +1244,22 @@ const styles = StyleSheet.create({
   },
 
   pendingBox: {
-    backgroundColor: '#fff4e5',
+    backgroundColor: '#fff',
     borderLeftWidth: 5,
-    borderLeftColor: '#ff9500',
+    borderLeftColor: '#eefa46',
   },
+
+  approvedBox: {
+  backgroundColor: '#d4edda',
+   borderLeftWidth: 5,
+  borderColor: '#28a745',
+},
 
   notificationTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    color:"#000"
   },
 
   remarkText: {
