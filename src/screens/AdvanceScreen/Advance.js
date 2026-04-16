@@ -53,6 +53,7 @@ const AdvanceManagement = () => {
   const [prog, setProgress] = useState(0);
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "" });
   const [rights, setRights] = useState(false);
+  const [loading, setLoading] = useState(false);
   const MAX_SINGLE_FILE_KB = 200;
   const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -132,13 +133,20 @@ const AdvanceManagement = () => {
   };
 
   const submitAdvanceRequest = async () => {
+    if (loading) return; 
+
+    setLoading(true);
     const { advanceAmount, recoveryFrom, installments, frequency, month, year, reason } = form;
     console.log(advanceAmount, "advanceAmount", installments, "installments", frequency, "frequency", month, "month", year, "year", recoveryFrom, "recoveryFrom");
 
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       if (!advanceAmount || !installments || !frequency || !month || !year || !recoveryFrom) {
         showPopup("error", "Error", "Please fill all required fields.");
+        setLoading(false);
         return;
       }
 
@@ -227,7 +235,9 @@ const AdvanceManagement = () => {
     } catch (err) {
       console.log(err);
       showPopup("error", "Error", "Failed to submit advance request");
-    }
+    }finally {
+    setLoading(false); 
+  }
   };
 
   const isFutureDate = (date) => {
@@ -406,7 +416,14 @@ const AdvanceManagement = () => {
                         <Text style={[GlobalFont.CustomFont, styles.uploadText]}>Upload File</Text>
                       </TouchableOpacity>
                     </View>
-
+                    {file ? (
+                      <Text style={{ color: "#ccc", marginTop: 5 }}>
+                        <Text style={{ fontWeight: "bold", color: "#fff" }}>
+                          Selected File:
+                        </Text>{" "}
+                        {" "+"File." + file.type.split("/")[1]}
+                      </Text>
+                    ) : null}
                     {uploading && (
                       <View style={styles.loaderOverlay}>
                         <ActivityIndicator size="large" color="#fff" />
@@ -427,10 +444,16 @@ const AdvanceManagement = () => {
                     </View>
 
                     <TouchableOpacity
-                      style={styles.submitBtn}
-                      onPress={() => submitAdvanceRequest()}
+                      style={[
+                        styles.submitBtn,
+                        { opacity: loading ? 0.6 : 1 } 
+                      ]}
+                      onPress={submitAdvanceRequest}
+                      disabled={loading}
                     >
-                      <Text style={[GlobalFont.semiBold, styles.submitText]}>Submit</Text>
+                      <Text style={[GlobalFont.semiBold, styles.submitText]}>
+                        {loading ? "Submitting..." : "Submit"}
+                      </Text>
                     </TouchableOpacity>
                   </ScrollView>
                 </View>

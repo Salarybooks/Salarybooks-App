@@ -468,13 +468,18 @@ const Expense = () => {
                   onChangeText={setHeadId}
                   style={[GlobalFont.CustomFont,{ borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
                   placeholderTextColor="#fff"
-                />
-                <TextInput
-                  placeholder="Amount"
-                  value={amount}
-                  onChangeText={setAmount}
-                  style={[GlobalFont.CustomFont,{ borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
-                  placeholderTextColor="#fff"
+                    />
+                    <TextInput
+                      placeholder="Amount"
+                      value={amount}
+                      // onChangeText={setAmount}
+                      onChangeText={(text) => {
+                        const numericText = text.replace(/[^0-9.]/g, "");
+                        setAmount(numericText);
+                      }}
+                      keyboardType="decimal-pad"
+                      style={[GlobalFont.CustomFont, { borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
+                      placeholderTextColor="#fff"
                 />
                 <TextInput
                   placeholder="Reason"
