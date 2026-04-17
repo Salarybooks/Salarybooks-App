@@ -489,6 +489,9 @@ const PersonalDetails = () => {
   const isAadharImageUploaded = !!EmployeeDet?.emp_aadhaar_image;
   const isPanImageUploaded = !!EmployeeDet?.emp_pan_image;
 const isPassportImageUploaded = !!EmployeeDet?.emp_passport_image;
+const isAdditionalIdUploaded = !!EmployeeDet?.additional_id_image;
+const isProfileUploaded = !!EmployeeDet?.profile_image;
+const isAttendanceUploaded = !!EmployeeDet?.attendence_image;
 
   return (
     <LinearGradient
@@ -1002,22 +1005,52 @@ const isPassportImageUploaded = !!EmployeeDet?.emp_passport_image;
             />
           )}
 
-          <UploadBox
+          {/* <UploadBox
             label="Additional ID"
             file={uploads.additional_id_image}
             onPress={() => pickFile('additional_id_image')}
+          /> */}
+          <UploadBox
+            label="Additional ID"
+            file={uploads.additional_id_image}
+            onPress={() => {
+              if (!isAdditionalIdUploaded) {
+                pickFile('additional_id_image');
+              }
+            }}
+            disabled={isAdditionalIdUploaded}
           />
 
-          <UploadBox
+          {/* <UploadBox
             label="Profile Image"
             file={uploads.profile_image}
             onPress={() => pickFile('profile_image')}
+          /> */}
+          <UploadBox
+            label="Profile Image"
+            file={uploads.profile_image}
+            onPress={() => {
+              if (!isProfileUploaded) {
+                pickFile('profile_image');
+              }
+            }}
+            disabled={isProfileUploaded}
           />
 
-          <UploadBox
+          {/* <UploadBox
             label="Attendance Image"
             file={uploads.attendence_image}
             onPress={() => pickFile('attendence_image')}
+          /> */}
+          <UploadBox
+            label="Attendance Image"
+            file={uploads.attendence_image}
+            onPress={() => {
+              if (!isAttendanceUploaded) {
+                pickFile('attendence_image');
+              }
+            }}
+            disabled={isAttendanceUploaded}
           />
         </View>
         {/* {PersonalDetailsStatus !== 'pending' && ( */}
