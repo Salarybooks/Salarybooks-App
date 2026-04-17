@@ -131,7 +131,8 @@ const PersonalDetails = () => {
       setRights(JSON.parse(await AsyncStorage.getItem("rights")));
     }
     if (personal_det && personal_det?.personal_details_status) {
-      console.log(personal_det.personal_details_status, "personal_det.personal_details_submit_status");
+      // console.log(personal_det.personal_details_status, "personal_det.personal_details_submit_status");
+      console.log(personal_det, "personal_det.personal_details");
       // console.log(EmployeeDet,"EmployeeDet");
 
       setPersonalDetailsStatus(personal_det?.personal_details_status);
@@ -336,149 +337,7 @@ const PersonalDetails = () => {
       console.log("File pick cancelled or failed", err);
     }
   };
-  // const fetchUpdatedDetails=async(token)=>{
-  //   console.log(token,"fetchUpdatedDetails");
-
-  //   try {
-  //     const payload = {}
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}employee/fetch-updated-details`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           "x-access-token": token,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     if(response){
-
-  //       console.log(response.data.employee_details,"response");
-  //       setFetchDetails(response.data.employee_details);
-  //     }
-  // }catch(error){
-  //     console.log(error.message);
-  //   }
-  // }
-
-
-  //   const onSubmit =async () => {
-  //     // console.log(form,"form");
-  //     console.log(EmployeeDet.emp_first_name,"form");
-
-  //     try {
-  //       const formData = new FormData();
-  //       formData.append('employee_id', employee_id);
-  //       formData.append('emp_id', userData.emp_id);
-  //       formData.append('emp_first_name', form.emp_first_name);
-  //       formData.append('emp_last_name', form.emp_last_name);
-  //       formData.append('mobile_no', form.mobile_no);
-  //       formData.append('emp_dob', form.emp_dob);
-  //       formData.append('sex', form.sex);
-  //       formData.append('emp_father_name', form.emp_father_name);
-  //       formData.append('email_id', form.email_id);
-  //       formData.append('alternate_mob_no', form.alternate_mob_no);
-  //       formData.append('emergency_contact_no', form.emergency_contact_no);
-  //       formData.append('emergency_contact_name', form.emergency_contact_name);
-  //       formData.append('aadhar_no', form.aadhar_no);
-  //       formData.append('pan_no', form.pan_no);
-  //       formData.append('passport_no', form.passport_no);
-  //       formData.append('passport_val_form', form.passport_val_form);
-  //       formData.append('passport_val_to', form.passport_val_to);
-  //       formData.append('nationality', form.nationality);
-  //       formData.append('physical_disability', form.physical_disability);
-  //       formData.append('blood_group', form.blood_group);
-  //       formData.append('marital_status', form.marital_status);
-  //       formData.append('marriage_date', form.marriage_date);
-  //       formData.append('domicile', form.domicile);
-  //       formData.append('height', form.height);
-  //       formData.append('religion', form.religion);
-
-
-  //       if (uploads.emp_aadhaar_image) {
-  //         formData.append('emp_aadhaar_image', {
-  //           uri: uploads.emp_aadhaar_image.uri,
-  //           name: uploads.emp_aadhaar_image.name,
-  //           type: uploads.emp_aadhaar_image.type,
-  //         });
-  //       }
-  //       if (uploads.emp_pan_image) {
-  //         formData.append('emp_pan_image', {
-  //           uri: uploads.emp_pan_image.uri,
-  //           name: uploads.emp_pan_image.name,
-  //           type: uploads.emp_pan_image.type,
-  //         });
-  //       }
-  //       if (uploads.emp_passport_image) {
-  //         formData.append('emp_passport_image', {
-  //           uri: uploads.emp_passport_image.uri,
-  //           name: uploads.emp_passport_image.name,
-  //           type: uploads.emp_passport_image.type,
-  //         });
-  //       }
-
-  //       if (uploads.additional_id_image) {
-  //         formData.append('additional_id_image', {
-  //           uri: uploads.additional_id_image.uri,
-  //           name: uploads.additional_id_image.name,
-  //           type: uploads.additional_id_image.type,
-  //         });
-  //       }
-
-  //       if (uploads.profile_image) {
-  //         formData.append('profile_image', {
-  //           uri: uploads.profile_image.uri,
-  //           name: uploads.profile_image.name,
-  //           type: uploads.profile_image.type,
-  //         });
-  //       }
-
-  //       if (uploads.attendence_image) {
-  //         formData.append('attendence_image', {
-  //           uri: uploads.attendence_image.uri,
-  //           name: uploads.attendence_image.name,
-  //           type: uploads.attendence_image.type,
-  //         });
-  //       }
-
-  //       //  console.log("formData",formData);
-  //        console.log("token",token);
-  //        console.log("API_BASE_URL",API_BASE_URL);
-
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}employee/request-update-employee-personal-details`,
-  //       formData,
-  //         {
-  //           headers: {
-  //             "x-access-token": token,
-  //             "Content-Type": "multipart/form-data",
-  //           },
-  //         }
-  //       );
-  //     //  if (response?.data?.status === "success") {
-
-  //     //   const updatedEmployee = {
-  //     //     ...EmployeeDet,
-  //     //     ...form,
-  //     //   };
-
-  //     //   await AsyncStorage.setItem(
-  //     //     "employee_det",
-  //     //     JSON.stringify(updatedEmployee)
-  //     //   );
-
-  //     //   setEmployeeDet(updatedEmployee);
-
-  //     //   isHydratedRef.current = false;
-
-  //     //   Alert.alert("Success", "Personal details updated");
-  //     // }
-  //   }catch(error){
-  //       console.log(error.message);
-  //     }
-  // };
-  const convertToYMD = (dateString) => {
+ const convertToYMD = (dateString) => {
     if (!dateString) return '';
 
     // If already YYYY-MM-DD, return directly
@@ -626,6 +485,10 @@ const PersonalDetails = () => {
       EmployeeDet?.[field] !== undefined &&
       String(EmployeeDet?.[field]).trim() !== '';
   };
+
+  const isAadharImageUploaded = !!EmployeeDet?.emp_aadhaar_image;
+  const isPanImageUploaded = !!EmployeeDet?.emp_pan_image;
+const isPassportImageUploaded = !!EmployeeDet?.emp_passport_image;
 
   return (
     <LinearGradient
@@ -1081,25 +944,61 @@ const PersonalDetails = () => {
           </Picker>
         </PickerWrapper>
         <View style={styles.uploadBoxall}>
-          {form.aadhar_no?.trim() !== '' && (
-            <UploadBox
+          {/* {form.aadhar_no?.trim() !== '' && ( */}
+            {/* <UploadBox
               label="Aadhar Card Image"
               file={uploads.emp_aadhaar_image}
               onPress={() => pickFile('emp_aadhaar_image')}
             />
+          )} */}
+          {form.aadhar_no?.trim() !== '' && (
+            <UploadBox
+              label="Aadhar Card Image"
+              file={uploads.emp_aadhaar_image}
+              onPress={() => {
+                if (!isAadharImageUploaded) {
+                  pickFile('emp_aadhaar_image');
+                }
+              }}
+              disabled={isAadharImageUploaded}
+            />
           )}
-          {form.pan_no?.trim() !== '' && (
+          {/* {form.pan_no?.trim() !== '' && (
             <UploadBox
               label="PAN Card Image "
               file={uploads.emp_pan_image}
               onPress={() => pickFile('emp_pan_image')}
             />
+          )} */}
+          {form.pan_no?.trim() !== '' && (
+            <UploadBox
+              label="PAN Card Image"
+              file={uploads.emp_pan_image}
+              onPress={() => {
+                if (!isPanImageUploaded) {
+                  pickFile('emp_pan_image');
+                }
+              }}
+              disabled={isPanImageUploaded}
+            />
           )}
-          {form.passport_no?.trim() !== '' && (
+          {/* {form.passport_no?.trim() !== '' && (
             <UploadBox
               label="Passport Image "
               file={uploads.emp_passport_image}
               onPress={() => pickFile('emp_passport_image')}
+            />
+          )} */}
+          {form.passport_no?.trim() !== '' && (
+            <UploadBox
+              label="Passport Image"
+              file={uploads.emp_passport_image}
+              onPress={() => {
+                if (!isPassportImageUploaded) {
+                  pickFile('emp_passport_image');
+                }
+              }}
+              disabled={isPassportImageUploaded}
             />
           )}
 
@@ -1163,18 +1062,53 @@ const PickerWrapper = ({ children }) => (
 //     </View>
 //   </View>
 // );
-const UploadBox = ({ label, file, onPress }) => {
+// const UploadBox = ({ label, file, onPress }) => {
+//   return (
+//     <View style={styles.uploadBox}>
+//       <Text style={styles.uploadLabel}>{label}</Text>
+
+//       {!file ? (
+//         /* No file → Pick file */
+//         <TouchableOpacity onPress={onPress} style={styles.uploadButton}>
+//           <Text style={styles.uploadText}>Select File</Text>
+//         </TouchableOpacity>
+//       ) : (
+//         /* File exists → View file OR change file */
+//         <View style={styles.fileRow}>
+//           <TouchableOpacity onPress={() => openDocument(file)}>
+//             <Text style={styles.fileName} numberOfLines={1}>
+//               📄 {file.name}
+//             </Text>
+//           </TouchableOpacity>
+
+//           <TouchableOpacity onPress={onPress}>
+//             <Text style={styles.changeText}>Change</Text>
+//           </TouchableOpacity>
+//         </View>
+//       )}
+//     </View>
+//   );
+// };
+
+const UploadBox = ({ label, file, onPress, disabled }) => {
   return (
     <View style={styles.uploadBox}>
       <Text style={styles.uploadLabel}>{label}</Text>
 
       {!file ? (
-        /* No file → Pick file */
-        <TouchableOpacity onPress={onPress} style={styles.uploadButton}>
-          <Text style={styles.uploadText}>Select File</Text>
+        <TouchableOpacity
+          onPress={onPress}
+          disabled={disabled}
+          style={[
+            styles.uploadButton,
+            disabled && { opacity: 0.5 }
+          ]}
+        >
+          <Text style={styles.uploadText}>
+            {disabled ? 'Already Uploaded' : 'Select File'}
+          </Text>
         </TouchableOpacity>
       ) : (
-        /* File exists → View file OR change file */
         <View style={styles.fileRow}>
           <TouchableOpacity onPress={() => openDocument(file)}>
             <Text style={styles.fileName} numberOfLines={1}>
@@ -1182,9 +1116,11 @@ const UploadBox = ({ label, file, onPress }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onPress}>
-            <Text style={styles.changeText}>Change</Text>
-          </TouchableOpacity>
+          {!disabled && (
+            <TouchableOpacity onPress={onPress}>
+              <Text style={styles.changeText}>Change</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
