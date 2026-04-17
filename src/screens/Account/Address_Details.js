@@ -17,6 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 import axios from "axios";
 import { API_BASE_URL } from "@env";
+import StatusPopup from '../StatusPopup/StatusPopup';
+
 
 const AddressForm = () => {
   const [isDifferent, setIsDifferent] = useState('no');
@@ -34,6 +36,7 @@ const AddressForm = () => {
   const [currPincodeError, setCurrPincodeError] = useState('');
   const [rights, setRights] = useState(false);
   const [updateButton, setUpdateButton] = useState(false);
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
   
   const [form, setForm] = useState({
     resident_no: '',
@@ -164,6 +167,15 @@ const AddressForm = () => {
     'curr_pincode',
     'curr_country',
   ];
+  
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
 
   const onSubmit = async () => {
     try {
@@ -227,7 +239,8 @@ const AddressForm = () => {
       // }
 
       if (formData._parts.length <= 2) {
-        Alert.alert('No Changes', 'Nothing to update');
+        // Alert.alert('No Changes', 'Nothing to update');
+        showPopup("error", "No Changes", "Nothing to update");
         return;
       }
 
@@ -245,7 +258,8 @@ const AddressForm = () => {
       );
 
       if (response?.data?.status === 'success') {
-        Alert.alert('Success', 'Address details sent for approval');
+        // Alert.alert('Success', 'Address details sent for approval');
+        showPopup("success", "Success", "Address details sent for approval");
       }
     } catch (error) {
       console.log(error.message);
@@ -633,7 +647,15 @@ const AddressForm = () => {
                   </TouchableOpacity>
                 )}
       </ScrollView>
-
+       <StatusPopup
+        visible={popupConfig.visible}
+        type={popupConfig.type}
+        title={popupConfig.title}
+        message={popupConfig.message}
+        onClose={() =>
+          setPopupConfig(prev => ({ ...prev, visible: false }))
+        }
+      />
       <BottomNavigation rights={rights}/>
     </LinearGradient>
   );

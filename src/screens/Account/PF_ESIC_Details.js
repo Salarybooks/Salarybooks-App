@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
 const { width } = Dimensions.get('window');
 import { API_BASE_URL } from "@env";
+import StatusPopup from '../StatusPopup/StatusPopup';
 
 const PF_ESIC_Details = () => {
     const [pfesic, setPfEsic] = useState(null);
@@ -37,6 +38,7 @@ const PF_ESIC_Details = () => {
     const [esicDate, setEsicDate] = useState(new Date());
     const [rights, setRights] = useState(false);
     const [updateButton, setUpdateButton] = useState(false);
+    const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
     
     const [form, setForm] = useState({
         pre_er_pf: '',
@@ -129,7 +131,15 @@ const PF_ESIC_Details = () => {
             membership_date_esic: pfesic?.curr_er_esic_details?.membership_date || unapprovePfesic?.membership_date_esic || '',
         }));
     }, [pfesic,unapprovePfesic]);
-
+      
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
     const onSubmit = async () => {
         try {
             const formData = new FormData();
@@ -226,7 +236,9 @@ const PF_ESIC_Details = () => {
             );
 
             if (response?.data?.status === 'success') {
-                Alert.alert('Success', 'Details sent for approval');
+                // Alert.alert('Success', 'Details sent for approval');
+                showPopup("success", "Success", "Details sent for approval");
+
             }
         } catch (e) {
             console.log('Submit error:', e.message);
@@ -697,6 +709,15 @@ const PF_ESIC_Details = () => {
                 </View>
 
             </ScrollView>
+             <StatusPopup
+                    visible={popupConfig.visible}
+                    type={popupConfig.type}
+                    title={popupConfig.title}
+                    message={popupConfig.message}
+                    onClose={() =>
+                      setPopupConfig(prev => ({ ...prev, visible: false }))
+                    }
+                  />
             <BottomNavigation rights={rights}/>
         </LinearGradient>
     );
