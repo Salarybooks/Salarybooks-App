@@ -192,12 +192,13 @@ const BankDetailsForm = () => {
       return;
     }
   }
+  
     try {
       const selectedFilesSizeKB = getRemainingSizeKB();
-      console.log(selectedFilesSizeKB, "selectedFilesSizeKB")
+      // console.log(selectedFilesSizeKB, "selectedFilesSizeKB")
       const totalUsed = alreadyUploadedSize + selectedFilesSizeKB;
-      console.log(totalUsed, "totalUsed")
-      console.log(employee_vault - totalUsed, "remaining")
+      // console.log(totalUsed, "totalUsed")
+      // console.log(employee_vault - totalUsed, "remaining")
       if (totalUsed > employee_vault) {
         Alert.alert(
           "Storage Limit Exceeded",
@@ -270,17 +271,46 @@ const BankDetailsForm = () => {
       'account_no',
       'account_type',
       'ifsc_code',
-      'micr_no'
+      'micr_no',
+      
     ];
 
-    return requiredFields.some(field => {
+    // return requiredFields.some(field => {
+    //   const value =
+    //     bankDetails?.[field] ??
+    //     unapproveBankDetails?.[field];
+
+    //   return !value || String(value).trim() === '';
+    // });
+    const isTextMissing = requiredFields.some(field => {
       const value =
         bankDetails?.[field] ??
         unapproveBankDetails?.[field];
 
       return !value || String(value).trim() === '';
     });
+
+    // 🔥 check cancel cheque separately
+    const cancelChequeValue =
+      bankDetails?.cancel_cheque || unapproveBankDetails?.cancel_cheque;
+
+    const isCancelChequeMissing =
+      (!cancelChequeValue || cancelChequeValue === '') && !file;
+
+    return isTextMissing || isCancelChequeMissing;
+
   };
+
+
+  const cancelChequeValue =
+  bankDetails?.cancel_cheque || unapproveBankDetails?.cancel_cheque;
+
+const isChequeUploaded =
+  cancelChequeValue !== null &&
+  cancelChequeValue !== undefined &&
+  cancelChequeValue !== '';
+
+  
   return (
     <LinearGradient
       colors={['#000000ff', '#1c68beff']}
@@ -415,7 +445,7 @@ const BankDetailsForm = () => {
             onChangeText={t => setForm(p => ({ ...p, micr_no: t }))}
           />
 
-          <Text style={styles.label}>Upload Cheque / Passbook</Text>
+          {/* <Text style={styles.label}>Upload Cheque / Passbook</Text>
           <View style={styles.uploadBox}>
             <TouchableOpacity onPress={pickFile}>
               <Text style={styles.chooseText}>Choose file</Text>
@@ -423,7 +453,20 @@ const BankDetailsForm = () => {
             <Text style={styles.fileText}>
               {file ? file.name : 'No file chosen'}
             </Text>
-          </View>
+          </View> */}
+          <Text style={styles.label}>Upload Cheque / Passbook</Text>
+          <UploadBox
+            // label="Upload Cheque / Passbook"
+            file={
+              file
+                ? file
+                : isChequeUploaded
+                  ? { name: 'Uploaded File' }
+                  : null
+            }
+            onPress={pickFile}
+            disabled={isChequeUploaded}
+          />
 
           {(updateButton !== "approved" || isAnyFieldMissing()) && (
             <TouchableOpacity style={styles.button} onPress={onSubmit}>
@@ -435,6 +478,43 @@ const BankDetailsForm = () => {
 
       <BottomNavigation rights={rights} />
     </LinearGradient>
+  );
+};
+
+const UploadBox = ({ label, file, onPress, disabled }) => {
+  return (
+    <View style={styles.uploadBox}>
+      <Text style={styles.uploadLabel}>{label}</Text>
+
+      {!file ? (
+        /* No file → Pick file */
+        <TouchableOpacity
+          onPress={onPress}
+          disabled={disabled}
+          style={[
+            styles.uploadButton,
+            disabled && { opacity: 0.5 }
+          ]}
+        >
+          <Text style={styles.uploadText}>
+            {disabled ? 'Already Uploaded' : 'Select File'}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        /* File exists → show file */
+        <View style={styles.fileRow}>
+          <Text style={styles.fileName} numberOfLines={1}>
+            📄 {file.name || 'Uploaded File'}
+          </Text>
+
+          {!disabled && (
+            <TouchableOpacity onPress={onPress}>
+              <Text style={styles.changeText}>Change</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+    </View>
   );
 };
 
