@@ -390,11 +390,13 @@ const AddressForm = () => {
         <View style={styles.pickerWrapper}>
           <Picker
             selectedValue={form.state}
-            editable={!address?.state}
+            // editable={!address?.state}
+             enabled={!address?.state}
             onValueChange={value =>
               setForm(prev => ({ ...prev, state: value }))
             }
           >
+              <Picker.Item label="Please select a state" value="" />
             <Picker.Item label="Andhra Pradesh" value="Andhra Pradesh" />
               <Picker.Item label="Arunachal Pradesh" value="Arunachal Pradesh" />
               <Picker.Item label="Assam" value="Assam" />

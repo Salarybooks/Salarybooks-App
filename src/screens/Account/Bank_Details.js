@@ -82,7 +82,7 @@ const BankDetailsForm = () => {
   }, [token]);
 
   useEffect(() => {
-    // console.log(bankDetails, "bankDEtails");
+    console.log(bankDetails, "bankDEtails");
     // console.log(userData.corporate_id, "userData");
 
     if (!bankDetails || !userData || !employee_id) return;
@@ -186,10 +186,12 @@ const BankDetailsForm = () => {
   };
   const onSubmit = async () => {
     // console.log(alreadyUploadedSize, "alreadyUploadedSize");
+    if(!bankDetails?.account_no ){
     if (form.account_no != form.re_account_no) {
       Alert.alert('Error', 'Account No. not match');
       return;
     }
+  }
     try {
       const selectedFilesSizeKB = getRemainingSizeKB();
       console.log(selectedFilesSizeKB, "selectedFilesSizeKB")
@@ -345,6 +347,7 @@ const BankDetailsForm = () => {
           <TextInput
             style={styles.input}
             value={form.branch_address}
+            editable={!bankDetails?.branch_address}
             onChangeText={t => setForm(p => ({ ...p, branch_address: t }))}
           />
 
@@ -353,6 +356,7 @@ const BankDetailsForm = () => {
             style={styles.input}
             keyboardType="numeric"
             value={form.branch_pin}
+             editable={!bankDetails?.branch_pin}
             onChangeText={t => setForm(p => ({ ...p, branch_pin: t }))}
           />
 
@@ -361,6 +365,7 @@ const BankDetailsForm = () => {
             style={styles.input}
             keyboardType="numeric"
             value={form.account_no}
+             editable={!bankDetails?.account_no}
             onChangeText={t => setForm(p => ({ ...p, account_no: t }))}
           />
 
@@ -382,6 +387,8 @@ const BankDetailsForm = () => {
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={form.account_type}
+               enabled={!bankDetails?.account_type}
+                // value={form.account_type}
               onValueChange={v =>
                 setForm(p => ({ ...p, account_type: v }))
               }
@@ -395,6 +402,7 @@ const BankDetailsForm = () => {
           <Text style={styles.label}>IFSC Code</Text>
           <TextInput
             style={styles.input}
+             editable={!bankDetails?.ifsc_code}
             value={form.ifsc_code}
             onChangeText={t => setForm(p => ({ ...p, ifsc_code: t }))}
           />
@@ -403,6 +411,7 @@ const BankDetailsForm = () => {
           <TextInput
             style={styles.input}
             value={form.micr_no}
+            editable={!bankDetails?.micr_no}
             onChangeText={t => setForm(p => ({ ...p, micr_no: t }))}
           />
 
