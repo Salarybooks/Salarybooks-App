@@ -18,6 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 import BottomNavigation from '../BottomNavigation';
 import DatePicker from 'react-native-date-picker';
+import StatusPopup from '../StatusPopup/StatusPopup';
+
 import { NativeModules } from "react-native";
 const { PdfPicker } = NativeModules;
 const { width } = Dimensions.get('window');
@@ -49,6 +51,7 @@ const PersonalDetails = () => {
   const [aadharError, setAadharError] = useState('');
   const [rights, setRights] = useState(false);
   const [updateButton, setupdateButton] = useState(false);
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
   const MAX_SINGLE_FILE_KB = 200;
   const [form, setForm] = useState({
     employee_id: '',
@@ -252,6 +255,16 @@ const PersonalDetails = () => {
     attendence_image: null,
   });
 
+    
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
+
   const formatDOB = (dateString) => {
     if (!dateString) return '';
 
@@ -313,10 +326,12 @@ const PersonalDetails = () => {
       const fileSizeKB = file.size / 1024;
 
       if (fileSizeKB > MAX_SINGLE_FILE_KB) {
-        Alert.alert(
-          "File Too Large",
-          `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
-        );
+        // Alert.alert(
+        //   "File Too Large",
+        //   `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`
+        // );
+        showPopup("error", "File Too Large", `Each file must be less than ${MAX_SINGLE_FILE_KB} KB`);
+
         return;
       }
 
@@ -436,7 +451,9 @@ const PersonalDetails = () => {
 
 
       if (formData._parts.length <= 2) {
-        Alert.alert('No Changes', 'Nothing to update');
+        // Alert.alert('No Changes', 'Nothing to update');
+        showPopup("error", "No Changes", "Nothing to update");
+
         return;
       }
 
@@ -454,8 +471,9 @@ const PersonalDetails = () => {
       if (response?.data?.status === 'success') {
         setPersonalDetailsStatus('pending');
         // await loadTokenAndFetch(); 
-        Alert.alert('Success', 'Details sent for approval');
-        
+        // Alert.alert('Success', 'Details sent for approval');
+        showPopup("success", "Success", "Details sent for approval");
+
       }
     } catch (error) {
       console.log(error.message);
@@ -1028,8 +1046,15 @@ const isPassportImageUploaded = !!EmployeeDet?.emp_passport_image;
         )}
         {/* )} */}
       </ScrollView>
-
-
+      <StatusPopup
+        visible={popupConfig.visible}
+        type={popupConfig.type}
+        title={popupConfig.title}
+        message={popupConfig.message}
+        onClose={() =>
+          setPopupConfig(prev => ({ ...prev, visible: false }))
+        }
+      />
       <BottomNavigation rights={rights} />
     </LinearGradient>
   );
@@ -1131,7 +1156,8 @@ const UploadBox = ({ label, file, onPress, disabled }) => {
 const openDocument = async (file) => {
   try {
     if (!file?.uri) {
-      Alert.alert('Error', 'File not found');
+      // Alert.alert('Error', 'File not found');
+       showPopup("error", "Error", "File not found");
       return;
     }
 
@@ -1140,7 +1166,9 @@ const openDocument = async (file) => {
     });
   } catch (error) {
     console.log('File open error:', error);
-    Alert.alert('Error', 'Unable to open this file');
+    // Alert.alert('Error', 'Unable to open this file');
+    showPopup("error", "Error", "Unable to open this file");
+
   }
 };
 
