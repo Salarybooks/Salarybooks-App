@@ -116,6 +116,14 @@ const PersonalDetails = () => {
     profile_image: true,
     attendence_image: true,
   };
+  const IMAGE_FIELDS_new = {
+    emp_aadhaar_image: true,
+    emp_pan_image: true,
+    emp_passport_image: true,
+    additional_id_image: true,
+    profile_pic: true,
+    attendence_pic: true,
+  };
   useEffect(() => {
   const loadTokenAndFetch = async () => {
     const t = await AsyncStorage.getItem("authToken");
@@ -136,7 +144,8 @@ const PersonalDetails = () => {
     if (personal_det && personal_det?.personal_details_status) {
       // console.log(personal_det.personal_details_status, "personal_det.personal_details_submit_status");
       console.log(personal_det, "personal_det.personal_details");
-      // console.log(EmployeeDet,"EmployeeDet");
+      console.log(EmployeeDet,"EmployeeDet");
+      console.log(fetchDetails,"fetchDetails");
 
       setPersonalDetailsStatus(personal_det?.personal_details_status);
 
@@ -480,18 +489,35 @@ const PersonalDetails = () => {
     }
   };
 
+  // const isAnyFieldEmptyFromAPI = () => {
+  //   if (!EmployeeDet && !fetchDetails) return false;
+
+  //   return PERSONAL_FIELDS.some(field => {
+  //     const value =
+  //       fetchDetails?.[field] ?? EmployeeDet?.[field];
+
+  //     return !value || String(value).trim() === '';
+  //   });
+  // };
+
   const isAnyFieldEmptyFromAPI = () => {
-    if (!EmployeeDet && !fetchDetails) return false;
+  if (!EmployeeDet && !fetchDetails) return false;
 
-    return PERSONAL_FIELDS.some(field => {
-      const value =
-        fetchDetails?.[field] ?? EmployeeDet?.[field];
+  const isPersonalEmpty = PERSONAL_FIELDS.some(field => {
+    const value =
+      fetchDetails?.[field] ?? EmployeeDet?.[field];
 
-      return !value || String(value).trim() === '';
-    });
-  };
+    return !value || String(value).trim() === '';
+  });
 
+  const isImageEmpty = Object.keys(IMAGE_FIELDS_new).some(field => {
+    const value =
+      fetchDetails?.[field] ?? EmployeeDet?.[field];
+  return !value;
+  });
 
+  return isPersonalEmpty || isImageEmpty;
+};
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -508,8 +534,8 @@ const PersonalDetails = () => {
   const isPanImageUploaded = !!EmployeeDet?.emp_pan_image;
 const isPassportImageUploaded = !!EmployeeDet?.emp_passport_image;
 const isAdditionalIdUploaded = !!EmployeeDet?.additional_id_image;
-const isProfileUploaded = !!EmployeeDet?.profile_image;
-const isAttendanceUploaded = !!EmployeeDet?.attendence_image;
+const isProfileUploaded = !!EmployeeDet?.profile_pic;
+const isAttendanceUploaded = !!EmployeeDet?.attendence_pic;
 
   return (
     <LinearGradient

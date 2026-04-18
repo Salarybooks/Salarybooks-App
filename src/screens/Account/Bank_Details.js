@@ -16,6 +16,8 @@ import BottomNavigation from '../BottomNavigation';
 import { NativeModules } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
+import StatusPopup from '../StatusPopup/StatusPopup';
+
 import { API_BASE_URL } from "@env";
 
 const { PdfPicker } = NativeModules;
@@ -33,6 +35,7 @@ const BankDetailsForm = () => {
   const [rights, setRights] = useState(false);
   const [alreadyUploadedSize, setAlreadyUploadedSize] = useState(0);
   const MAX_SINGLE_FILE_KB = 200;
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
   const [employee_id, setemployee_id] = useState(null);
   const [updateButton, setUpdateButton] = useState(false);
   const [form, setForm] = useState({
@@ -145,7 +148,14 @@ const BankDetailsForm = () => {
   //   }
   // };
 
-
+  const showPopup = (type, title, message) => {
+    setPopupConfig({
+      visible: true,
+      type,
+      title,
+      message,
+    });
+  };
   const pickFile = async () => {
     try {
       const picked = await PdfPicker.pickFile();
@@ -156,10 +166,11 @@ const BankDetailsForm = () => {
       // console.log(remainingSizeKB,"remainingSizeKB");
 
       if (fileSizeKB > MAX_SINGLE_FILE_KB) {
-        Alert.alert(
-          "File Too Large",
-          `File must be less than ${MAX_SINGLE_FILE_KB} KB`
-        );
+        // Alert.alert(
+        //   "File Too Large",
+        //   `File must be less than ${MAX_SINGLE_FILE_KB} KB`
+        // );
+        showPopup("error", "File Too Large", `File must be less than ${MAX_SINGLE_FILE_KB} KB`);
         return;
       }
 
@@ -188,7 +199,8 @@ const BankDetailsForm = () => {
     // console.log(alreadyUploadedSize, "alreadyUploadedSize");
     if(!bankDetails?.account_no ){
     if (form.account_no != form.re_account_no) {
-      Alert.alert('Error', 'Account No. not match');
+      // Alert.alert('Error', 'Account No. not match');
+      showPopup("error", "Error", "Account No. not match");
       return;
     }
   }
@@ -199,10 +211,11 @@ const BankDetailsForm = () => {
       console.log(totalUsed, "totalUsed")
       console.log(employee_vault - totalUsed, "remaining")
       if (totalUsed > employee_vault) {
-        Alert.alert(
-          "Storage Limit Exceeded",
-          `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
-        );
+        // Alert.alert(
+        //   "Storage Limit Exceeded",
+        //   `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`
+        // );
+        showPopup("error", "Storage Limit Exceeded", `Only ${(employee_vault - alreadyUploadedSize).toFixed(2)} KB remaining`);
         return;
       }
       const formData = new FormData();
@@ -255,7 +268,9 @@ const BankDetailsForm = () => {
       );
 
       if (response?.data?.status === 'success') {
-        Alert.alert('Success', 'Details sent for approval');
+        // Alert.alert('Success', 'Details sent for approval');
+        showPopup("success", "Success", "Details sent for approval");
+
       }
     } catch (error) {
       console.log(error.message);
@@ -432,7 +447,15 @@ const BankDetailsForm = () => {
           )}
         </View>
       </ScrollView>
-
+      <StatusPopup
+        visible={popupConfig.visible}
+        type={popupConfig.type}
+        title={popupConfig.title}
+        message={popupConfig.message}
+        onClose={() =>
+          setPopupConfig(prev => ({ ...prev, visible: false }))
+        }
+      />
       <BottomNavigation rights={rights} />
     </LinearGradient>
   );
