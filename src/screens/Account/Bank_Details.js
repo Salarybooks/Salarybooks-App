@@ -305,7 +305,6 @@ const BankDetailsForm = () => {
       return !value || String(value).trim() === '';
     });
 
-    // 🔥 check cancel cheque separately
     const cancelChequeValue =
       bankDetails?.cancel_cheque || unapproveBankDetails?.cancel_cheque;
 

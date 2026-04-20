@@ -141,16 +141,99 @@ const Account = ({ navigation }) => {
         console.log(response.data, "employee_det");
         // console.log(response.data, "employee_det_cur");
 
-        AsyncStorage.setItem('employee_det', JSON.stringify(response.data.employee_det))
-        AsyncStorage.setItem('employee_vault', JSON.stringify(response.data.employee_det.employee_vault))
-        AsyncStorage.setItem('total_file_size', JSON.stringify(response.data.employee_det.total_file_size))
-        AsyncStorage.setItem('employee_address', JSON.stringify(response.data.employee_det.emp_det.emp_address))
-        AsyncStorage.setItem('employee_curr_address', JSON.stringify(response.data.employee_det.emp_det.emp_curr_address))
-        AsyncStorage.setItem('employee_bank_details', JSON.stringify(response.data.employee_det.emp_det.bank_details))
-        AsyncStorage.setItem('employee_hr_details', JSON.stringify(response.data.employee_det.emp_det.employment_hr_details))
-        AsyncStorage.setItem('employee_PF_ESIC_details', JSON.stringify(response.data.employee_det.emp_det.pf_esic_details))
+        // AsyncStorage.setItem('employee_det', JSON.stringify(response.data.employee_det))
+        // AsyncStorage.setItem('employee_vault', JSON.stringify(response.data.employee_det.employee_vault))
+        // AsyncStorage.setItem('total_file_size', JSON.stringify(response.data.employee_det.total_file_size))
+        // AsyncStorage.setItem('employee_address', JSON.stringify(response.data.employee_det.emp_det.emp_address))
+        // AsyncStorage.setItem('employee_curr_address', JSON.stringify(response.data.employee_det.emp_det.emp_curr_address))
+        // AsyncStorage.setItem('employee_bank_details', JSON.stringify(response.data.employee_det.emp_det.bank_details))
+        // AsyncStorage.setItem('employee_hr_details', JSON.stringify(response.data.employee_det.emp_det.employment_hr_details))
+        // AsyncStorage.setItem('employee_PF_ESIC_details', JSON.stringify(response.data.employee_det.emp_det.pf_esic_details))
         // console.log(response,"response");
 
+
+
+        // new code
+         const employee = response?.data?.employee_det;
+        const empDet = employee?.emp_det;
+        if (employee) {
+          await AsyncStorage.setItem(
+            "employee_det",
+            JSON.stringify(employee)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_det");
+        }
+
+        // VAULT
+        if (employee?.employee_vault) {
+          await AsyncStorage.setItem(
+            "employee_vault",
+            JSON.stringify(employee.employee_vault)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_vault");
+        }
+
+        // TOTAL FILE SIZE
+        if (employee?.total_file_size) {
+          await AsyncStorage.setItem(
+            "total_file_size",
+            JSON.stringify(employee.total_file_size)
+          );
+        } else {
+          await AsyncStorage.removeItem("total_file_size");
+        }
+
+        // ADDRESS
+        if (empDet?.emp_address) {
+          await AsyncStorage.setItem(
+            "employee_address",
+            JSON.stringify(empDet.emp_address)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_address");
+        }
+
+        // CURRENT ADDRESS
+        if (empDet?.emp_curr_address) {
+          await AsyncStorage.setItem(
+            "employee_curr_address",
+            JSON.stringify(empDet.emp_curr_address)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_curr_address");
+        }
+
+        // BANK DETAILS
+        if (empDet?.bank_details) {
+          await AsyncStorage.setItem(
+            "employee_bank_details",
+            JSON.stringify(empDet.bank_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_bank_details");
+        }
+
+        // HR DETAILS
+        if (empDet?.employment_hr_details) {
+          await AsyncStorage.setItem(
+            "employee_hr_details",
+            JSON.stringify(empDet.employment_hr_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_hr_details");
+        }
+
+        // PF / ESIC
+        if (empDet?.pf_esic_details) {
+          await AsyncStorage.setItem(
+            "employee_PF_ESIC_details",
+            JSON.stringify(empDet.pf_esic_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_PF_ESIC_details");
+        }
       }
     } catch (error) {
       console.log(error.message);
@@ -214,8 +297,8 @@ const Account = ({ navigation }) => {
         // console.log(response.data, "response");
 
         const employee = response?.data?.employee_details;
-        console.log(response?.data?.employee_details,"employee");
-        
+        console.log(response?.data?.employee_details, "employee");
+
         if (employee) {
           await AsyncStorage.setItem(
             'personal_det',
