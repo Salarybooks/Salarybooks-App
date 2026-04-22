@@ -23,7 +23,7 @@ import { API_BASE_URL } from "@env";
 const { PdfPicker } = NativeModules;
 const { width } = Dimensions.get('window');
 
-const BankDetailsForm = () => {
+const BankDetailsForm = ({route}) => {
   const [file, setFile] = useState(null);
   const [token, setToken] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -56,8 +56,10 @@ const BankDetailsForm = () => {
     const loadTokenAndFetch = async () => {
       const t = await AsyncStorage.getItem("authToken");
       const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-      const employee_bank_details = JSON.parse(await AsyncStorage.getItem("employee_bank_details"));
-      const emp_unapprove_bank_details = JSON.parse(await AsyncStorage.getItem("emp_unapprove_bank_details"));
+      // const employee_bank_details = JSON.parse(await AsyncStorage.getItem("employee_bank_details"));
+      // const emp_unapprove_bank_details = JSON.parse(await AsyncStorage.getItem("emp_unapprove_bank_details"));
+      const employee_bank_details = route?.params?.employee_bank_details;
+      const emp_unapprove_bank_details = route?.params?.emp_unapprove_bank_details;
       const employee_vault = JSON.parse(await AsyncStorage.getItem("employee_vault"));
       const total_file_size = JSON.parse(await AsyncStorage.getItem("total_file_size"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));

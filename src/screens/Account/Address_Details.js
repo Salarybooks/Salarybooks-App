@@ -20,7 +20,7 @@ import { API_BASE_URL } from "@env";
 import StatusPopup from '../StatusPopup/StatusPopup';
 
 
-const AddressForm = () => {
+const AddressForm = ({ route }) => {
   const [isDifferent, setIsDifferent] = useState('no');
   const [token, setToken] = useState(null);
   const [address, setAddress] = useState(null);
@@ -63,11 +63,20 @@ const AddressForm = () => {
     const loadTokenAndFetch = async () => {
       const t = await AsyncStorage.getItem("authToken");
       const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-      const employee_address = JSON.parse(await AsyncStorage.getItem("employee_address"));
-      const employee_curr_address = JSON.parse(await AsyncStorage.getItem("employee_curr_address"));
-      const emp_unapprove_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_address"));
-      const emp_unapprove_curr_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_curr_address"));
+      // const employee_address = JSON.parse(await AsyncStorage.getItem("employee_address"));
+      // const employee_curr_address = JSON.parse(await AsyncStorage.getItem("employee_curr_address"));
+      // const emp_unapprove_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_address"));
+      // const emp_unapprove_curr_address = JSON.parse(await AsyncStorage.getItem("emp_unapprove_curr_address"));
+      const employee_address = route?.params?.employee_address;
+      const employee_curr_address = route?.params?.employee_curr_address;
+      const emp_unapprove_address = route?.params?.emp_unapprove_address;
+      const emp_unapprove_curr_address = route?.params?.emp_unapprove_curr_address;
       setemployee_id(await AsyncStorage.getItem("employee_id"));
+        console.log(route,"route");
+        console.log(employee_address,"employee_address");
+        console.log(employee_curr_address,"employee_curr_address");
+        console.log(emp_unapprove_address,"emp_unapprove_address");
+        console.log(emp_unapprove_curr_address,"emp_unapprove_curr_address");
         
       if (true) {
 
@@ -94,13 +103,8 @@ const AddressForm = () => {
 
     loadTokenAndFetch();
     // fetchUpdatedDetails(token);
-  }, [token]);
+  }, []);
 
- console.log(address,"address");  
- console.log(curaddress,"curaddress");  
- console.log(unApproveAddress,"unApproveAddress");  
- console.log(curUnApproveAddress,"curUnApproveAddress");  
- console.log(updateButton,"updateButton");  
   useEffect(() => {
     console.log(address, "null", curaddress);
 
@@ -140,7 +144,7 @@ const AddressForm = () => {
 
     }
     // isHydratedRef.current = true;
-  }, [address, curaddress]);
+  }, [address, curaddress,unApproveAddress,curUnApproveAddress]);
 
 
   const ADDRESS_FIELDS = [

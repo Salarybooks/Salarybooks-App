@@ -38,8 +38,7 @@ const Account = ({ navigation }) => {
   const [profilepic, setProfilepic] = useState(null);
   const [rights, setRights] = useState(false);
   const [employee_id, setemployee_id] = useState(null);
-  const [accountData, setAccountData] = useState(null);
-  const [updatedDetails, setUpdatedDetails] = useState(null);
+
   const [token, setToken] = useState(false);
   const themeColors = {
     background: isDarkMode ? '#000' : '#fff',
@@ -118,138 +117,15 @@ const Account = ({ navigation }) => {
     });
   };
 
-  // const fetchAccountDetails = async (token) => {
-
-  //   if (!token) return;
-  //   // console.log(API_BASE_URL, "API_BASE_URL11");
-
-  //   try {
-  //     const payload = {
-  //       employee_id: employee_id
-  //     }
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}employee/fetch-account-details`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           "x-access-token": token,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     if (response) {
-  //       console.log(response.data, "employee_det");
-  //       // console.log(response.data, "employee_det_cur");
-
-  //       // AsyncStorage.setItem('employee_det', JSON.stringify(response.data.employee_det))
-  //       // AsyncStorage.setItem('employee_vault', JSON.stringify(response.data.employee_det.employee_vault))
-  //       // AsyncStorage.setItem('total_file_size', JSON.stringify(response.data.employee_det.total_file_size))
-  //       // AsyncStorage.setItem('employee_address', JSON.stringify(response.data.employee_det.emp_det.emp_address))
-  //       // AsyncStorage.setItem('employee_curr_address', JSON.stringify(response.data.employee_det.emp_det.emp_curr_address))
-  //       // AsyncStorage.setItem('employee_bank_details', JSON.stringify(response.data.employee_det.emp_det.bank_details))
-  //       // AsyncStorage.setItem('employee_hr_details', JSON.stringify(response.data.employee_det.emp_det.employment_hr_details))
-  //       // AsyncStorage.setItem('employee_PF_ESIC_details', JSON.stringify(response.data.employee_det.emp_det.pf_esic_details))
-  //       // console.log(response,"response");
-
-
-
-  //       // new code
-  //        const employee = response?.data?.employee_det;
-  //       const empDet = employee?.emp_det;
-  //       if (employee) {
-  //         await AsyncStorage.setItem(
-  //           "employee_det",
-  //           JSON.stringify(employee)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_det");
-  //       }
-
-  //       // VAULT
-  //       if (employee?.employee_vault) {
-  //         await AsyncStorage.setItem(
-  //           "employee_vault",
-  //           JSON.stringify(employee.employee_vault)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_vault");
-  //       }
-
-  //       // TOTAL FILE SIZE
-  //       if (employee?.total_file_size) {
-  //         await AsyncStorage.setItem(
-  //           "total_file_size",
-  //           JSON.stringify(employee.total_file_size)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("total_file_size");
-  //       }
-
-  //       // ADDRESS
-  //       if (empDet?.emp_address) {
-  //         await AsyncStorage.setItem(
-  //           "employee_address",
-  //           JSON.stringify(empDet.emp_address)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_address");
-  //       }
-
-  //       // CURRENT ADDRESS
-  //       if (empDet?.emp_curr_address) {
-  //         await AsyncStorage.setItem(
-  //           "employee_curr_address",
-  //           JSON.stringify(empDet.emp_curr_address)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_curr_address");
-  //       }
-
-  //       // BANK DETAILS
-  //       if (empDet?.bank_details) {
-  //         await AsyncStorage.setItem(
-  //           "employee_bank_details",
-  //           JSON.stringify(empDet.bank_details)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_bank_details");
-  //       }
-
-  //       // HR DETAILS
-  //       if (empDet?.employment_hr_details) {
-  //         await AsyncStorage.setItem(
-  //           "employee_hr_details",
-  //           JSON.stringify(empDet.employment_hr_details)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_hr_details");
-  //       }
-
-  //       // PF / ESIC
-  //       if (empDet?.pf_esic_details) {
-  //         await AsyncStorage.setItem(
-  //           "employee_PF_ESIC_details",
-  //           JSON.stringify(empDet.pf_esic_details)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem("employee_PF_ESIC_details");
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // }
-
   const fetchAccountDetails = async (token) => {
+
     if (!token) return;
+    // console.log(API_BASE_URL, "API_BASE_URL11");
 
     try {
       const payload = {
         employee_id: employee_id
-      };
-      console.log(API_BASE_URL, "API_BASE_URL");
-
+      }
       const response = await axios.post(
         `${API_BASE_URL}employee/fetch-account-details`,
         payload,
@@ -261,16 +137,108 @@ const Account = ({ navigation }) => {
         }
       );
 
-      if (response?.data?.employee_det) {
-        console.log(response.data.employee_det, "response.data.employee_det");
+      if (response) {
+        console.log(response.data, "employee_det");
+        // console.log(response.data, "employee_det_cur");
 
-        setAccountData(response.data.employee_det);
+        // AsyncStorage.setItem('employee_det', JSON.stringify(response.data.employee_det))
+        // AsyncStorage.setItem('employee_vault', JSON.stringify(response.data.employee_det.employee_vault))
+        // AsyncStorage.setItem('total_file_size', JSON.stringify(response.data.employee_det.total_file_size))
+        // AsyncStorage.setItem('employee_address', JSON.stringify(response.data.employee_det.emp_det.emp_address))
+        // AsyncStorage.setItem('employee_curr_address', JSON.stringify(response.data.employee_det.emp_det.emp_curr_address))
+        // AsyncStorage.setItem('employee_bank_details', JSON.stringify(response.data.employee_det.emp_det.bank_details))
+        // AsyncStorage.setItem('employee_hr_details', JSON.stringify(response.data.employee_det.emp_det.employment_hr_details))
+        // AsyncStorage.setItem('employee_PF_ESIC_details', JSON.stringify(response.data.employee_det.emp_det.pf_esic_details))
+        // console.log(response,"response");
+
+
+
+        // new code
+         const employee = response?.data?.employee_det;
+        const empDet = employee?.emp_det;
+        if (employee) {
+          await AsyncStorage.setItem(
+            "employee_det",
+            JSON.stringify(employee)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_det");
+        }
+
+        // VAULT
+        if (employee?.employee_vault) {
+          await AsyncStorage.setItem(
+            "employee_vault",
+            JSON.stringify(employee.employee_vault)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_vault");
+        }
+
+        // TOTAL FILE SIZE
+        if (employee?.total_file_size) {
+          await AsyncStorage.setItem(
+            "total_file_size",
+            JSON.stringify(employee.total_file_size)
+          );
+        } else {
+          await AsyncStorage.removeItem("total_file_size");
+        }
+
+        // ADDRESS
+        if (empDet?.emp_address) {
+          await AsyncStorage.setItem(
+            "employee_address",
+            JSON.stringify(empDet.emp_address)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_address");
+        }
+
+        // CURRENT ADDRESS
+        if (empDet?.emp_curr_address) {
+          await AsyncStorage.setItem(
+            "employee_curr_address",
+            JSON.stringify(empDet.emp_curr_address)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_curr_address");
+        }
+
+        // BANK DETAILS
+        if (empDet?.bank_details) {
+          await AsyncStorage.setItem(
+            "employee_bank_details",
+            JSON.stringify(empDet.bank_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_bank_details");
+        }
+
+        // HR DETAILS
+        if (empDet?.employment_hr_details) {
+          await AsyncStorage.setItem(
+            "employee_hr_details",
+            JSON.stringify(empDet.employment_hr_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_hr_details");
+        }
+
+        // PF / ESIC
+        if (empDet?.pf_esic_details) {
+          await AsyncStorage.setItem(
+            "employee_PF_ESIC_details",
+            JSON.stringify(empDet.pf_esic_details)
+          );
+        } else {
+          await AsyncStorage.removeItem("employee_PF_ESIC_details");
+        }
       }
-
     } catch (error) {
       console.log(error.message);
     }
-  };
+  }
   const fetchMasterDetails = async (token) => {
 
     console.log(token, "API_BASE_URL21");
@@ -302,89 +270,14 @@ const Account = ({ navigation }) => {
     }
   }
 
-  // const fetchUpdatedDetails = async (token) => {
-  //   // console.log(token,"fetchUpdatedDetails");
-
-  //   try {
-  //     const payload = {}
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}employee/fetch-updated-details`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           "x-access-token": token,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     if (response) {
-
-  //       // console.log(response.data,"response");
-  //       // AsyncStorage.setItem('personal_det', JSON.stringify(response.data.employee_details))
-  //       // AsyncStorage.setItem('emp_unapprove_address', JSON.stringify(response.data.employee_details.emp_address))
-  //       // AsyncStorage.setItem('emp_unapprove_curr_address', JSON.stringify(response.data.employee_details.emp_curr_address))
-  //       // AsyncStorage.setItem('emp_unapprove_bank_details', JSON.stringify(response.data.employee_details.bank_details))
-  //       // AsyncStorage.setItem('emp_unapprove_pfesic_details', JSON.stringify(response.data.employee_details.pfesic_details))
-  //       // console.log(response.data, "response");
-
-  //       const employee = response?.data?.employee_details;
-  //       console.log(response?.data?.employee_details, "employee");
-
-  //       if (employee) {
-  //         await AsyncStorage.setItem(
-  //           'personal_det',
-  //           JSON.stringify(employee)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem('personal_det');
-  //       }
-
-  //       if (employee?.emp_address) {
-  //         await AsyncStorage.setItem(
-  //           'emp_unapprove_address',
-  //           JSON.stringify(employee.emp_address)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem('emp_unapprove_address');
-  //       }
-
-  //       if (employee?.emp_curr_address) {
-  //         await AsyncStorage.setItem(
-  //           'emp_unapprove_curr_address',
-  //           JSON.stringify(employee.emp_curr_address)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem('emp_unapprove_curr_address');
-  //       }
-
-  //       if (employee?.bank_details) {
-  //         await AsyncStorage.setItem(
-  //           'emp_unapprove_bank_details',
-  //           JSON.stringify(employee.bank_details)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem('emp_unapprove_bank_details');
-  //       }
-
-  //       if (employee?.pfesic_details) {
-  //         await AsyncStorage.setItem(
-  //           'emp_unapprove_pfesic_details',
-  //           JSON.stringify(employee.pfesic_details)
-  //         );
-  //       } else {
-  //         await AsyncStorage.removeItem('emp_unapprove_pfesic_details');
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // }
   const fetchUpdatedDetails = async (token) => {
+    // console.log(token,"fetchUpdatedDetails");
+
     try {
+      const payload = {}
       const response = await axios.post(
         `${API_BASE_URL}employee/fetch-updated-details`,
-        {},
+        payload,
         {
           headers: {
             "x-access-token": token,
@@ -393,18 +286,68 @@ const Account = ({ navigation }) => {
         }
       );
 
-      const employee = response?.data?.employee_details;
+      if (response) {
 
-      // console.log(response, "response");
+        // console.log(response.data,"response");
+        // AsyncStorage.setItem('personal_det', JSON.stringify(response.data.employee_details))
+        // AsyncStorage.setItem('emp_unapprove_address', JSON.stringify(response.data.employee_details.emp_address))
+        // AsyncStorage.setItem('emp_unapprove_curr_address', JSON.stringify(response.data.employee_details.emp_curr_address))
+        // AsyncStorage.setItem('emp_unapprove_bank_details', JSON.stringify(response.data.employee_details.bank_details))
+        // AsyncStorage.setItem('emp_unapprove_pfesic_details', JSON.stringify(response.data.employee_details.pfesic_details))
+        // console.log(response.data, "response");
 
-      if (employee) {
-        setUpdatedDetails(employee);
+        const employee = response?.data?.employee_details;
+        console.log(response?.data?.employee_details, "employee");
+
+        if (employee) {
+          await AsyncStorage.setItem(
+            'personal_det',
+            JSON.stringify(employee)
+          );
+        } else {
+          await AsyncStorage.removeItem('personal_det');
+        }
+
+        if (employee?.emp_address) {
+          await AsyncStorage.setItem(
+            'emp_unapprove_address',
+            JSON.stringify(employee.emp_address)
+          );
+        } else {
+          await AsyncStorage.removeItem('emp_unapprove_address');
+        }
+
+        if (employee?.emp_curr_address) {
+          await AsyncStorage.setItem(
+            'emp_unapprove_curr_address',
+            JSON.stringify(employee.emp_curr_address)
+          );
+        } else {
+          await AsyncStorage.removeItem('emp_unapprove_curr_address');
+        }
+
+        if (employee?.bank_details) {
+          await AsyncStorage.setItem(
+            'emp_unapprove_bank_details',
+            JSON.stringify(employee.bank_details)
+          );
+        } else {
+          await AsyncStorage.removeItem('emp_unapprove_bank_details');
+        }
+
+        if (employee?.pfesic_details) {
+          await AsyncStorage.setItem(
+            'emp_unapprove_pfesic_details',
+            JSON.stringify(employee.pfesic_details)
+          );
+        } else {
+          await AsyncStorage.removeItem('emp_unapprove_pfesic_details');
+        }
       }
-
     } catch (error) {
       console.log(error.message);
     }
-  };
+  }
   const handleLogout = () => {
     setShowLogoutPopup(true);
     // Alert.alert(
@@ -425,45 +368,20 @@ const Account = ({ navigation }) => {
   };
 
   const RoutPage = (field) => {
-
-    if (!accountData || !updatedDetails) {
-      Alert.alert("Please wait", "Data is still loading...");
-      return;
-    }
     if (field == "Personal") {
-      const commonParams = {
-        accountData,
-        updatedDetails
-      };
-      Navigation.navigate('PersonalDetails', commonParams)
+      Navigation.navigate('PersonalDetails')
     }
     if (field == "Address") {
-      const commonParams = {
-        employee_address: accountData?.emp_det?.emp_address,
-        employee_curr_address: accountData?.emp_det?.emp_curr_address,
-        emp_unapprove_address: updatedDetails?.emp_address,
-        emp_unapprove_curr_address: updatedDetails?.emp_curr_address
-      };
-      Navigation.navigate('AddressDetails',commonParams)
+      Navigation.navigate('AddressDetails')
     }
     if (field == "BankDetails") {
-       const commonParams = {
-        employee_bank_details: accountData?.emp_det?.bank_details,
-        emp_unapprove_bank_details: updatedDetails?.bank_details
-      };      
-      Navigation.navigate('BankDetailsForm',commonParams)
+      Navigation.navigate('BankDetailsForm')
     }
     if (field == "HRDetails") {
       Navigation.navigate('HRDetails')
     }
     if (field == "PFESICDetails") {
-      const commonParams = {
-        employee_PF_ESIC_details: accountData?.emp_det?.pf_esic_details,
-        emp_unapprove_pfesic_details: updatedDetails?.pfesic_details
-      };
-      console.log(commonParams,"commonParams");
-      
-      Navigation.navigate('PFESICDetails', commonParams)
+      Navigation.navigate('PFESICDetails')
     }
   }
   // const confirmLogout = async () => {

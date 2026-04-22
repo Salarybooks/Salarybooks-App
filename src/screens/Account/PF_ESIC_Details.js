@@ -20,7 +20,7 @@ const { width } = Dimensions.get('window');
 import { API_BASE_URL } from "@env";
 import StatusPopup from '../StatusPopup/StatusPopup';
 
-const PF_ESIC_Details = () => {
+const PF_ESIC_Details = ({ route }) => {
     const [pfesic, setPfEsic] = useState(null);
     const [unapprovePfesic, setunapprovePfesic] = useState(null);
     const [token, setToken] = useState(null);
@@ -71,10 +71,15 @@ const PF_ESIC_Details = () => {
             const t = await AsyncStorage.getItem("authToken");
             const emp_id = await AsyncStorage.getItem("emp_id");
             const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-            const emp_unapprove_pfesic_details = JSON.parse(await AsyncStorage.getItem("emp_unapprove_pfesic_details"));
-            const data = JSON.parse(
-                await AsyncStorage.getItem("employee_PF_ESIC_details")
-            );
+            // const emp_unapprove_pfesic_details = JSON.parse(await AsyncStorage.getItem("emp_unapprove_pfesic_details"));
+            // const data = JSON.parse(
+            //     await AsyncStorage.getItem("employee_PF_ESIC_details")
+            // );
+            const emp_unapprove_pfesic_details =  route?.params?.emp_unapprove_pfesic_details;
+            const data = route?.params?.employee_PF_ESIC_details;
+            // console.log(emp_unapprove_pfesic_details,"emp_unapprove_pfesic_details");
+            console.log(data,"data");
+            
             setemployee_id(await AsyncStorage.getItem("employee_id"));
             SetEmpId(emp_id);
 
@@ -107,28 +112,28 @@ const PF_ESIC_Details = () => {
             ...prev,
             pre_er_pf: pfesic.pre_er_pf === 'yes',
 
-            er_name: pfesic?.pre_er_details?.er_name || unapprovePfesic?.er_name || '',
-            exit_date: pfesic?.pre_er_details?.exit_date || unapprovePfesic?.exit_date || '',
-            last_drawn_gross: pfesic?.pre_er_details?.last_drawn_gross || unapprovePfesic?.last_drawn_gross || '',
-            last_designation: pfesic?.pre_er_details?.last_designation || unapprovePfesic?.last_designation || '',
-            reporting_to: pfesic?.pre_er_details?.reporting_to || unapprovePfesic?.reporting_to || '',
-            contact_no: pfesic?.pre_er_details?.contact_no || unapprovePfesic?.contact_no || '',
+            er_name: pfesic?.pre_er_details?.er_name || unapprovePfesic?.pre_er_details?.er_name || '',
+            exit_date: pfesic?.pre_er_details?.exit_date || unapprovePfesic?.pre_er_details?.exit_date || '',
+            last_drawn_gross: pfesic?.pre_er_details?.last_drawn_gross || unapprovePfesic?.pre_er_details?.last_drawn_gross || '',
+            last_designation: pfesic?.pre_er_details?.last_designation || unapprovePfesic?.pre_er_details?.last_designation || '',
+            reporting_to: pfesic?.pre_er_details?.reporting_to || unapprovePfesic?.pre_er_details?.reporting_to || '',
+            contact_no: pfesic?.pre_er_details?.contact_no || unapprovePfesic?.pre_er_details?.contact_no || '',
 
-            uan_no: pfesic?.pre_er_epfo_details?.uan_no || unapprovePfesic?.uan_no || '',
-            esic_no: pfesic?.pre_er_esic_details?.esic_no || unapprovePfesic?.esic_no || '',
-            last_member_id: pfesic?.pre_er_epfo_details?.last_member_id || unapprovePfesic?.last_member_id || '',
-            ip_dispensary: pfesic?.pre_er_esic_details?.ip_dispensary || unapprovePfesic?.ip_dispensary || '',
-            last_ro: pfesic?.pre_er_epfo_details?.last_ro || unapprovePfesic?.last_ro || '',
-            family_dispensary: pfesic?.pre_er_esic_details?.family_dispensary || unapprovePfesic?.family_dispensary || '',
+            uan_no: pfesic?.pre_er_epfo_details?.uan_no || unapprovePfesic?.pre_er_epfo_details?.uan_no || '',
+            esic_no: pfesic?.pre_er_esic_details?.esic_no || unapprovePfesic?.pre_er_esic_details?.esic_no || '',
+            last_member_id: pfesic?.pre_er_epfo_details?.last_member_id || unapprovePfesic?.pre_er_epfo_details?.last_member_id || '',
+            ip_dispensary: pfesic?.pre_er_esic_details?.ip_dispensary || unapprovePfesic?.pre_er_esic_details?.ip_dispensary || '',
+            last_ro: pfesic?.pre_er_epfo_details?.last_ro || unapprovePfesic?.pre_er_epfo_details?.last_ro || '',
+            family_dispensary: pfesic?.pre_er_esic_details?.family_dispensary || unapprovePfesic?.pre_er_esic_details?.family_dispensary || '',
 
-            current_uan: pfesic?.curr_er_epfo_details?.uan_no || unapprovePfesic?.current_uan || '',
-            current_ip_esic: pfesic?.curr_er_esic_details?.esic_no || unapprovePfesic?.current_ip_esic || '',
-            current_member_id: pfesic?.curr_er_epfo_details?.last_member_id || unapprovePfesic?.current_member_id || '',
-            current_ip_dispensary: pfesic?.curr_er_esic_details?.ip_dispensary || unapprovePfesic?.current_ip_dispensary || '',
-            current_ro: pfesic?.curr_er_epfo_details?.last_ro || unapprovePfesic?.current_ro || '',
-            current_family_dispensary: pfesic?.curr_er_esic_details?.family_dispensary || unapprovePfesic?.current_family_dispensary || '',
-            membership_date_pf: pfesic?.curr_er_epfo_details?.membership_date || unapprovePfesic?.membership_date_pf || '',
-            membership_date_esic: pfesic?.curr_er_esic_details?.membership_date || unapprovePfesic?.membership_date_esic || '',
+            current_uan: pfesic?.curr_er_epfo_details?.uan_no || unapprovePfesic?.curr_er_epfo_details?.uan_no || '',
+            current_ip_esic: pfesic?.curr_er_esic_details?.esic_no || unapprovePfesic?.curr_er_esic_details?.esic_no || '',
+            current_member_id: pfesic?.curr_er_epfo_details?.last_member_id || unapprovePfesic?.curr_er_epfo_details?.last_member_id || '',
+            current_ip_dispensary: pfesic?.curr_er_esic_details?.ip_dispensary || unapprovePfesic?.curr_er_esic_details?.ip_dispensary || '',
+            current_ro: pfesic?.curr_er_epfo_details?.last_ro || unapprovePfesic?.curr_er_epfo_details?.last_ro || '',
+            current_family_dispensary: pfesic?.curr_er_esic_details?.family_dispensary || unapprovePfesic?.curr_er_esic_details?.family_dispensary || '',
+            membership_date_pf: pfesic?.curr_er_epfo_details?.membership_date || unapprovePfesic?.curr_er_epfo_details?.membership_date || '',
+            membership_date_esic: pfesic?.curr_er_esic_details?.membership_date || unapprovePfesic?.curr_er_esic_details?.membership_date || '',
         }));
     }, [pfesic,unapprovePfesic]);
       
@@ -222,7 +227,7 @@ const PF_ESIC_Details = () => {
                     JSON.stringify(pfesicPayload)
                 );
             }
-            // console.log(formData,"formDatanew");
+            console.log(formData,"formDatanew");
             
             const response = await axios.post(
                 `${API_BASE_URL}employee/request-update-pfesic-details`,
@@ -309,7 +314,7 @@ const PF_ESIC_Details = () => {
 
             return (
                 pfesic?.[section]?.[key] ??
-                unapprovePfesic?.[field]
+                unapprovePfesic?.[section]?.[field]
             );
         };
 
@@ -429,7 +434,7 @@ const PF_ESIC_Details = () => {
                             value={form.last_drawn_gross}
                             editable={!pfesic?.pre_er_details?.last_drawn_gross}
                             onChangeText={(t) => {
-                                const cleaned = t.replace(/[^0-9]/g, ''); // ✅ allow only digits
+                                const cleaned = t.replace(/[^0-9]/g, ''); 
 
                                 setForm(p => ({
                                     ...p,

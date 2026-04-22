@@ -24,7 +24,7 @@ import { NativeModules } from "react-native";
 const { PdfPicker } = NativeModules;
 const { width } = Dimensions.get('window');
 import { API_BASE_URL } from "@env";
-const PersonalDetails = () => {
+const PersonalDetails = ({ route }) => {
   const [openDob, setOpenDob] = useState(false);
   const [Dob, setDob] = useState(new Date());
   const [token, setToken] = useState(null);
@@ -53,6 +53,7 @@ const PersonalDetails = () => {
   const [updateButton, setupdateButton] = useState(false);
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
   const MAX_SINGLE_FILE_KB = 200;
+  
   const [form, setForm] = useState({
     employee_id: '',
     emp_id: '',
@@ -128,10 +129,14 @@ const PersonalDetails = () => {
   const loadTokenAndFetch = async () => {
     const t = await AsyncStorage.getItem("authToken");
     const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-    const employee_det = JSON.parse(await AsyncStorage.getItem("employee_det"));
-    const personal_det = JSON.parse(await AsyncStorage.getItem("personal_det"));
+    const employee_det = route?.params?.accountData;
+  const personal_det = route?.params?.updatedDetails;
+  
+    
+    // const employee_det = JSON.parse(await AsyncStorage.getItem("employee_det"));
+    // const personal_det = JSON.parse(await AsyncStorage.getItem("personal_det"));
     setemployee_id(await AsyncStorage.getItem("employee_id"));
-    if (t && employee_det) {
+    if (t && employee_det && personal_det) {
       setToken(t);
       setUserData(userData);
       setEmployeeDet(employee_det);
@@ -140,12 +145,15 @@ const PersonalDetails = () => {
       setEmployee_Vault(employee_det.employee_vault || 0);
       setAlreadyUploadedSize(employee_det.total_file_size || 0);
       setRights(JSON.parse(await AsyncStorage.getItem("rights")));
+   
     }
+      // console.log(personal_det,"personal_det");
+      // console.log(fetchDetails,"fetchDetails");
     if (personal_det && personal_det?.personal_details_status) {
       // console.log(personal_det.personal_details_status, "personal_det.personal_details_submit_status");
-      console.log(personal_det, "personal_det.personal_details");
-      console.log(EmployeeDet,"EmployeeDet");
-      console.log(fetchDetails,"fetchDetails");
+      // console.log(personal_det, "personal_det.personal_details");
+      
+      // console.log(fetchDetails,"fetchDetails");
 
       setPersonalDetailsStatus(personal_det?.personal_details_status);
 
@@ -156,13 +164,13 @@ const PersonalDetails = () => {
     }
   };
 
-    loadTokenAndFetch();
-  }, [token]);
+   loadTokenAndFetch();
 
+    
+  }, []);
 
 
   useEffect(() => {
-
     if (EmployeeDet) {
       if (!EmployeeDet) return;
       setForm(prev => ({
@@ -253,7 +261,7 @@ const PersonalDetails = () => {
 
     }
     isHydratedRef.current = true;
-  }, [EmployeeDet]);
+  }, [EmployeeDet,fetchDetails]);
 
   const [uploads, setUploads] = useState({
     emp_aadhaar_image: null,
