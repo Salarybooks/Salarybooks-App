@@ -169,6 +169,12 @@ const PersonalDetails = ({ route }) => {
     
   }, []);
 
+  useEffect(() => {
+    console.log("EmployeeDet",EmployeeDet);
+    console.log("fetchDetails",fetchDetails);
+    
+  }, [EmployeeDet,fetchDetails])
+
 
   useEffect(() => {
     if (EmployeeDet) {
