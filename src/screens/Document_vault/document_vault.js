@@ -123,13 +123,13 @@ const DocumentVaultScreen = () => {
         return;
       }
   
-      if (fileSizeKB > remainingSizeKB) {
-        Alert.alert(
-          "Storage Limit Exceeded",
-          `Only ${remainingSizeKB.toFixed(2)} KB remaining`
-        );
-        return;
-      }
+      // if (fileSizeKB > remainingSizeKB) {
+      //   Alert.alert(
+      //     "Storage Limit Exceeded",
+      //     `Only ${remainingSizeKB.toFixed(2)} KB remaining`
+      //   );
+      //   return;
+      // }
       const currentList = uploadedFiles.other_documents || [];
       const extractedName = `Document_${currentList.length + 1}`;
 
@@ -263,7 +263,7 @@ const DocumentVaultScreen = () => {
           documents: response.data.documents || [],
           other_documents: othersArray,
         });
-        // console.log(uploadedFiles,"uploadedFiles");
+        console.log(uploadedFiles,"uploadedFiles");
         
       }
     } catch (error) {
