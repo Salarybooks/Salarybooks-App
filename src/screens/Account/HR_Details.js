@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
-const HR_Details = () => {
+const HR_Details = ({route}) => {
   const [selfService, setSelfService] = useState(true);
   const [empid, SetEmpId] = useState(true);
   const [hrDetails, setHrDetails] = useState(null);
@@ -55,8 +55,10 @@ const HR_Details = () => {
     const loadTokenAndFetch = async () => {
       const t = await AsyncStorage.getItem("authToken");
       const emp_id = await AsyncStorage.getItem("emp_id");
-      const employee_hr_details = JSON.parse(await AsyncStorage.getItem("employee_hr_details"));
-      const masterdata = JSON.parse(await AsyncStorage.getItem("masterdata"));
+      // const employee_hr_details = JSON.parse(await AsyncStorage.getItem("employee_hr_details"));
+      // const masterdata = JSON.parse(await AsyncStorage.getItem("masterdata"));
+      const employee_hr_details =route?.params?.employee_hr_details;
+      const masterdata =route?.params?.masterdata;
       //   const userData = JSON.parse(await AsyncStorage.getItem("userData"));
       // console.log("setHrDetails==true", employee_hr_details);
       
