@@ -63,7 +63,9 @@ const BankDetailsForm = ({route}) => {
       const employee_vault = JSON.parse(await AsyncStorage.getItem("employee_vault"));
       const total_file_size = JSON.parse(await AsyncStorage.getItem("total_file_size"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-      if (true) {
+      console.log(route,"employee_bank_details");
+      
+      if (t) {
         setToken(t);
         setUserData(userData);
         setBankDetails(employee_bank_details)
