@@ -41,6 +41,7 @@ const Account = ({ navigation }) => {
   const [accountData, setAccountData] = useState(null);
   const [updatedDetails, setUpdatedDetails] = useState(null);
   const [token, setToken] = useState(false);
+  const [masterdata, setMasterdata] = useState(null);
   const themeColors = {
     background: isDarkMode ? '#000' : '#fff',
     card: isDarkMode ? '#1c1c1e' : '#f4f4f4',
@@ -85,14 +86,14 @@ const Account = ({ navigation }) => {
     };
 
     loadData();
-  }, [profilepic]);
+  }, []);
   useEffect(() => {
-    if (token) {
+    if (token && employee_id) {
       fetchAccountDetails(token);
       fetchUpdatedDetails(token);
       fetchMasterDetails(token);
     }
-  }, [token])
+  }, [token,employee_id])
   // const handleLogout = () => {
   //   Alert.alert('Logout', 'Do you want to logout?', [
   //     {
@@ -265,12 +266,17 @@ const Account = ({ navigation }) => {
         console.log(response.data.employee_det, "response.data.employee_det");
 
         setAccountData(response.data.employee_det);
+        console.log(accountData,"accountData");
+        
       }
 
     } catch (error) {
       console.log(error.message);
     }
   };
+  useEffect(() => {
+  console.log("UPDATED accountData:", accountData);
+}, [accountData]);
   const fetchMasterDetails = async (token) => {
 
     console.log(token, "API_BASE_URL21");
@@ -293,8 +299,9 @@ const Account = ({ navigation }) => {
       );
 
       if (response) {
-        console.log(response.data, "masterdata");
-        AsyncStorage.setItem('masterdata', JSON.stringify(response.data))
+        // console.log(response.data, "masterdata");
+        setMasterdata(response.data)
+        // AsyncStorage.setItem('masterdata', JSON.stringify(response.data))
 
       }
     } catch (error) {
@@ -426,7 +433,7 @@ const Account = ({ navigation }) => {
 
   const RoutPage = (field) => {
 
-    if (!accountData || !updatedDetails) {
+    if (!accountData ) {
       Alert.alert("Please wait", "Data is still loading...");
       return;
     }
@@ -435,6 +442,8 @@ const Account = ({ navigation }) => {
         accountData,
         updatedDetails
       };
+      console.log(commonParams,"commonParams");
+      
       Navigation.navigate('PersonalDetails', commonParams)
     }
     if (field == "Address") {
@@ -454,7 +463,13 @@ const Account = ({ navigation }) => {
       Navigation.navigate('BankDetailsForm',commonParams)
     }
     if (field == "HRDetails") {
-      Navigation.navigate('HRDetails')
+      const commonParams = {
+      masterdata: masterdata,
+      employee_hr_details: accountData?.emp_det.employment_hr_details
+      };
+      console.log(commonParams,"commonParams");
+      
+      Navigation.navigate('HRDetails',commonParams);
     }
     if (field == "PFESICDetails") {
       const commonParams = {
