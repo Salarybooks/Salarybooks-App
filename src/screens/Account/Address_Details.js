@@ -37,7 +37,7 @@ const AddressForm = ({ route }) => {
   const [rights, setRights] = useState(false);
   const [updateButton, setUpdateButton] = useState(false);
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
-  
+
   const [form, setForm] = useState({
     resident_no: '',
     residential_name: '',
@@ -72,14 +72,14 @@ const AddressForm = ({ route }) => {
       const emp_unapprove_address = route?.params?.emp_unapprove_address;
       const emp_unapprove_curr_address = route?.params?.emp_unapprove_curr_address;
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-        console.log(route,"route");
-        console.log(employee_address,"employee_address");
-        console.log(employee_curr_address,"employee_curr_address");
-        console.log(emp_unapprove_address,"emp_unapprove_address");
-        console.log(emp_unapprove_curr_address,"emp_unapprove_curr_address");
-        console.log(address,"address");
-        console.log(curaddress,"curaddress");
-        
+      console.log(route.params, "route.params");
+      console.log(employee_address, "employee_address");
+      console.log(employee_curr_address, "employee_curr_address");
+      console.log(emp_unapprove_address, "emp_unapprove_address");
+      console.log(emp_unapprove_curr_address, "emp_unapprove_curr_address");
+      console.log(address, "address");
+      console.log(curaddress, "curaddress");
+
       if (t) {
 
         setToken(t);
@@ -87,10 +87,12 @@ const AddressForm = ({ route }) => {
         // console.log(employee_address,"employee_address");
 
         setAddress(employee_address);
-        setUpdateButton(emp_unapprove_address.address_details_status);
+        setUpdateButton(emp_unapprove_address.address_details_status || null);
         setCurAddress(employee_curr_address);
-        setUnApproveAddress(emp_unapprove_address);
-        setCurUnApproveAddress(emp_unapprove_curr_address);
+        // setUnApproveAddress(emp_unapprove_address);
+        // setCurUnApproveAddress(emp_unapprove_curr_address);
+        setUnApproveAddress(emp_unapprove_address || {});
+        setCurUnApproveAddress(emp_unapprove_curr_address || {});
         setRights(JSON.parse(await AsyncStorage.getItem("rights")));
 
         if (emp_unapprove_address.address_details_status) {
@@ -107,48 +109,125 @@ const AddressForm = ({ route }) => {
     // fetchUpdatedDetails(token);
   }, []);
 
-  useEffect(() => {
-    console.log(address, "null", curaddress);
+  // useEffect(() => {
+  //   // console.log(address, "null", curaddress);
 
-    if (address && curaddress) {
-      if (!address && !curaddress) return;
-      setForm(prev => ({
-        ...prev,
-        employee_id: employee_id || '',
-        emp_id: userData?.emp_id || '',
-        resident_no: unApproveAddress?.resident_no || address.resident_no || '',
-        residential_name: unApproveAddress?.residential_name || address.residential_name || '',
-        road: unApproveAddress?.road || address.road || '',
-        locality: unApproveAddress?.locality || address.locality || '',
-        city: unApproveAddress?.city || address.city || '',
-        district: unApproveAddress?.district || address.district || '',
-        state: unApproveAddress?.state || address.state || '',
-        pincode: unApproveAddress?.pincode || address.pincode || '',
-        country: unApproveAddress?.country || address.country || '',
-        diff_current_add: unApproveAddress?.diff_current_add || address.diff_current_add || '',
-        curr_resident_no: curUnApproveAddress?.curr_resident_no || curaddress.resident_no || '',
-        curr_residential_name: curUnApproveAddress?.curr_residential_name || curaddress.residential_name || '',
-        curr_road: curUnApproveAddress?.curr_road || curaddress.road || '',
-        curr_locality: curUnApproveAddress?.curr_locality || curaddress.locality || '',
-        curr_city: curUnApproveAddress?.curr_city || curaddress.city || '',
-        curr_district: curUnApproveAddress?.curr_district || curaddress.district || '',
-        curr_state: curUnApproveAddress?.curr_state || curaddress.state || '',
-        curr_pincode: curUnApproveAddress?.curr_pincode || curaddress.pincode || '',
-        curr_country: curUnApproveAddress?.curr_country || curaddress.country || '',
-      }));
+  //   // if (address || curaddress) {
+  //     if (!address && !curaddress) return;
+  //     setForm(prev => ({
+  //       ...prev,
+  //       employee_id: employee_id || '',
+  //       emp_id: userData?.emp_id || '',
+  //       resident_no: unApproveAddress?.resident_no ?? address.resident_no ?? '',
+  //       residential_name: unApproveAddress?.residential_name ?? address.residential_name ?? '',
+  //       road: unApproveAddress?.road ?? address.road ?? '',
+  //       locality: unApproveAddress?.locality ?? address.locality ?? '',
+  //       city: unApproveAddress?.city ?? address.city ?? '',
+  //       district: unApproveAddress?.district ?? address.district ?? '',
+  //       state: unApproveAddress?.state ?? address.state ?? '',
+  //       pincode: unApproveAddress?.pincode ?? address.pincode ?? '',
+  //       country: unApproveAddress?.country ?? address.country ?? '',
+  //       diff_current_add: unApproveAddress?.diff_current_add ?? address.diff_current_add ?? '',
+  //       curr_resident_no: curUnApproveAddress?.curr_resident_no ?? curaddress.resident_no ?? '',
+  //       curr_residential_name: curUnApproveAddress?.curr_residential_name ?? curaddress.residential_name ?? '',
+  //       curr_road: curUnApproveAddress?.curr_road ?? curaddress.road ?? '',
+  //       curr_locality: curUnApproveAddress?.curr_locality ?? curaddress.locality ?? '',
+  //       curr_city: curUnApproveAddress?.curr_city ?? curaddress.city ?? '',
+  //       curr_district: curUnApproveAddress?.curr_district ?? curaddress.district ?? '',
+  //       curr_state: curUnApproveAddress?.curr_state ?? curaddress.state ?? '',
+  //       curr_pincode: curUnApproveAddress?.curr_pincode ?? curaddress.pincode ?? '',
+  //       curr_country: curUnApproveAddress?.curr_country ?? curaddress.country ?? '',
+  //     }));
 
-      if (!isHydratedRef.current) {
-        setIsDifferent(
-          unApproveAddress?.diff_current_add || address?.diff_current_add || 'no'
-        );
-        isHydratedRef.current = true;
-      }
+  //     if (!isHydratedRef.current) {
+  //       setIsDifferent(
+  //         unApproveAddress?.diff_current_add || address?.diff_current_add || 'no'
+  //       );
+  //       isHydratedRef.current = true;
+  //     }
 
-    }
-    // isHydratedRef.current = true;
-  }, [address, curaddress,unApproveAddress,curUnApproveAddress]);
+  //   // }
+  //   // isHydratedRef.current = true;
+  // }, [address, curaddress,unApproveAddress,curUnApproveAddress]);
 
 
+useEffect(() => {
+  if (!address && !curaddress) return;
+
+  setForm(prev => ({
+    ...prev,
+
+    employee_id: employee_id || '',
+    emp_id: userData?.emp_id || '',
+
+ 
+    resident_no: unApproveAddress?.resident_no ?? route?.params?.employee_address?.resident_no ?? '',
+    residential_name: unApproveAddress?.residential_name ?? route?.params?.employee_address?.residential_name ?? '',
+    road: unApproveAddress?.road ?? route?.params?.employee_address?.road ?? '',
+    locality: unApproveAddress?.locality ?? route?.params?.employee_address?.locality ?? '',
+    city: unApproveAddress?.city ?? route?.params?.employee_address?.city ?? '',
+    district: unApproveAddress?.district ?? route?.params?.employee_address?.district ?? '',
+    state: unApproveAddress?.state ?? route?.params?.employee_address?.state ?? '',
+    pincode: unApproveAddress?.pincode ?? route?.params?.employee_address?.pincode ?? '',
+    country: unApproveAddress?.country ?? route?.params?.employee_address?.country ?? '',
+    diff_current_add: unApproveAddress?.diff_current_add ?? route?.params?.employee_address?.diff_current_add ?? '',
+
+    curr_resident_no:
+      curUnApproveAddress?.curr_resident_no ??
+      route?.params?.employee_curr_address?.resident_no ??
+      '',
+
+    curr_residential_name:
+      curUnApproveAddress?.curr_residential_name ??
+      route?.params?.employee_curr_address?.residential_name ??
+      '',
+
+    curr_road:
+      curUnApproveAddress?.curr_road ??
+      route?.params?.employee_curr_address?.road ??
+      '',
+
+    curr_locality:
+      curUnApproveAddress?.curr_locality ??
+      route?.params?.employee_curr_address?.locality ??
+      '',
+
+    curr_city:
+      curUnApproveAddress?.curr_city ??
+      route?.params?.employee_curr_address?.city ??
+      '',
+
+    curr_district:
+      curUnApproveAddress?.curr_district ??
+      route?.params?.employee_curr_address?.district ??
+      '',
+
+    curr_state:
+      curUnApproveAddress?.curr_state ??
+      route?.params?.employee_curr_address?.state ??
+      '',
+
+    curr_pincode:
+      curUnApproveAddress?.curr_pincode ??
+      route?.params?.employee_curr_address?.pincode ??
+      '',
+
+    curr_country:
+      curUnApproveAddress?.curr_country ??
+      route?.params?.employee_curr_address?.country ??
+      '',
+  }));
+
+  if (!isHydratedRef.current) {
+    setIsDifferent(
+      unApproveAddress?.diff_current_add ??
+      address?.diff_current_add ??
+      'no'
+    );
+    isHydratedRef.current = true;
+  }
+
+}, [address, curaddress, unApproveAddress, curUnApproveAddress]);
   const ADDRESS_FIELDS = [
     'resident_no',
     'residential_name',
@@ -173,7 +252,7 @@ const AddressForm = ({ route }) => {
     'curr_pincode',
     'curr_country',
   ];
-  
+
   const showPopup = (type, title, message) => {
     setPopupConfig({
       visible: true,
@@ -219,15 +298,15 @@ const AddressForm = ({ route }) => {
       const empCurrAddressPayload = {};
 
       if (form.diff_current_add === 'yes') {
-      CURRENT_ADDRESS_FIELDS.forEach(field => {
-        const apiField = field.replace('curr_', '');
-        const oldValue = curaddress?.[apiField] ?? '';
-        const newValue = form?.[field] ?? ''; 
+        CURRENT_ADDRESS_FIELDS.forEach(field => {
+          const apiField = field.replace('curr_', '');
+          const oldValue = curaddress?.[apiField] ?? '';
+          const newValue = form?.[field] ?? '';
 
-        if (String(oldValue).trim() === String(newValue).trim()) return;
+          if (String(oldValue).trim() === String(newValue).trim()) return;
 
-        empCurrAddressPayload[field] = newValue;
-      });
+          empCurrAddressPayload[field] = newValue;
+        });
       }
 
       if (Object.keys(empCurrAddressPayload).length > 0) {
@@ -273,20 +352,20 @@ const AddressForm = ({ route }) => {
   };
 
   const isAnyAddressMissing = () => {
-  if (!address && !curaddress) return false;
+    if (!address && !curaddress) return false;
 
-  const isPermanentMissing = ADDRESS_FIELDS.some(field => {
-    const value =
-      address?.[field] ?? unApproveAddress?.[field];
+    const isPermanentMissing = ADDRESS_FIELDS.some(field => {
+      const value =
+        address?.[field] ?? unApproveAddress?.[field];
 
-    return !value || String(value).trim() === '';
-  });
+      return !value || String(value).trim() === '';
+    });
 
-  let isCurrentMissing = false;
+    let isCurrentMissing = false;
 
-  // if (
-  //   (address?.diff_current_add ?? unApproveAddress?.diff_current_add) === 'yes'
-  // ) {
+    // if (
+    //   (address?.diff_current_add ?? unApproveAddress?.diff_current_add) === 'yes'
+    // ) {
     isCurrentMissing = CURRENT_ADDRESS_FIELDS.some(field => {
       const apiField = field.replace('curr_', '');
 
@@ -295,10 +374,10 @@ const AddressForm = ({ route }) => {
 
       return !value || String(value).trim() === '';
     });
-  // }
+    // }
 
-  return isPermanentMissing || isCurrentMissing;
-};
+    return isPermanentMissing || isCurrentMissing;
+  };
 
   return (
     <LinearGradient
@@ -309,115 +388,115 @@ const AddressForm = ({ route }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.containerall}>
-        <View style={styles.header}>
-          <Image
-            source={require('../../assets/home-address.png')}
-            style={styles.header_iconImage}
-          />
-          <Text style={styles.title}>Address Details</Text>
-        </View>
-        {addressDetailsStatus && (
-          <View
-             style={[
-              styles.notificationBox,
-              addressDetailsStatus  === 'rejected'
-                ? styles.rejectedBox
-                : addressDetailsStatus  === 'pending'
-                  ? styles.pendingBox
-                  : addressDetailsStatus  === 'approved'
-                    ? styles.approvedBox
-                    : null
-            ]}
-          >
-            <Text style={styles.notificationTitle}>
-              {addressDetailsStatus === 'rejected'
-                ? 'Details Rejected'
-                : addressDetailsStatus === 'pending'
-                  ? 'Details Pending for Approval'
-                  : addressDetailsStatus === 'approved'
-                    ? 'Details Approved'
-                    : ''}
-            </Text>
-
-            {addressDetailsStatus === 'rejected' && (
-              <Text style={styles.remarkText}>
-                Remark: {rejectedRemark}
-              </Text>
-            )}
+          <View style={styles.header}>
+            <Image
+              source={require('../../assets/home-address.png')}
+              style={styles.header_iconImage}
+            />
+            <Text style={styles.title}>Address Details</Text>
           </View>
-        )}
-        <Text style={styles.label}>Residence No</Text>
-        <TextInput
-          style={styles.input}
-          value={form.resident_no}
-          editable={!address?.resident_no}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, resident_no: text }))
-          }
-        />
+          {addressDetailsStatus && (
+            <View
+              style={[
+                styles.notificationBox,
+                addressDetailsStatus === 'rejected'
+                  ? styles.rejectedBox
+                  : addressDetailsStatus === 'pending'
+                    ? styles.pendingBox
+                    : addressDetailsStatus === 'approved'
+                      ? styles.approvedBox
+                      : null
+              ]}
+            >
+              <Text style={styles.notificationTitle}>
+                {addressDetailsStatus === 'rejected'
+                  ? 'Details Rejected'
+                  : addressDetailsStatus === 'pending'
+                    ? 'Details Pending for Approval'
+                    : addressDetailsStatus === 'approved'
+                      ? 'Details Approved'
+                      : ''}
+              </Text>
 
-        <Text style={styles.label}>Residence Name</Text>
-        <TextInput
-          style={styles.input}
-          value={form.residential_name}
-          editable={!address?.residential_name}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, residential_name: text }))
-          }
-        />
-
-        <Text style={styles.label}>Road / Street</Text>
-        <TextInput
-          style={styles.input}
-          value={form.road}
-          editable={!address?.road}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, road: text }))
-          }
-        />
-
-        <Text style={styles.label}>Locality / Area</Text>
-        <TextInput
-          style={styles.input}
-          value={form.locality}
-          editable={!address?.locality}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, locality: text }))
-          }
-        />
-
-        <Text style={styles.label}>City / Town</Text>
-        <TextInput
-          style={styles.input}
-          value={form.city}
-          editable={!address?.city}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, city: text }))
-          }
-        />
-
-        <Text style={styles.label}>District</Text>
-        <TextInput
-          style={styles.input}
-          value={form.district}
-          editable={!address?.district}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, district: text }))
-          }
-        />
-
-        <Text style={styles.label}>State</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={form.state}
-            // editable={!address?.state}
-             enabled={!address?.state}
-            onValueChange={value =>
-              setForm(prev => ({ ...prev, state: value }))
+              {addressDetailsStatus === 'rejected' && (
+                <Text style={styles.remarkText}>
+                  Remark: {rejectedRemark}
+                </Text>
+              )}
+            </View>
+          )}
+          <Text style={styles.label}>Residence No</Text>
+          <TextInput
+            style={styles.input}
+            value={form.resident_no}
+            editable={!address?.resident_no}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, resident_no: text }))
             }
-          >
+          />
+
+          <Text style={styles.label}>Residence Name</Text>
+          <TextInput
+            style={styles.input}
+            value={form.residential_name}
+            editable={!address?.residential_name}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, residential_name: text }))
+            }
+          />
+
+          <Text style={styles.label}>Road / Street</Text>
+          <TextInput
+            style={styles.input}
+            value={form.road}
+            editable={!address?.road}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, road: text }))
+            }
+          />
+
+          <Text style={styles.label}>Locality / Area</Text>
+          <TextInput
+            style={styles.input}
+            value={form.locality}
+            editable={!address?.locality}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, locality: text }))
+            }
+          />
+
+          <Text style={styles.label}>City / Town</Text>
+          <TextInput
+            style={styles.input}
+            value={form.city}
+            editable={!address?.city}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, city: text }))
+            }
+          />
+
+          <Text style={styles.label}>District</Text>
+          <TextInput
+            style={styles.input}
+            value={form.district}
+            editable={!address?.district}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, district: text }))
+            }
+          />
+
+          <Text style={styles.label}>State</Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={form.state}
+              // editable={!address?.state}
+              enabled={!address?.state}
+              onValueChange={value =>
+                setForm(prev => ({ ...prev, state: value }))
+              }
+            >
               <Picker.Item label="Please select a state" value="" />
-            <Picker.Item label="Andhra Pradesh" value="Andhra Pradesh" />
+              <Picker.Item label="Andhra Pradesh" value="Andhra Pradesh" />
               <Picker.Item label="Arunachal Pradesh" value="Arunachal Pradesh" />
               <Picker.Item label="Assam" value="Assam" />
               <Picker.Item label="Bihar" value="Bihar" />
@@ -445,215 +524,215 @@ const AddressForm = ({ route }) => {
               <Picker.Item label="Uttar Pradesh" value="Uttar Pradesh" />
               <Picker.Item label="Uttarakhand" value="Uttarakhand" />
               <Picker.Item label="West Bengal" value="West Bengal" />
-          </Picker>
-        </View>
+            </Picker>
+          </View>
 
-        <Text style={styles.label}>Pincode</Text>
+          <Text style={styles.label}>Pincode</Text>
 
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          maxLength={6}
-          value={form.pincode}
-          editable={!address?.pincode}
-          onChangeText={(text) => {
-            const cleaned = text.replace(/[^0-9]/g, '');
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            maxLength={6}
+            value={form.pincode}
+            editable={!address?.pincode}
+            onChangeText={(text) => {
+              const cleaned = text.replace(/[^0-9]/g, '');
 
-            setForm(prev => ({ ...prev, pincode: cleaned }));
+              setForm(prev => ({ ...prev, pincode: cleaned }));
 
-            if (cleaned.length > 0 && cleaned.length < 6) {
-              setPincodeError('Pincode must be 6 digits');
-            } else if (cleaned.length === 6) {
-              if (/^0/.test(cleaned)) {
-                setPincodeError('Invalid pincode');
+              if (cleaned.length > 0 && cleaned.length < 6) {
+                setPincodeError('Pincode must be 6 digits');
+              } else if (cleaned.length === 6) {
+                if (/^0/.test(cleaned)) {
+                  setPincodeError('Invalid pincode');
+                } else {
+                  setPincodeError('');
+                }
               } else {
                 setPincodeError('');
               }
-            } else {
-              setPincodeError('');
+            }}
+          />
+          {pincodeError ? (
+            <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+              {pincodeError}
+            </Text>
+          ) : null}
+          <Text style={styles.label}>Country</Text>
+          <TextInput
+            style={styles.input}
+            value={form.country}
+            editable={!address?.country}
+            onChangeText={text =>
+              setForm(prev => ({ ...prev, country: text }))
             }
-          }}
-        />
-        {pincodeError ? (
-          <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
-            {pincodeError}
+          />
+
+          <Text style={styles.label}>
+            Is current residential address different from the above?
           </Text>
-        ) : null}
-        <Text style={styles.label}>Country</Text>
-        <TextInput
-          style={styles.input}
-          value={form.country}
-          editable={!address?.country}
-          onChangeText={text =>
-            setForm(prev => ({ ...prev, country: text }))
-          }
-        />
 
-        <Text style={styles.label}>
-          Is current residential address different from the above?
-        </Text>
+          <View style={styles.radioGroup}>
+            <TouchableOpacity
+              style={styles.radioOption}
+              onPress={() => {
+                setIsDifferent('yes');
+                setForm(prev => ({ ...prev, diff_current_add: 'yes' }));
+              }}
+            >
+              <View
+                style={[
+                  styles.radioCircle,
+                  isDifferent === 'yes' && styles.radioSelected,
+                ]}
+              />
+              <Text style={styles.radioText}>Yes</Text>
+            </TouchableOpacity>
 
-        <View style={styles.radioGroup}>
-          <TouchableOpacity
-            style={styles.radioOption}
-            onPress={() => {
-              setIsDifferent('yes');
-              setForm(prev => ({ ...prev, diff_current_add: 'yes' }));
-            }}
-          >
-            <View
-              style={[
-                styles.radioCircle,
-                isDifferent === 'yes' && styles.radioSelected,
-              ]}
-            />
-            <Text style={styles.radioText}>Yes</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.radioOption}
+              onPress={() => {
+                setIsDifferent('no');
+                setForm(prev => ({ ...prev, diff_current_add: 'no' }));
+              }}
+            >
+              <View
+                style={[
+                  styles.radioCircle,
+                  isDifferent === 'no' && styles.radioSelected,
+                ]}
+              />
+              <Text style={styles.radioText}>No</Text>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            style={styles.radioOption}
-            onPress={() => {
-              setIsDifferent('no');
-              setForm(prev => ({ ...prev, diff_current_add: 'no' }));
-            }}
-          >
-            <View
-              style={[
-                styles.radioCircle,
-                isDifferent === 'no' && styles.radioSelected,
-              ]}
-            />
-            <Text style={styles.radioText}>No</Text>
-          </TouchableOpacity>
-        </View>
+          {/* CURRENT ADDRESS */}
+          {isDifferent === 'yes' && (
+            <>
+              <Text style={styles.label}>Current Residence No</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_resident_no}
+                editable={!curaddress?.resident_no}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_resident_no: text }))
+                }
+              />
 
-        {/* CURRENT ADDRESS */}
-        {isDifferent === 'yes' && (
-          <>
-            <Text style={styles.label}>Current Residence No</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_resident_no}
-              editable={!curaddress?.resident_no}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_resident_no: text }))
-              }
-            />
+              <Text style={styles.label}>Current Residence Name</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_residential_name}
+                editable={!curaddress?.residential_name}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_residential_name: text }))
+                }
+              />
 
-            <Text style={styles.label}>Current Residence Name</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_residential_name}
-              editable={!curaddress?.residential_name}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_residential_name: text }))
-              }
-            />
+              <Text style={styles.label}>Current Road / Street</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_road}
+                editable={!curaddress?.road}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_road: text }))
+                }
+              />
 
-            <Text style={styles.label}>Current Road / Street</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_road}
-              editable={!curaddress?.road}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_road: text }))
-              }
-            />
+              <Text style={styles.label}>Current Locality / Area</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_locality}
+                editable={!curaddress?.locality}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_locality: text }))
+                }
+              />
 
-            <Text style={styles.label}>Current Locality / Area</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_locality}
-              editable={!curaddress?.locality}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_locality: text }))
-              }
-            />
+              <Text style={styles.label}>Current City / Town</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_city}
+                editable={!curaddress?.city}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_city: text }))
+                }
+              />
 
-            <Text style={styles.label}>Current City / Town</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_city}
-              editable={!curaddress?.city}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_city: text }))
-              }
-            />
+              <Text style={styles.label}>Current District</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_district}
+                editable={!curaddress?.district}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_district: text }))
+                }
+              />
 
-            <Text style={styles.label}>Current District</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_district}
-              editable={!curaddress?.district}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_district: text }))
-              }
-            />
-
-            <Text style={styles.label}>Current State</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_state}
-              editable={!curaddress?.state}
-              onChangeText={value =>
-                setForm(prev => ({ ...prev, curr_state: value }))
-              }
-            />
+              <Text style={styles.label}>Current State</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_state}
+                editable={!curaddress?.state}
+                onChangeText={value =>
+                  setForm(prev => ({ ...prev, curr_state: value }))
+                }
+              />
 
 
-            <Text style={styles.label}>Current Pincode</Text>
+              <Text style={styles.label}>Current Pincode</Text>
 
-            <TextInput
-              style={[
-                styles.input,
-                currPincodeError && { borderColor: 'red' } 
-              ]}
-              keyboardType="numeric"
-              maxLength={6}
-              value={form.curr_pincode}
-              editable={!curaddress?.pincode}
-              onChangeText={(text) => {
-                const cleaned = text.replace(/[^0-9]/g, '');
+              <TextInput
+                style={[
+                  styles.input,
+                  currPincodeError && { borderColor: 'red' }
+                ]}
+                keyboardType="numeric"
+                maxLength={6}
+                value={form.curr_pincode}
+                editable={!curaddress?.pincode}
+                onChangeText={(text) => {
+                  const cleaned = text.replace(/[^0-9]/g, '');
 
-                setForm(prev => ({ ...prev, curr_pincode: cleaned }));
+                  setForm(prev => ({ ...prev, curr_pincode: cleaned }));
 
-                if (cleaned.length > 0 && cleaned.length < 6) {
-                  setCurrPincodeError('Pincode must be 6 digits');
-                } else if (cleaned.length === 6) {
-                  if (/^0/.test(cleaned)) {
-                    setCurrPincodeError('Invalid pincode');
+                  if (cleaned.length > 0 && cleaned.length < 6) {
+                    setCurrPincodeError('Pincode must be 6 digits');
+                  } else if (cleaned.length === 6) {
+                    if (/^0/.test(cleaned)) {
+                      setCurrPincodeError('Invalid pincode');
+                    } else {
+                      setCurrPincodeError('');
+                    }
                   } else {
                     setCurrPincodeError('');
                   }
-                } else {
-                  setCurrPincodeError('');
+                }}
+              />
+              {currPincodeError ? (
+                <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
+                  {currPincodeError}
+                </Text>
+              ) : null}
+              <Text style={styles.label}>Current Country</Text>
+              <TextInput
+                style={styles.input}
+                value={form.curr_country}
+                editable={!curaddress?.country}
+                onChangeText={text =>
+                  setForm(prev => ({ ...prev, curr_country: text }))
                 }
-              }}
-            />
-            {currPincodeError ? (
-              <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>
-                {currPincodeError}
-              </Text>
-            ) : null}
-            <Text style={styles.label}>Current Country</Text>
-            <TextInput
-              style={styles.input}
-              value={form.curr_country}
-              editable={!curaddress?.country}
-              onChangeText={text =>
-                setForm(prev => ({ ...prev, curr_country: text }))
-              }
-            />
-          </>
-        )}
+              />
+            </>
+          )}
         </View>
         {(updateButton !== "approved" || isAnyAddressMissing()) && (
-                  <TouchableOpacity style={styles.button} onPress={onSubmit}>
-                    <Text style={styles.buttonText}>Update</Text>
-                  </TouchableOpacity>
-                )}
+          <TouchableOpacity style={styles.button} onPress={onSubmit}>
+            <Text style={styles.buttonText}>Update</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
-       <StatusPopup
+      <StatusPopup
         visible={popupConfig.visible}
         type={popupConfig.type}
         title={popupConfig.title}
@@ -662,7 +741,7 @@ const AddressForm = ({ route }) => {
           setPopupConfig(prev => ({ ...prev, visible: false }))
         }
       />
-      <BottomNavigation rights={rights}/>
+      <BottomNavigation rights={rights} />
     </LinearGradient>
   );
 };
@@ -674,8 +753,8 @@ const styles = StyleSheet.create({
   scrollContainer: {
     top: 15
   },
-  containerall:{
-    marginBottom:100
+  containerall: {
+    marginBottom: 100
   },
   header: {
     flexDirection: "row",
