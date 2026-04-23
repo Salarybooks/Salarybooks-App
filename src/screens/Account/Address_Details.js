@@ -77,8 +77,10 @@ const AddressForm = ({ route }) => {
         console.log(employee_curr_address,"employee_curr_address");
         console.log(emp_unapprove_address,"emp_unapprove_address");
         console.log(emp_unapprove_curr_address,"emp_unapprove_curr_address");
+        console.log(address,"address");
+        console.log(curaddress,"curaddress");
         
-      if (true) {
+      if (t) {
 
         setToken(t);
         setUserData(userData);

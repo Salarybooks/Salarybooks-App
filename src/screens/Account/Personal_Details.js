@@ -136,7 +136,7 @@ const PersonalDetails = ({ route }) => {
     // const employee_det = JSON.parse(await AsyncStorage.getItem("employee_det"));
     // const personal_det = JSON.parse(await AsyncStorage.getItem("personal_det"));
     setemployee_id(await AsyncStorage.getItem("employee_id"));
-    if (t && employee_det && personal_det) {
+    if (t && employee_det ) {
       setToken(t);
       setUserData(userData);
       setEmployeeDet(employee_det);
