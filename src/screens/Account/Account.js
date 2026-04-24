@@ -460,7 +460,7 @@ const Account = ({ navigation }) => {
         employee_bank_details: accountData?.emp_det?.bank_details,
         emp_unapprove_bank_details: updatedDetails?.bank_details
       };      
-      console.log(accountData,"commonParams");
+      // console.log(updatedDetails?.bank_details,"commonParams");
       Navigation.navigate('BankDetailsForm',commonParams)
     }
     if (field == "HRDetails") {
@@ -468,7 +468,7 @@ const Account = ({ navigation }) => {
       masterdata: masterdata,
       employee_hr_details: accountData?.emp_det.employment_hr_details
       };
-      console.log(commonParams,"commonParams");
+      // console.log(commonParams,"commonParams");
       
       Navigation.navigate('HRDetails',commonParams);
     }

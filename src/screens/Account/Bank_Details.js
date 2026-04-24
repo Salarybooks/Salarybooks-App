@@ -74,7 +74,19 @@ const BankDetailsForm = ({route}) => {
         setEmployeeVault(employee_vault || 0);
         setAlreadyUploadedSize(total_file_size || 0);
         setRights(JSON.parse(await AsyncStorage.getItem("rights")));
-
+         setForm(prev => ({
+        ...prev,
+        employee_id,
+        emp_id: userData?.emp_id || '',
+        bank_name: employee_bank_details?.bank_name || emp_unapprove_bank_details?.bank_name || '',
+        branch_name: employee_bank_details?.branch_name || emp_unapprove_bank_details?.branch_name || '',
+        branch_address: employee_bank_details?.branch_address || emp_unapprove_bank_details?.branch_address || '',
+        branch_pin: employee_bank_details?.branch_pin || emp_unapprove_bank_details?.branch_pin || '',
+        account_no: employee_bank_details?.account_no || emp_unapprove_bank_details?.account_no || '',
+        account_type: employee_bank_details?.account_type || emp_unapprove_bank_details?.account_type || '',
+        ifsc_code: employee_bank_details?.ifsc_code || emp_unapprove_bank_details?.ifsc_code || '',
+        micr_no: employee_bank_details?.micr_no || emp_unapprove_bank_details?.micr_no || '',
+      }));
       }
       if (emp_unapprove_bank_details.bank_details_status) {
         setBankDetailsStatus(emp_unapprove_bank_details.bank_details_status);
@@ -88,26 +100,26 @@ const BankDetailsForm = ({route}) => {
     // fetchUpdatedDetails(token);
   }, [token]);
 
-  useEffect(() => {
-    console.log(bankDetails, "bankDEtails");
-    // console.log(userData.corporate_id, "userData");
+  // useEffect(() => {
+  //   console.log(bankDetails, "bankDEtails");
+  //   // console.log(userData.corporate_id, "userData");
 
-    if (!bankDetails || !userData || !employee_id) return;
-    console.log(bankDetails.branch_name, "bankDetails");
-    setForm(prev => ({
-      ...prev,
-      employee_id,
-      emp_id: userData.emp_id || '',
-      bank_name: bankDetails?.bank_name || unapproveBankDetails?.bank_name || '',
-      branch_name: bankDetails?.branch_name || unapproveBankDetails?.branch_name || '',
-      branch_address: bankDetails?.branch_address || unapproveBankDetails?.branch_address || '',
-      branch_pin: bankDetails?.branch_pin || unapproveBankDetails?.branch_pin || '',
-      account_no: bankDetails?.account_no || unapproveBankDetails?.account_no || '',
-      account_type: bankDetails?.account_type || unapproveBankDetails?.account_type || '',
-      ifsc_code: bankDetails?.ifsc_code || unapproveBankDetails?.ifsc_code || '',
-      micr_no: bankDetails?.micr_no || unapproveBankDetails?.micr_no || '',
-    }));
-  }, [bankDetails, userData, employee_id]);
+  //   if (!bankDetails || !userData || !employee_id) return;
+  //   console.log(bankDetails.branch_name, "bankDetails");
+  //   setForm(prev => ({
+  //     ...prev,
+  //     employee_id,
+  //     emp_id: userData.emp_id || '',
+  //     bank_name: bankDetails?.bank_name || unapproveBankDetails?.bank_name || '',
+  //     branch_name: bankDetails?.branch_name || unapproveBankDetails?.branch_name || '',
+  //     branch_address: bankDetails?.branch_address || unapproveBankDetails?.branch_address || '',
+  //     branch_pin: bankDetails?.branch_pin || unapproveBankDetails?.branch_pin || '',
+  //     account_no: bankDetails?.account_no || unapproveBankDetails?.account_no || '',
+  //     account_type: bankDetails?.account_type || unapproveBankDetails?.account_type || '',
+  //     ifsc_code: bankDetails?.ifsc_code || unapproveBankDetails?.ifsc_code || '',
+  //     micr_no: bankDetails?.micr_no || unapproveBankDetails?.micr_no || '',
+  //   }));
+  // }, [bankDetails, userData, employee_id]);
 
 
 
