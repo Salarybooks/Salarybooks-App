@@ -665,11 +665,11 @@ const Account = ({ navigation }) => {
                       style={styles.card}
                     > */}
         <View style={styles.card}>
+          <TouchableOpacity onPress={handleLogout}>
           <View style={styles.support}>
-            <TouchableOpacity onPress={handleLogout}>
               <Text style={[GlobalFont.CustomFont, styles.value, { color: "#fff" }]}>LOGOUT</Text>
-            </TouchableOpacity>
           </View>
+          </TouchableOpacity>
           {/* </View> */}
           {/* </LinearGradient> */}
         </View>

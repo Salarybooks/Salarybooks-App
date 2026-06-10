@@ -98,6 +98,7 @@ const SignUpScreen = () => {
       const url = `${API_BASE_URL}employee_signin`;
       // const url = 'http://10.0.2.2:8080/employee_signin';
       const data = { corporate_id: corporateId, userid: userId, password };
+      // const data = { "corporate_id": "VBL", "userid": "TEST062",  "password":"souravHalder@123"};
       console.log(url,"url");
       
       const response = await axios.post(url, data, {
@@ -159,9 +160,15 @@ const SignUpScreen = () => {
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#ffffffff' }}>Loading...</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', opacity: 1 }}>
+          <Image source={require('../assets/Salarybooks_Fav_logo.png')} style={{
+            width: width * 0.5,
+            height: height * 0.4, resizeMode: 'contain'
+          }} />
         </View>
+        {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#ffffffff' }}>Page Loading ...</Text>
+        </View> */}
       </LinearGradient>
     );
   }
