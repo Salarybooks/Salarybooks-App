@@ -1,4 +1,4 @@
-package com.pay
+package app.salarybooks
 
 import android.app.Application
 import com.facebook.react.PackageList

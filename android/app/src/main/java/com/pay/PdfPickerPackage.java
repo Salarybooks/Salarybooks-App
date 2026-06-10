@@ -1,4 +1,4 @@
-package com.pay;
+package app.salarybooks;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
