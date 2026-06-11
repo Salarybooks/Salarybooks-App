@@ -8,7 +8,8 @@ import {
   ScrollView,
   Alert,
   Switch,
-  Dimensions
+  Dimensions,
+  Modal
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,8 +24,9 @@ import axios from "axios";
 import { API_BASE_URL } from "@env";
 
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const scale = width / 375;
+const isSmallPhone = height < 700;
 import StatusPopup from "../StatusPopup/StatusPopup";
 
 const Account = ({ navigation }) => {
@@ -42,6 +44,7 @@ const Account = ({ navigation }) => {
   const [updatedDetails, setUpdatedDetails] = useState(null);
   const [token, setToken] = useState(false);
   const [masterdata, setMasterdata] = useState(null);
+  const [privacy, setPrivacy] = useState(false);
   const themeColors = {
     background: isDarkMode ? '#000' : '#fff',
     card: isDarkMode ? '#1c1c1e' : '#f4f4f4',
@@ -93,7 +96,7 @@ const Account = ({ navigation }) => {
       fetchUpdatedDetails(token);
       fetchMasterDetails(token);
     }
-  }, [token,employee_id])
+  }, [token, employee_id])
   // const handleLogout = () => {
   //   Alert.alert('Logout', 'Do you want to logout?', [
   //     {
@@ -266,8 +269,8 @@ const Account = ({ navigation }) => {
         console.log(response.data.employee_det, "response.data.employee_det");
 
         setAccountData(response.data.employee_det);
-        console.log(accountData,"accountData");
-        
+        console.log(accountData, "accountData");
+
       }
 
     } catch (error) {
@@ -275,8 +278,8 @@ const Account = ({ navigation }) => {
     }
   };
   useEffect(() => {
-  console.log("UPDATED accountData:", accountData);
-}, [accountData]);
+    console.log("UPDATED accountData:", accountData);
+  }, [accountData]);
   const fetchMasterDetails = async (token) => {
 
     console.log(token, "API_BASE_URL21");
@@ -433,7 +436,7 @@ const Account = ({ navigation }) => {
 
   const RoutPage = (field) => {
 
-    if (!accountData ) {
+    if (!accountData) {
       Alert.alert("Please wait", "Data is still loading...");
       return;
     }
@@ -442,8 +445,8 @@ const Account = ({ navigation }) => {
         accountData,
         updatedDetails
       };
-      
-      
+
+
       Navigation.navigate('PersonalDetails', commonParams)
     }
     if (field == "Address") {
@@ -453,32 +456,32 @@ const Account = ({ navigation }) => {
         emp_unapprove_address: updatedDetails?.emp_address,
         emp_unapprove_curr_address: updatedDetails?.emp_curr_address
       };
-      Navigation.navigate('AddressDetails',commonParams)
+      Navigation.navigate('AddressDetails', commonParams)
     }
     if (field == "BankDetails") {
-       const commonParams = {
+      const commonParams = {
         employee_bank_details: accountData?.emp_det?.bank_details,
         emp_unapprove_bank_details: updatedDetails?.bank_details
-      };      
+      };
       // console.log(updatedDetails?.bank_details,"commonParams");
-      Navigation.navigate('BankDetailsForm',commonParams)
+      Navigation.navigate('BankDetailsForm', commonParams)
     }
     if (field == "HRDetails") {
       const commonParams = {
-      masterdata: masterdata,
-      employee_hr_details: accountData?.emp_det.employment_hr_details
+        masterdata: masterdata,
+        employee_hr_details: accountData?.emp_det.employment_hr_details
       };
       // console.log(commonParams,"commonParams");
-      
-      Navigation.navigate('HRDetails',commonParams);
+
+      Navigation.navigate('HRDetails', commonParams);
     }
     if (field == "PFESICDetails") {
       const commonParams = {
         employee_PF_ESIC_details: accountData?.emp_det?.pf_esic_details,
         emp_unapprove_pfesic_details: updatedDetails?.pfesic_details
       };
-      console.log(commonParams,"commonParams");
-      
+      console.log(commonParams, "commonParams");
+
       Navigation.navigate('PFESICDetails', commonParams)
     }
   }
@@ -665,14 +668,65 @@ const Account = ({ navigation }) => {
                       style={styles.card}
                     > */}
         <View style={styles.card}>
-          <TouchableOpacity onPress={handleLogout}>
           <View style={styles.support}>
+            <TouchableOpacity onPress={handleLogout}>
               <Text style={[GlobalFont.CustomFont, styles.value, { color: "#fff" }]}>LOGOUT</Text>
+            </TouchableOpacity>
           </View>
-          </TouchableOpacity>
           {/* </View> */}
           {/* </LinearGradient> */}
         </View>
+        <TouchableOpacity
+          style={styles.privacyLinkWrapper}
+          onPress={() => setPrivacy(true)}
+          activeOpacity={0.7}
+        >
+          <Image
+                source={require('../../assets/icons8-lock-50.png')}
+                style={styles.lockIcon}
+                resizeMode="contain"
+              />
+          <Text style={[GlobalFont.CustomFont, styles.privacyLink]}>
+            Privacy Policy
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.copyrightWrapper}>
+          <Text style={styles.Copyright}>Copyright © 2025 Salarybooks.com</Text>
+          <Text style={styles.Copyright}>Version 1.0.0</Text>
+        </View>
+        <Modal
+          visible={privacy}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setPrivacy(false)}
+        >
+          <View style={styles.privacyOverlay}>
+            <View style={styles.privacyCard}>
+              <TouchableOpacity
+                style={styles.privacyDismissBtn}
+                onPress={() => setPrivacy(false)}
+              >
+                <Text style={{ color: '#fff', fontSize: 18 }}>✕</Text>
+              </TouchableOpacity>
+              <Image
+                source={require('../../assets/logo.png')}
+                style={styles.privacyLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.privacyHeading}>Privacy Policy</Text>
+              <View style={styles.privacyScrollWrapper}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.privacyScrollContent}
+                >
+                  <Text style={styles.privacyBodyText}>
+                    This Privacy Policy explains how information about you is collected, used and disclosed by Vauras Biztech LLP, a company incorporated under the Companies Act 2013, doing business as Salarybooks, and its subsidiaries and affiliates (collectively, "Salarybooks," "we," "us" or "our") when you access or use our website (the "Site") and our online payroll, benefits, human resources and other related services (the "Service"), which are provided through the Site. By using the Site and/or the Service, you consent to the collection, use and disclosure of your information as outlined in this Privacy Policy. Information We Collect and How We Collect It In connection with your access to our Site and/or use of our Service, we collect and store certain information about you. Some of this information can be used on its own or in combination with other information to identify you individually. We call that information "personal information." We collect personal information and other information as described below: Information You Provide: We collect your personal information when you or your employer registers to use the Service, provides information when using the Site or Service, updates your account information, adds additional services, submits information to verify your identity, contacts us with questions or feedback, or otherwise communicates with us. This personal information may include your name, address, email address, phone number, bank account information and taxpayer identification number.
+                  </Text>
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        </Modal>
         {/* </View> */}
       </ScrollView>
       <StatusPopup
@@ -983,4 +1037,89 @@ const styles = StyleSheet.create({
     paddingVertical: 12 * scale,
     borderRadius: 12,
   },
+  privacyLinkWrapper: {
+    alignItems: "center",
+    display: "flex",
+     flexDirection: "row",
+     justifyContent: "center",
+     marginTop: 10 * scale
+  },
+  privacyLink: {
+    color: "#fff",
+    fontSize: 14 * scale,
+    textDecorationLine: "underline",
+  },
+  privacyOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  privacyCard: {
+    backgroundColor: "#0A3158",
+    width: Math.min(width - 32, 460),
+    maxHeight: height * 0.86,
+    borderRadius: 16,
+    paddingHorizontal: isSmallPhone ? 12 : 16,
+    paddingTop: isSmallPhone ? 16 : 20,
+    paddingBottom: isSmallPhone ? 14 : 20,
+  },
+  privacyDismissBtn: {
+    position: "absolute",
+    right: 14,
+    top: 14,
+    zIndex: 1,
+  },
+  privacyDismissText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  privacyLogo: {
+    width: Math.min(width * 0.42, 170),
+    height: isSmallPhone ? 54 : 72,
+    alignSelf: "center",
+    marginBottom: isSmallPhone ? 8 : 12,
+  },
+  privacyHeading: {
+    color: "#fff",
+    fontSize: isSmallPhone ? 18 : 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: isSmallPhone ? 10 : 16,
+    paddingHorizontal: 28,
+  },
+  privacyScrollWrapper: {
+    maxHeight: height * (isSmallPhone ? 0.58 : 0.62),
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+    borderRadius: 12,
+    paddingHorizontal: isSmallPhone ? 10 : 12,
+    paddingVertical: isSmallPhone ? 8 : 12,
+  },
+  privacyScrollContent: {
+    paddingBottom: 8,
+  },
+  privacyBodyText: {
+    color: "#fff",
+    fontSize: isSmallPhone ? 12 : 13,
+    lineHeight: isSmallPhone ? 19 : 21,
+  },
+  lockIcon: {
+    width: 16,
+    height: 16,
+    marginRight: 6,
+    tintColor:"#fff"
+  },
+  Copyright: {
+    color: "#fff",
+    fontSize: 10 * scale,
+  },
+  copyrightWrapper: {
+    alignItems: "center",
+    marginTop: 15 * scale,
+    marginBottom: 25 * scale 
+  }
 });
