@@ -36,10 +36,8 @@ import PFESICDetails from './src/screens/Account/PF_ESIC_Details'
 import { navigationRef } from "./NavigationRef";
 import "./src/theme/GlobalFont"
 import messaging from '@react-native-firebase/messaging';
-import axios from 'axios';
-import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 
 Ionicons.loadFont();
 const Stack = createNativeStackNavigator();
@@ -47,51 +45,67 @@ const Stack = createNativeStackNavigator();
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
-  const syncTokenWithBackend = async (fcmToken) => {
+  const fcmgetToken = async () => {
     try {
-      const employeeId = await AsyncStorage.getItem('employee_id');
-      if (employeeId && fcmToken && API_BASE_URL && API_BASE_URL !== 'undefined') {
-        await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
-          employeeId,
-          fcmToken,
-        });
-        console.log('App: Token synced with backend');
+      const fcmToken = await messaging().getToken();
+      if (fcmToken) {
+        console.log('FCM Token:', fcmToken);
+
+        // Get employee_id from AsyncStorage
+        const employeeId = await AsyncStorage.getItem('employee_id');
+        if (employeeId) {
+          // Send FCM token and employee_id to your backend
+          await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
+            employeeId: employeeId,
+            fcmToken: fcmToken,
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          console.log('FCM Token registered with backend successfully.');
+        }
       }
     } catch (error) {
-      console.error('App: Token sync failed', error);
+      console.log('Error fetching FCM token:', error);
     }
-  };
-
-  const fcmgetToken = async () => {
-    const fcmToken = await messaging().getToken();
-    if (fcmToken) syncTokenWithBackend(fcmToken);
-  };
+  }
 
   const onDisplayNotification = async (remoteMessage) => {
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
     await notifee.displayNotification({
       title: remoteMessage.notification?.title || 'Notification Received',
       body: remoteMessage.notification?.body || '',
       android: {
-        channelId: 'default',
-        smallIcon: 'ic_launcher',
-        pressAction: { id: 'default' },
-        importance: AndroidImportance.HIGH,
+        channelId,
+        smallIcon: 'ic_launcher', // Use a default system icon to avoid crashes
+        pressAction: {
+          id: 'default',
+        },
       },
     });
-  };
+  }
 
   const requestPermissionAndroid = async () => {
     if (Platform.OS === 'android') {
-      // Create channel once
-      await notifee.createChannel({
-        id: 'default',
-        name: 'Default Channel',
-        importance: AndroidImportance.HIGH,
-      });
-
+      // Request for API 33+
       if (Platform.Version >= 33) {
-        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+          console.log('Notification permission:', granted);
+        } catch (err) {
+          console.warn('Permission request error:', err);
+        }
       }
+      // Always try to get token regardless of version
       fcmgetToken();
     }
   };
@@ -99,28 +113,12 @@ function App() {
   useEffect(() => {
     requestPermissionAndroid();
 
-    // Handle foreground messages
-    const unsubscribeOnMessage = messaging().onMessage(onDisplayNotification);
-
-    // Handle token refresh
-    const unsubscribeTokenRefresh = messaging().onTokenRefresh(syncTokenWithBackend);
-
-    // Handle notification click when app is in background
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('App: Notification caused app to open from background', remoteMessage);
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('FCM Message received in foreground:', remoteMessage);
+      onDisplayNotification(remoteMessage);
     });
 
-    // Check if app was opened from a killed state via notification
-    messaging().getInitialNotification().then(remoteMessage => {
-      if (remoteMessage) {
-        console.log('App: Notification caused app to open from killed state', remoteMessage);
-      }
-    });
-
-    return () => {
-      unsubscribeOnMessage();
-      unsubscribeTokenRefresh();
-    };
+    return unsubscribe;
   }, []);
 
 

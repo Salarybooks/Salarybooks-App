@@ -1,4 +1,4 @@
-package com.pay
+package com.salarybooks.app
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,6 +10,7 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
+import com.salarybooks.app.BuildConfig // Explicitly import the generated BuildConfig
 
 class MainApplication : Application(), ReactApplication {
 
@@ -18,7 +19,7 @@ class MainApplication : Application(), ReactApplication {
 
       override fun getPackages(): List<ReactPackage> =
         PackageList(this).packages.apply {
-          add(PdfPickerPackage())
+          add(PdfPickerPackage()) 
         }
 
       override fun getJSMainModuleName(): String = "index"
