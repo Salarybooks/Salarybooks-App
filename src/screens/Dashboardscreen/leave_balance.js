@@ -234,7 +234,7 @@ const Leave_Balance = () => {
         total: item.total_balance,
 
         topLabelComponent: () => (
-            <Text style={{ color: 'white', fontSize: 14 }}>
+            <Text style={{ color: 'white', fontSize: 8 }}>
                 {item.total_balance}
             </Text>
         ),
@@ -246,7 +246,7 @@ const Leave_Balance = () => {
         // )
         barInnerComponent: () => (
             <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-                <Text style={{ color: 'black', fontSize: 14 }}>
+                <Text style={{ color: 'black', fontSize: 7.5, fontWeight: 'bold', }}>
                     {item.available}
                 </Text>
             </View>
@@ -276,9 +276,9 @@ const Leave_Balance = () => {
                     height={120}
                     width={chartWidth}
                     barWidth={20}
-                    spacing={20}
+                    spacing={19}
                     hideRules={true}
-                    initialSpacing={4}   
+                    initialSpacing={3}   
                     endSpacing={0} 
 
                     // maxValue={Math.max(...stackData.map(i => i.total)) + 5}

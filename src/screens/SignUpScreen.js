@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
   ScrollView,
+  Modal,
   Alert
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -29,7 +30,9 @@ const SignUpScreen = () => {
   const [userData, setUserData] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
-  
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   //   const handleSignIn = async () => {
 
   // try{  
@@ -76,7 +79,7 @@ const SignUpScreen = () => {
         console.log('Auto login check failed', error);
       }
       finally {
-        setCheckingAuth(false); 
+        setCheckingAuth(false);
       }
     };
 
@@ -98,8 +101,9 @@ const SignUpScreen = () => {
       const url = `${API_BASE_URL}employee_signin`;
       // const url = 'http://10.0.2.2:8080/employee_signin';
       const data = { corporate_id: corporateId, userid: userId, password };
-      console.log(url,"url");
-      
+      // const data = { "corporate_id": "VBL", "userid": "TEST062",  "password":"souravHalder@123"};
+      console.log(url, "url");
+
       const response = await axios.post(url, data, {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -125,16 +129,16 @@ const SignUpScreen = () => {
         // Alert.alert(response.data.message || 'Login failed');
       }
     } catch (error) {
-      showPopup("error",  error.message, "'Something went wrong. Please try again.'");
+      showPopup("error", error.message, "'Something went wrong. Please try again.'");
       // console.error('Login Failed:', error.response?.data || error.message);
       // Alert.alert('Something went wrong. Please try again.');
     }
   };
 
-  const handleForgotPassword = async () =>{
+  const handleForgotPassword = async () => {
     // console.log("Forgotpasseword");
-    
-    showPopup("error",  "Forgot Password", "Please contact your HR for credentials");
+
+    showPopup("error", "Forgot Password", "Please contact your HR for credentials");
   }
   // const handleRememberMe = async () => {
   //   setRememberMe(!rememberMe);
@@ -159,9 +163,15 @@ const SignUpScreen = () => {
         end={{ x: 1, y: 1 }}
         style={{ flex: 1 }}
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#ffffffff' }}>Loading...</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', opacity: 1 }}>
+          <Image source={require('../assets/Salarybooks_Fav_logo.png')} style={{
+            width: width * 0.5,
+            height: height * 0.4, resizeMode: 'contain'
+          }} />
         </View>
+        {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#ffffffff' }}>Page Loading ...</Text>
+        </View> */}
       </LinearGradient>
     );
   }
@@ -217,7 +227,6 @@ const SignUpScreen = () => {
               />
               <Text style={styles.checkboxLabel}>Remember Me</Text>
             </View>
-
             <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
               <Text style={styles.signInText}>Sign In ➜</Text>
             </TouchableOpacity>
@@ -227,6 +236,84 @@ const SignUpScreen = () => {
             <Text style={styles.forgotText}>Forget Password?</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.termsconditionsprivacyContainer}>
+          <Text style={styles.termsconditionsprivacyContainerText}>
+            By logging in and using salarybooks, you agree to and accept our{' '}<Text style={styles.termsLink} onPress={() => setShowTerms(true)}>Privacy Policy</Text>{' '}, and  {' '}
+            <Text style={styles.termsLink} onPress={() => setTermsAccepted(true)}>
+              terms and conditions
+            </Text>
+            .
+          </Text>
+        </View>
+
+        <Modal
+          visible={termsAccepted}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setTermsAccepted(false)}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.card}>
+              <TouchableOpacity
+                style={styles.dismissBtn}
+                onPress={() => setTermsAccepted(false)}
+              >
+                <Text style={styles.dismissText}>x</Text>
+              </TouchableOpacity>
+              <Image
+                source={require('../assets/logo.png')}
+                style={styles.modalOverlayLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.heading}>Terms and conditions</Text>
+              <View style={styles.scrollWrapper}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.termsScrollContent}
+                >
+                  <Text style={styles.bodyText}>
+                    This document is an electronic record in terms of Information Technology Act, 2000 and all other applicable laws for the time being in force. This electronic record is generated by a computer system and does not require any physical or digital signatures. This document is published in accordance with the provisions of Rule 3 (1) of the Information Technology (Intermediaries guidelines) Rules, 2011 that require publishing the rules and regulations, privacy policy and Terms of Use for access or usage of the SALARYBOOKS Platform. This Terms of Service Agreement is made and entered into by and between you, as a User, and Vauras Biztech LLP doing business as SALARYBOOKS, and its subsidiaries and affiliates. This Agreement contains the terms and conditions that govern the use of SALARYBOOKS's all-in-one HR platform. By clicking the applicable button to indicate acceptance of this Agreement, or by accessing or using the Platform, User agrees to be bound by the Agreement.
+                  </Text>
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          visible={showTerms}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowTerms(false)}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.card}>
+              <TouchableOpacity
+                style={styles.dismissBtn}
+                onPress={() => setShowTerms(false)}
+              >
+                <Text style={styles.dismissText}>x</Text>
+              </TouchableOpacity>
+              <Image
+                source={require('../assets/logo.png')}
+                style={styles.modalOverlayLogo}
+                resizeMode="contain"
+              />
+              <Text style={styles.heading}>Privacy Policy</Text>
+              <View style={styles.scrollWrapper}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.termsScrollContent}
+                >
+                  <Text style={styles.bodyText}>
+                    This document is an electronic record in terms of Information Technology Act, 2000 and all other applicable laws for the time being in force. This electronic record is generated by a computer system and does not require any physical or digital signatures. This document is published in accordance with the provisions of Rule 3 (1) of the Information Technology (Intermediaries guidelines) Rules, 2011 that require publishing the rules and regulations, privacy policy and Terms of Use for access or usage of the SALARYBOOKS Platform. This Terms of Service Agreement (this "Agreement") is made and entered into by and between you, as a User (as defined below), and Vauras Biztech LLP a corporation doing business as SALARYBOOKS, and its subsidiaries and affiliates (collectively, "Salarybooks," "we," "us" or "our"). This Agreement contains the terms and conditions that govern the use of SALARYBOOKS's all-in-one HR platform (the "Platform"). Vauras Biztech LLP directly, and through its website and the associated domains thereof (the "Site"), offers customers the products and services listed (as such list may be updated, modified, or otherwise changed from time to time, collectively, the "Services"). This Agreement is applicable to all persons who use or access the Platform and/or the Services, in their company's capacity or in an individual capacity, including authorized users representing the company, its employees, or other persons using or accessing the Services (collectively, "Users" and each, a "User"). If User is agreeing to these terms on behalf of a business or an individual other than User, User represents and warrants that User has authority to bind that business or other individual to this Agreement, and User's agreement to these terms will be treated as the agreement of such business or individual. In that event, "User" also refers to that business or individual. By clicking the applicable button to indicate User's acceptance of this Agreement, or by accessing or using the Platform, User agrees, effective as of the date of such action, to be bound by the Agreement.
+                  </Text>
+                </ScrollView>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+
         <StatusPopup
           visible={popupConfig.visible}
           type={popupConfig.type}
@@ -292,6 +379,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     color: '#fff',
     fontSize: 14,
+    flexShrink: 1,
+  },
+  termsLink: {
+    color: '#7D99FF',
+    fontWeight: 'bold',
+  },
+  requiredStar: {
+    color: 'red',
   },
   signInButton: {
     backgroundColor: '#00508B',
@@ -304,6 +399,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+    fontFamily: 'Outfit-Bold',
+  },
+  disabledButton: {
+    backgroundColor: '#6d7f8f',
+    opacity: 0.7,
+  },
+  disabledButtonText: {
+    color: '#d8e1e8',
   },
   forgotText: {
     marginTop: 20,
@@ -311,7 +414,125 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     textDecorationLine: 'underline',
+    fontFamily: 'Outfit-Bold',
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  card: {
+    width: '100%',
+    maxHeight: height * 0.90,
+    backgroundColor: '#0A3158',
+    borderRadius: 14,
+    padding: 18,
+  },
+  dismissBtn: {
+    position: 'absolute',
+    right: 14,
+    top: 14,
+    zIndex: 1,
+  },
+  dismissText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    lineHeight: 20,
+    fontFamily: 'Outfit-Bold',
+  },
+  modalOverlayLogo: {
+    width: Math.min(width * 0.42, 170),
+    height: 70,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  heading: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 14,
+    paddingHorizontal: 28,
+  },
+  scrollWrapper: {
+    maxHeight: height * 0.58,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  termsScrollContent: {
+    paddingBottom: 8,
+  },
+  bodyText: {
+    color: '#fff',
+    fontSize: 13,
+    lineHeight: 21,
+    fontFamily: 'Outfit-Bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalBox: {
+    width: '100%',
+    backgroundColor: '#0A3158',
+    borderRadius: 14,
+    padding: 20,
+    alignItems: 'center',
+  },
+  termLogo: {
+    width: Math.min(width * 0.42, 160),
+    height: 62,
+    marginBottom: 12,
+  },
+  termsBox: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  modalText: {
+    color: 'white',
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontFamily: 'Outfit-Bold',
+  },
+  submitBtn: {
+    backgroundColor: '#00508B',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+  },
+  submitText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontFamily: 'Outfit-Bold',
+  },
+  termsconditionsprivacyContainer: {
+    marginTop: 30,
+    marginBottom: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  termsconditionsprivacyContainerText:{
+    color: '#fff',
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
+    fontFamily: 'Outfit-Bold',
+  }
 });
 
 export default SignUpScreen;

@@ -1,4 +1,4 @@
-import React, { useRef , useState} from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,13 +21,14 @@ const BottomNavigation = ({ rights }) => {
   const insets = useSafeAreaInsets();
   const { isDarkMode } = useTheme();
   const translateY = useRef(new Animated.Value(0)).current;
-  const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
-  
+  const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
 
-  const canApplyAttendance = rights?.apply?.includes("Attendance");
-  const canApplyleave = rights?.apply?.includes("leave");
-  const canApplypayslip = rights?.view?.includes("payslip");
-  const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+
+  const hasRights = rights && Object.keys(rights).length > 0;
+  const canApplyAttendance = hasRights ? rights?.apply?.includes("Attendance") : true;
+  const canApplyleave = hasRights ? rights?.apply?.includes("leave") : true;
+  const canApplypayslip = hasRights ? rights?.view?.includes("payslip") : true;
+  const canApplyreimburdement = hasRights ? rights?.apply?.includes("reimbursement") : true;
 
   const handleHomePress = () => {
     navigation.navigate('Dashboard');
@@ -58,11 +59,11 @@ const BottomNavigation = ({ rights }) => {
   ).current;
 
   const navItems = [
-    { label: 'Expenses', icon: require('../assets/expenses.png'), screen: 'Expense',title:"Expense Management", permission:canApplyreimburdement},
-    { label: 'Leaves', icon: require('../assets/leaves.png'), screen: 'Leave_Management',title:"Leave Management", permission:canApplyleave },
-    { label: 'Payslips', icon: require('../assets/payslips.png'), screen: 'Payslips',title:"Payslips" ,permission:canApplypayslip},
-    { label: 'Check In', icon: require('../assets/checkin.png'), screen: 'Blank',title:"Attendance Management",permission:canApplyAttendance },
-    { label: 'Account', icon: require('../assets/settings.png'), screen: 'Account',title:"My Account",permission:true },
+    { label: 'Expenses', icon: require('../assets/expenses.png'), screen: 'Expense', title: "Expense Management", permission: canApplyreimburdement },
+    { label: 'Leaves', icon: require('../assets/leaves.png'), screen: 'Leave_Management', title: "Leave Management", permission: canApplyleave },
+    { label: 'Payslips', icon: require('../assets/payslips.png'), screen: 'Payslips', title: "Payslips", permission: canApplypayslip },
+    { label: 'Check In', icon: require('../assets/checkin.png'), screen: 'Blank', title: "Attendance Management", permission: canApplyAttendance },
+    { label: 'Account', icon: require('../assets/settings.png'), screen: 'Account', title: "My Account", permission: true },
   ];
 
   const showPopup = (type, title, message) => {
@@ -75,7 +76,7 @@ const BottomNavigation = ({ rights }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom || 10 }]}>
+    <View style={[styles.container]}>
       {/* Bottom Nav Items */}
       <View style={[styles.bottomNav, { backgroundColor: isDarkMode ? '#1c1c1c' : '#092338ff' }]}>
         {navItems.map((item, index) => (
@@ -98,7 +99,7 @@ const BottomNavigation = ({ rights }) => {
                 { tintColor: isDarkMode ? '#ececec' : '#ffffffff' }
               ]}
             />
-            <Text style={[GlobalFont.CustomFont,styles.navLabel, { color: isDarkMode ? '#ececec' : '#ffffffff' }]}>
+            <Text style={[GlobalFont.CustomFont, styles.navLabel, { color: isDarkMode ? '#ececec' : '#ffffffff' }]}>
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -142,6 +143,64 @@ const BottomNavigation = ({ rights }) => {
 export default BottomNavigation;
 
 const styles = StyleSheet.create({
+  //   container: {
+  //   position: 'absolute',
+  //   bottom: 0,
+  //   left: 0,
+  //   right: 0,
+  //   alignItems: 'center',
+  // },
+  //   bottomNav: {
+  //     flexDirection: 'row',
+  //     justifyContent: 'space-around',
+  //     alignItems: 'center',
+  //     width: '100%',
+  //     height: 65,
+  //     paddingTop: 10,
+  //     borderTopWidth: 0.7,
+  //     borderColor: '#333',
+  //     zIndex: 2,
+  //     // top:-10
+  //   },
+  //   navItem: {
+  //     marginTop:-8,
+  //     alignItems: 'center',
+  //     width: width / 5,
+  //   },
+  //   navIconImage: {
+  //     width: 21,
+  //     height: 21,
+  //     marginBottom: 4,
+  //     resizeMode: 'contain',
+  //   },
+  //   navLabel: {
+  //     fontSize: 11,
+  //   },
+  //   homeButtonContainer: {
+  //     position: 'absolute',
+  //     top: -25,
+  //     zIndex: 1,
+  //     alignItems: 'center',
+  //     justifyContent: 'center',
+  //   },
+  //   homeButton: {
+  //     width: 60,
+  //     height: 60,
+  //     borderRadius: 30,
+  //     alignItems: 'center',
+  //     justifyContent: 'center',
+  //     elevation: 5,
+  //     shadowColor: '#000',
+  //     shadowOpacity: 0.2,
+  //     shadowRadius: 4,
+  //     shadowOffset: { width: 0, height: 2 },
+  //   },
+  //   homeIcon: {
+  //     width: 26,
+  //     height: 26,
+  //     resizeMode: 'contain',
+  //     marginTop: -30
+  //   },
   container: {
     position: 'absolute',
     bottom: 0,
@@ -162,7 +221,7 @@ const styles = StyleSheet.create({
     // top:-10
   },
   navItem: {
-    marginTop:-8,
+    marginTop: -8,
     alignItems: 'center',
     width: width / 5,
   },

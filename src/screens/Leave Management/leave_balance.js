@@ -121,7 +121,7 @@ const Leave_Balance = () => {
         total: item.total_balance,
 
         topLabelComponent: () => (
-            <Text style={{ color: 'white', fontSize: 14 }}>
+            <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
                 {item.total_balance}
             </Text>
         ),
@@ -132,8 +132,8 @@ const Leave_Balance = () => {
         //     </Text>
         // )
         barInnerComponent: () => (
-            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-                <Text style={{ color: 'black', fontSize: 14 }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center',fontWeight: 'bold' }}>
+                <Text style={{ color: 'black', fontSize: 10 }}>
                     {item.available}
                 </Text>
             </View>
