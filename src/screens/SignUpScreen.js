@@ -121,7 +121,7 @@ const SignUpScreen = () => {
         }
         // Alert.alert("token", token );
         console.log('Token saved:', token);
-        console.log('User saved:', user);
+        console.log('User saved:', userId);
 
         navigation.navigate('Dashboard');
       } else {

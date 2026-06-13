@@ -48,17 +48,11 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   const syncTokenWithBackend = async (fcmToken) => {
-    try {
-      const employeeId = await AsyncStorage.getItem('employee_id');
-      if (employeeId && fcmToken && API_BASE_URL && API_BASE_URL !== 'undefined') {
-        await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
-          employeeId,
-          fcmToken,
-        });
-        console.log('App: Token synced with backend');
-      }
-    } catch (error) {
-      console.error('App: Token sync failed', error);
+    const employeeId = await AsyncStorage.getItem('employee_id'); // Assuming employee_id is the userId
+    if (employeeId) {
+      console.log('App: FCM Token:', fcmToken, 'employee_id:', employeeId);
+    } else {
+      console.log('App: FCM Token:', fcmToken, 'employee_id: Not found (user not logged in or data not set yet)');
     }
   };
 
@@ -88,7 +82,7 @@ function App() {
         name: 'Default Channel',
         importance: AndroidImportance.HIGH,
       });
-
+      console.log('App: Notification channel created with ID:', channelId);
       if (Platform.Version >= 33) {
         await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
       }
