@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 10.5,
   },
   checkboxLabel: {
     marginLeft: 8,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   termsLink: {
     color: '#7D99FF',
-    fontSize: 10,
+    fontSize: 11,
   },
   requiredStar: {
     color: 'red',

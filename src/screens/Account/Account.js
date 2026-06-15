@@ -552,11 +552,11 @@ const Account = ({ navigation }) => {
                       style={styles.card}
                     > */}
         <View style={styles.card}>
+          <TouchableOpacity onPress={handleLogout}>
           <View style={styles.support}>
-            <TouchableOpacity onPress={handleLogout}>
               <Text style={[GlobalFont.CustomFont, styles.value, { color: "#fff" }]}>LOGOUT</Text>
-            </TouchableOpacity>
           </View>
+          </TouchableOpacity>
           {/* </View> */}
           {/* </LinearGradient> */}
         </View>
@@ -599,12 +599,12 @@ const Account = ({ navigation }) => {
                   onRequestClose={() => setTermsAccepted(false)}
                 >
                   <View style={styles.overlay}>
-                    <View style={styles.card}>
+                    <View style={styles.term_card}>
                       <TouchableOpacity
                         style={styles.dismissBtn}
                         onPress={() => setTermsAccepted(false)}
                       >
-                        <Text style={styles.dismissText}>x</Text>
+                        <Text style={styles.dismissText}>✖</Text>
                       </TouchableOpacity>
                       <Image
                         source={require('../../assets/logo.png')}
@@ -638,7 +638,7 @@ const Account = ({ navigation }) => {
                 style={styles.privacyDismissBtn}
                 onPress={() => setPrivacy(false)}
               >
-                <Text style={styles.Privacy}>✕</Text>
+                <Text style={styles.Privacy}>✖</Text>
               </TouchableOpacity>
               <Image
                 source={require('../../assets/logo.png')}
@@ -995,7 +995,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   privacyCard: {
-    backgroundColor: "#0A3158",
+    backgroundColor: "#071f36",
     width: Math.min(width - 32, 460),
     maxHeight: height * 0.86,
     borderRadius: 16,
@@ -1066,10 +1066,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
   },
-  card: {
+  term_card: {
     width: '100%',
     maxHeight: height * 0.90,
-    backgroundColor: '#0A3158',
+    backgroundColor: '#071f36',
     borderRadius: 14,
     padding: 18,
   },
