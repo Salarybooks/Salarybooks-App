@@ -61,7 +61,7 @@ const SignUpScreen = () => {
       try {
         const storedRememberMe = await AsyncStorage.getItem('rememberMe');
         const rememberstorage = JSON.parse(storedRememberMe);
-        console.log("rememberMe fetched:", rememberstorage);
+        // console.log("rememberMe fetched:", rememberstorage);
         if (rememberstorage) {
           const token = await AsyncStorage.getItem('authToken');
           const user = await AsyncStorage.getItem('userData');
@@ -76,7 +76,9 @@ const SignUpScreen = () => {
           await AsyncStorage.clear();
         }
       } catch (error) {
-        console.log('Auto login check failed', error);
+        // console.log('Auto login check failed', error);
+        showPopup("error", "Auto login check failed", error );
+
       }
       finally {
         setCheckingAuth(false);
@@ -102,7 +104,7 @@ const SignUpScreen = () => {
       // const url = 'http://10.0.2.2:8080/employee_signin';
       const data = { corporate_id: corporateId, userid: userId, password };
       // const data = { "corporate_id": "VBL", "userid": "TEST062",  "password":"souravHalder@123"};
-      console.log(url, "url");
+      // console.log(url, "url");
 
       const response = await axios.post(url, data, {
         headers: { 'Content-Type': 'application/json' },
@@ -112,7 +114,7 @@ const SignUpScreen = () => {
         const token = response.data.token;
         const user = response.data.user;
 
-        console.log(token, "token");
+        // console.log(token, "token");
 
         await AsyncStorage.setItem('authToken', token);
         await AsyncStorage.setItem('userData', JSON.stringify(user));
@@ -120,8 +122,8 @@ const SignUpScreen = () => {
           setUserData(user);
         }
         // Alert.alert("token", token );
-        console.log('Token saved:', token);
-        console.log('User saved:', user);
+        // console.log('Token saved:', token);
+        // console.log('User saved:', user);
 
         navigation.navigate('Dashboard');
       } else {
@@ -150,7 +152,7 @@ const SignUpScreen = () => {
   const handleRememberMe = async (newValue) => {
     setRememberMe(newValue);
     await AsyncStorage.setItem('rememberMe', JSON.stringify(newValue));
-    console.log("rememberMe saved:", newValue);
+    // console.log("rememberMe saved:", newValue);
   };
 
 
@@ -336,21 +338,22 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    // paddingVertical: 40,
   },
   container: {
     alignItems: 'center',
     width: '85%',
+    marginTop:50
   },
   logo: {
     width: width * 0.6,
     height: height * 0.1,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   welcomeText: {
     color: '#fff',
     fontSize: 14,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   inputCard: {
     width: '100%',
@@ -392,7 +395,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00508B',
     borderRadius: 10,
     paddingVertical: 12,
-    marginTop: 20,
+    marginTop: 5,
     alignItems: 'center',
   },
   signInText: {
@@ -409,7 +412,7 @@ const styles = StyleSheet.create({
     color: '#d8e1e8',
   },
   forgotText: {
-    marginTop: 20,
+    marginTop: 10,
     fontWeight: 'bold',
     fontSize: 14,
     color: '#fff',
@@ -426,9 +429,10 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxHeight: height * 0.90,
-    backgroundColor: '#0A3158',
+    backgroundColor: '#071f36',
     borderRadius: 14,
     padding: 18,
+    fontFamily: 'Outfit-Bold',
   },
   dismissBtn: {
     position: 'absolute',
@@ -456,6 +460,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 14,
     paddingHorizontal: 28,
+    fontFamily: 'Outfit-Bold',
   },
   scrollWrapper: {
     maxHeight: height * 0.58,
@@ -520,7 +525,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Outfit-Bold',
   },
   termsconditionsprivacyContainer: {
-    marginTop: 30,
+    marginTop: 20,
     marginBottom: 30,
     paddingHorizontal: 20,
     alignItems: 'center',

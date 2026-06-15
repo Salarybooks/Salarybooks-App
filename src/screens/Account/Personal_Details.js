@@ -169,11 +169,11 @@ const PersonalDetails = ({ route }) => {
     
   }, []);
 
-  useEffect(() => {
-    console.log("EmployeeDet",EmployeeDet);
-    console.log("fetchDetails",fetchDetails);
+  // useEffect(() => {
+  //   console.log("EmployeeDet",EmployeeDet);
+  //   console.log("fetchDetails",fetchDetails);
     
-  }, [EmployeeDet,fetchDetails])
+  // }, [EmployeeDet,fetchDetails])
 
 
   useEffect(() => {
@@ -412,7 +412,7 @@ const PersonalDetails = ({ route }) => {
 
 
   const onSubmit = async () => {
-    console.log(alreadyUploadedSize, "alreadyUploadedSize")
+    // console.log(alreadyUploadedSize, "alreadyUploadedSize")
     try {
       //   const selectedFilesSizeKB = getSelectedFilesSizeKB();
       //    console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
@@ -1238,7 +1238,7 @@ const openDocument = async (file) => {
       showOpenWithDialog: true,
     });
   } catch (error) {
-    console.log('File open error:', error);
+    // console.log('File open error:', error);
     // Alert.alert('Error', 'Unable to open this file');
     showPopup("error", "Error", "Unable to open this file");
 

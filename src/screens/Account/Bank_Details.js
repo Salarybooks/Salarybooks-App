@@ -63,7 +63,7 @@ const BankDetailsForm = ({route}) => {
       const employee_vault = JSON.parse(await AsyncStorage.getItem("employee_vault"));
       const total_file_size = JSON.parse(await AsyncStorage.getItem("total_file_size"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-      console.log(route,"employee_bank_details");
+      // console.log(route,"employee_bank_details");
       
       if (t) {
         setToken(t);
@@ -271,7 +271,7 @@ const BankDetailsForm = ({route}) => {
           type: file.type,
         });
       }
-      console.log(formData, "formData");
+      // console.log(formData, "formData");
 
       const response = await axios.post(
         `${API_BASE_URL}employee/request-update-employee-bank-details`,

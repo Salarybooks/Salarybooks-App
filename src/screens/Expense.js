@@ -55,7 +55,7 @@ const Expense = () => {
       if(employee_id){
       setEmployee_id(employee_id);
       }
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
     };
     loadToken();
   }, []);
@@ -98,7 +98,8 @@ const Expense = () => {
       setFile(fileObj);
 
     } catch (error) {
-      console.log("File picking cancelled or failed", error);
+      showPopup("error", "File picking cancelled or failed", error);
+      // console.log("File picking cancelled or failed", error);
     }
   };
 
@@ -124,7 +125,7 @@ const Expense = () => {
   }, [token]);
 
   const fetchClaimsData = async () => {
-    console.log("Expense", token)
+    // console.log("Expense", token)
     if (!token) return;
     try {
       // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
@@ -149,8 +150,8 @@ const Expense = () => {
         const docs = response.data.data.docs || [];
         // Alert.alert("apisuccess");
         // transform data to match your UI
-        console.log("docsexpense",docs
-        );
+        // console.log("docsexpense",docs
+        // );
         
         const formattedData = docs.map((item) => ({
           id: item._id,
@@ -185,7 +186,7 @@ const Expense = () => {
         showPopup("error", "Error", "Token not found");
         return;
       }
-      console.log(employee_id,"employee_id");
+      // console.log(employee_id,"employee_id");
       
       const formData = new FormData();
       formData.append("employee_id",employee_id)
@@ -215,7 +216,7 @@ const Expense = () => {
         }
       );
 
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       if (response.data.status === "success") {
         showPopup("success", "Success", response.data.message);

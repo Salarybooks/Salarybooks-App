@@ -68,7 +68,7 @@ const AdvanceManagement = () => {
       setPercentage(percentage);
       setProgress(Progress);
       setRights(JSON.parse(await AsyncStorage.getItem("rights")));
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
     };
     loadToken();
   }, []);
@@ -137,7 +137,7 @@ const AdvanceManagement = () => {
 
     setLoading(true);
     const { advanceAmount, recoveryFrom, installments, frequency, month, year, reason } = form;
-    console.log(advanceAmount, "advanceAmount", installments, "installments", frequency, "frequency", month, "month", year, "year", recoveryFrom, "recoveryFrom");
+    // console.log(advanceAmount, "advanceAmount", installments, "installments", frequency, "frequency", month, "month", year, "year", recoveryFrom, "recoveryFrom");
 
     if (!token) {
       setLoading(false);
@@ -158,7 +158,7 @@ const AdvanceManagement = () => {
 
       const startMonthNum = monthMap[month];
       const emi = Number(advanceAmount) / Number(installments);
-      console.log(startMonthNum, "startMonthNum");
+      // console.log(startMonthNum, "startMonthNum");
 
       let instalment_history = [];
       let currentMonth = startMonthNum;
@@ -214,7 +214,7 @@ const AdvanceManagement = () => {
       });
 
       const data = response.data;
-      console.log("API Response for advance:", data);
+      // console.log("API Response for advance:", data);
 
       if (data.status === "success") {
         showPopup("success", "Success", "Advance request submitted");
@@ -233,7 +233,7 @@ const AdvanceManagement = () => {
         showPopup("error", "Error", data.message || "Something went wrong");
       }
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       showPopup("error", "Error", "Failed to submit advance request");
     }finally {
     setLoading(false); 

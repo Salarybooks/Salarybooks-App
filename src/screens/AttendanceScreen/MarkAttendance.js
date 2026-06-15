@@ -154,7 +154,7 @@ const MarkAttendance = () => {
     return new Promise((resolve) => {
       Geolocation.getCurrentPosition(
         (pos) => {
-          console.log("POSITION:", pos);
+          // console.log("POSITION:", pos);
 
           setLatitude(pos.coords.latitude);
           setLongitude(pos.coords.longitude);
@@ -166,11 +166,11 @@ const MarkAttendance = () => {
           });
         },
         (error) => {
-          console.log("LOCATION ERROR:", error);
+          // console.log("LOCATION ERROR:", error);
           Alert.alert("Error", error.message);
 
           setLoadingLocation(false);
-          resolve(false); // ✅ return failure
+          resolve(false); 
         },
         {
           enableHighAccuracy: true,
@@ -285,7 +285,7 @@ const MarkAttendance = () => {
       }), // HH:mm:ss
     };
 
-    console.log("CHECK IN PAYLOAD:", payload);
+    // console.log("CHECK IN PAYLOAD:", payload);
 
     try {
       const response = await axios.post(
@@ -317,7 +317,7 @@ const MarkAttendance = () => {
         Alert.alert("Error", response.data.message);
       }
     } catch (error) {
-      console.log("API ERROR:", error);
+      // console.log("API ERROR:", error);
       Alert.alert("Error", "Something went wrong");
     }
   };

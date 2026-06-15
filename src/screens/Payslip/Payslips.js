@@ -67,7 +67,7 @@ const PayslipScreen = () => {
       const t = await AsyncStorage.getItem("authToken");
       setToken(t);
       setRights( JSON.parse(await AsyncStorage.getItem("rights")))
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
     };
     loadToken();
   }, []);
@@ -129,7 +129,7 @@ const PayslipScreen = () => {
           },
         }
       );
-      console.log("API Response payshilp:", response.data);
+      // console.log("API Response payshilp:", response.data);
 
       if (response.data.status === "success") {
         setPayslipData(response.data);
@@ -350,7 +350,7 @@ const PayslipScreen = () => {
         { headers: { "x-access-token": token } }
       );
 
-      console.log("API response:", res.data);
+      // console.log("API response:", res.data);
 
       if (!res.data?.file_url) {
         showPopup("error", "Error", "File URL not found in response");
@@ -360,7 +360,7 @@ const PayslipScreen = () => {
       // Step 2: Build the full PDF URL
       // file_url = '/storage/company/payslip/payslip-VBL-TEST035-1-2026.pdf'
       const fileUrl = API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
-      console.log("Full PDF URL:", fileUrl);
+      // console.log("Full PDF URL:", fileUrl);
 
       // Step 3: Download the actual PDF file using RNBlobUtil
       const tempPath = `${RNBlobUtil.fs.dirs.CacheDir}/payslip_preview.pdf`;
@@ -377,11 +377,11 @@ const PayslipScreen = () => {
       });
 
       const savedPath = downloadRes.path();
-      console.log("PDF saved to:", savedPath);
+      // console.log("PDF saved to:", savedPath);
 
       // Step 4: Verify file is valid
       const stat = await RNBlobUtil.fs.stat(savedPath);
-      console.log("PDF file size:", stat.size);
+      // console.log("PDF file size:", stat.size);
 
       if (stat.size < 100) {
         showPopup("error", "Error", "Downloaded file is invalid or empty");
@@ -393,7 +393,7 @@ const PayslipScreen = () => {
       setModalVisible(true);
 
     } catch (err) {
-      console.log("View error:", err);
+      // console.log("View error:", err);
       showPopup("error", "View Failed", err.message || "Unable to open payslip");
     }
   };
@@ -434,7 +434,7 @@ const PayslipScreen = () => {
       { headers: { "x-access-token": token } }
     );
 
-    console.log("Download API response:", res.data);
+    // console.log("Download API response:", res.data);
 
     if (!res.data?.file_url) {
       showPopup("error", "Error", "File URL not found");
@@ -444,7 +444,7 @@ const PayslipScreen = () => {
     // Step 2: Build full URL
     // file_url = '/storage/company/payslip/payslip-VBL-TEST035-1-2026.pdf'
     const fileUrl = API_BASE_URL.replace(/\/$/, "") + res.data.file_url;
-    console.log("Downloading from:", fileUrl);
+    // console.log("Downloading from:", fileUrl);
 
     const downloadPath =
       RNBlobUtil.fs.dirs.DownloadDir + `/payslip_${monthKey}_${year}.pdf`;
@@ -468,7 +468,7 @@ const PayslipScreen = () => {
     showPopup("success", "Success", "Payslip downloaded successfully");
 
   } catch (err) {
-    console.log("Download error:", err);
+    // console.log("Download error:", err);
     showPopup("error", "Download Failed", err.message);
   }
 };

@@ -46,7 +46,7 @@ const Leave_Balance = () => {
             );
 
             if (response.data?.status === "success") {
-                console.log(response.data, "response.data");
+                // console.log(response.data, "response.data");
 
                 setLeaveList(response.data.leave_type || []);
             }

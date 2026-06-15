@@ -87,7 +87,7 @@ export default function LeaveManagementScreen() {
         // console.log(employee_id,"employee_id");
       }
       setToken(t);
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
       
       // fetch_applied_leave_data();
       // if (t) {
@@ -285,7 +285,7 @@ export default function LeaveManagementScreen() {
       formData.append("emp_reason", reason);
       formData.append("available", selectedLeave.available);
       formData.append("leave_approval_status", "pending");
-      console.log(formData,"formData");
+      // console.log(formData,"formData");
       
       const response = await axios.post(
         `${API_BASE_URL}employee/employee-leave-request`,
@@ -305,7 +305,7 @@ export default function LeaveManagementScreen() {
         setModalVisible(false);
         fetch_applied_leave_data();
       } else {
-        console.log("true");
+        // console.log("true");
         
         showPopup("error", "Error", response.data.message);
         // Alert.alert("Error", response.data.message);
@@ -404,9 +404,9 @@ export default function LeaveManagementScreen() {
     );
 
     if (totalBalance === 0) return 0;
-    console.log(Math.round(
-      ((totalBalance - totalAvailable) / totalBalance) * 100
-    ), "total");
+    // console.log(Math.round(
+    //   ((totalBalance - totalAvailable) / totalBalance) * 100
+    // ), "total");
 
     return Math.round(
       ((totalBalance - totalAvailable) / totalBalance) * 100

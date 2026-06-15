@@ -78,7 +78,7 @@ const PF_ESIC_Details = ({ route }) => {
             const emp_unapprove_pfesic_details =  route?.params?.emp_unapprove_pfesic_details;
             const data = route?.params?.employee_PF_ESIC_details;
             // console.log(emp_unapprove_pfesic_details,"emp_unapprove_pfesic_details");
-            console.log(data,"data");
+            // console.log(data,"data");
             
             setemployee_id(await AsyncStorage.getItem("employee_id"));
             SetEmpId(emp_id);
@@ -227,7 +227,7 @@ const PF_ESIC_Details = ({ route }) => {
                     JSON.stringify(pfesicPayload)
                 );
             }
-            console.log(formData,"formDatanew");
+            // console.log(formData,"formDatanew");
             
             const response = await axios.post(
                 `${API_BASE_URL}employee/request-update-pfesic-details`,
