@@ -21,6 +21,7 @@ import StatusPopup from "./StatusPopup/StatusPopup";
 import axios from "axios";
 import { API_BASE_URL } from "@env";
 import { useNavigation } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
 
 
@@ -103,10 +104,37 @@ const Dashboard = () => {
 
         setRights(rightsData);
         AsyncStorage.setItem('rights',JSON.stringify(rightsData))
+
+        // Register FCM Token once we have the employee_id
+        registerFCM(employeeData[0].employee_details.employee_id);
       }
 
     } catch (error) {
       // console.log("Advance list error:", error);
+    }
+  };
+
+  const registerFCM = async (empId) => {
+    try {
+      const fcmToken = await messaging().getToken();
+      const authToken = await AsyncStorage.getItem("authToken");
+      if (fcmToken && empId && authToken) {
+        console.log('================ DASHBOARD FCM TOKEN START ================');
+        console.log(fcmToken);
+        // console.log('================  DASHBOARD FCM TOKEN END  ================');
+        // await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
+        //   employeeId: empId,
+        //   fcmToken: fcmToken,
+        // }, {
+        //   headers: { 
+        //     'Content-Type': 'application/json',
+        //     'x-access-token': authToken,
+        //   },
+        // });
+        // console.log('Dashboard: FCM Token linked to Employee ID:', empId);
+      }
+    } catch (e) {
+      console.error('Dashboard: FCM Registration failed', e);
     }
   };
 

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "602848599370",
-    "project_id": "salarybook-notification",
-    "storage_bucket": "salarybook-notification.firebasestorage.app"
+    "project_number": "687675634993",
+    "project_id": "salarybook-notification-d327e",
+    "storage_bucket": "salarybook-notification-d327e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:602848599370:android:50f89b0d7b4224f0e835b3",
+        "mobilesdk_app_id": "1:687675634993:android:c96c3795d0ec05b211ac10",
         "android_client_info": {
           "package_name": "com.salarybooks.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBD5B4P900djJUys3cLipD4hdxs7FlzCxk"
+          "current_key": "AIzaSyA13VhZ8VhloywaJrl0G75qyLrqIQ_55BY"
         }
       ],
       "services": {

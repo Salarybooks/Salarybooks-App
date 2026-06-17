@@ -36,6 +36,8 @@ import PFESICDetails from './src/screens/Account/PF_ESIC_Details'
 import { navigationRef } from "./NavigationRef";
 import "./src/theme/GlobalFont"
 import messaging from '@react-native-firebase/messaging';
+import axios from 'axios';
+import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee from '@notifee/react-native';
 
@@ -53,7 +55,8 @@ function App() {
 
         // Get employee_id from AsyncStorage
         const employeeId = await AsyncStorage.getItem('employee_id');
-        if (employeeId) {
+        const authToken = await AsyncStorage.getItem('authToken');
+        if (employeeId && authToken) {
           // Send FCM token and employee_id to your backend
           await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
             employeeId: employeeId,
@@ -61,13 +64,30 @@ function App() {
           }, {
             headers: {
               'Content-Type': 'application/json',
+              'x-access-token': authToken,
             },
           });
           console.log('FCM Token registered with backend successfully.');
         }
       }
     } catch (error) {
-      console.log('Error fetching FCM token:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // The server responded with a status code outside of 2xx (e.g., 404, 500)
+          console.error(
+            `FCM Registration failed: Server responded with status ${error.response.status} for URL: ${error.config.url}`
+          );
+          console.error('Server response data:', error.response.data);
+        } else if (error.request) {
+          // The request was made but no response was received (e.g., network error, server down)
+          console.error('FCM Registration failed: No response received from server. Request:', error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error('FCM Registration failed: Error setting up request:', error.message);
+        }
+      } else {
+        console.error('FCM Registration failed: An unexpected error occurred:', error);
+      }
     }
   }
 

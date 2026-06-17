@@ -55,7 +55,7 @@ const Expense = () => {
       if(employee_id){
       setEmployee_id(employee_id);
       }
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
     };
     loadToken();
   }, []);
@@ -124,7 +124,7 @@ const Expense = () => {
   }, [token]);
 
   const fetchClaimsData = async () => {
-    console.log("Expense", token)
+    // console.log("Expense", token)
     if (!token) return;
     try {
       // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";

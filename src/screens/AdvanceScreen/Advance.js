@@ -68,8 +68,9 @@ const AdvanceManagement = () => {
       setPercentage(percentage);
       setProgress(Progress);
       setRights(JSON.parse(await AsyncStorage.getItem("rights")));
-      console.log("TOKEN LOADED:", t);
-    };
+      // console.log("TOKEN LOADED:", t);
+    }
+    ;
     loadToken();
   }, []);
 

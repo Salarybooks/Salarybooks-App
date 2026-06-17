@@ -112,7 +112,7 @@ const SignUpScreen = () => {
         const token = response.data.token;
         const user = response.data.user;
 
-        console.log(token, "token");
+        // console.log(token, "token");
 
         await AsyncStorage.setItem('authToken', token);
         await AsyncStorage.setItem('userData', JSON.stringify(user));
@@ -120,8 +120,8 @@ const SignUpScreen = () => {
           setUserData(user);
         }
         // Alert.alert("token", token );
-        console.log('Token saved:', token);
-        console.log('User saved:', userId);
+        // console.log('Login Auth Token (JWT) saved:', token);
+        // console.log('User saved:', userId);
 
         navigation.navigate('Dashboard');
       } else {

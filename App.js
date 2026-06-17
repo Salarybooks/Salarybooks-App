@@ -48,12 +48,29 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   const syncTokenWithBackend = async (fcmToken) => {
-    const employeeId = await AsyncStorage.getItem('employee_id'); // Assuming employee_id is the userId
-    if (employeeId) {
-      console.log('App: FCM Token:', fcmToken, 'employee_id:', employeeId);
-    } else {
-      console.log('App: FCM Token:', fcmToken, 'employee_id: Not found (user not logged in or data not set yet)');
-    }
+    console.log('================ FCM REGISTRATION TOKEN START ================');
+    console.log(fcmToken);
+    // console.log('================  FCM REGISTRATION TOKEN END  ================');
+    // const employeeId = await AsyncStorage.getItem('employee_id');
+    // const authToken = await AsyncStorage.getItem('authToken');
+    // if (employeeId && authToken) {
+    //   try {
+    //     await axios.post(`${API_BASE_URL}employee/register-fcm-token`, {
+    //       employeeId: employeeId,
+    //       fcmToken: fcmToken,
+    //     }, {
+    //       headers: { 
+    //         'Content-Type': 'application/json',
+    //         'x-access-token': authToken,
+    //       },
+    //     });
+    //     console.log('App: FCM Token synced with backend successfully.');
+    //   } catch (error) {
+    //     console.error('App: Failed to sync FCM token with backend', error);
+    //   }
+    // } else {
+    //   console.log('App: employee_id or authToken not found, skipping backend sync.');
+    // }
   };
 
   const fcmgetToken = async () => {
@@ -76,15 +93,17 @@ function App() {
 
   const requestPermissionAndroid = async () => {
     if (Platform.OS === 'android') {
-      // Create channel once
+      const channelId = 'default';
       await notifee.createChannel({
-        id: 'default',
+        id: channelId,
         name: 'Default Channel',
         importance: AndroidImportance.HIGH,
       });
-      console.log('App: Notification channel created with ID:', channelId);
+      console.log('App: Notification channel verified:', channelId);
+
       if (Platform.Version >= 33) {
-        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+        const status = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+        console.log('App: Notification permission status:', status);
       }
       fcmgetToken();
     }
