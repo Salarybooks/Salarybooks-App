@@ -589,7 +589,8 @@ const Account = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
         <View style={styles.copyrightWrapper}>
-          <Text style={styles.Copyright}>Copyright © 2025 Salarybooks.com</Text>
+          <Text style={styles.Copyright}>Powered by Vauras Biztech Payroll LLP</Text>
+          <Text style={styles.Copyright}>Copyright © 2026 Salarybooks.com</Text>
           <Text style={styles.Copyright}>Version 1.0.0</Text>
         </View>
         <Modal
@@ -984,7 +985,6 @@ const styles = StyleSheet.create({
   privacyLink: {
     color: "#fff",
     fontSize: 14 * scale,
-    textDecorationLine: "underline",
   },
   privacyOverlay: {
     flex: 1,
@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
     tintColor:"#fff"
   },
-  Copyright: {
+  Copyright: {  
     color: "#fff",
     fontSize: 10 * scale,
   },
