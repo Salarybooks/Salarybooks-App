@@ -121,7 +121,7 @@ const Leave_Balance = () => {
         total: item.total_balance,
 
         topLabelComponent: () => (
-            <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
+            <Text style={{ color: 'white', fontSize: 8}}>
                 {item.total_balance}
             </Text>
         ),
@@ -133,7 +133,7 @@ const Leave_Balance = () => {
         // )
         barInnerComponent: () => (
             <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center',fontWeight: 'bold' }}>
-                <Text style={{ color: 'black', fontSize: 10 }}>
+                <Text style={{ color: 'black', fontSize: 8 }}>
                     {item.available}
                 </Text>
             </View>
@@ -208,13 +208,13 @@ const styles = StyleSheet.create({
         marginLeft: 55
     },
     topLabel: {
-        color: "#FFFFFF",   // ✅ white (top total)
+        color: "#FFFFFF",  
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 4
     },
     insideLabel: {
-        color: "#000000",   // ✅ black (bottom available)
+        color: "#000000", 
         fontSize: 12,
         marginBottom: 4
     },
@@ -228,14 +228,14 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
     container: {
-    alignItems: 'center',   // 🔥 centers horizontally
+    alignItems: 'center',   
     justifyContent: 'center',
 },
 
 barchart: {
     height: 170,
     justifyContent: 'center',
-    alignItems: 'center',   // 🔥 centers chart inside
+    alignItems: 'center', 
 },
 
 });
