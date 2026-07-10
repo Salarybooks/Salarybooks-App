@@ -265,10 +265,13 @@ useEffect(() => {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-
+      const currentDate = new Date();
+      const month = currentDate.getMonth(); 
+      const year = currentDate.getFullYear();
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
-
+      formData.append("wage_month", month);
+      formData.append("wage_year", year);
       const empAddressPayload = {};
 
       ADDRESS_FIELDS.forEach(field => {

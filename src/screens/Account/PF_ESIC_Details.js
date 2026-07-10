@@ -148,9 +148,14 @@ const PF_ESIC_Details = ({ route }) => {
     const onSubmit = async () => {
         try {
             const formData = new FormData();
+            const currentDate = new Date();
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
             formData.append('employee_id', employee_id);
             formData.append('emp_id', userData.emp_id);
             formData.append('personal_details_status', 'pending');
+            formData.append("wage_month", month);
+            formData.append("wage_year", year);
             // send switch value only if editable
             if (!pfesic) {
                 formData.append('pre_er_pf', form.pre_er_pf ? 'yes' : 'no');
