@@ -76,7 +76,7 @@ const BottomNavigation = ({ rights }) => {
   };
 
   return (
-    <View style={[styles.container]}>
+    <View style={[styles.container , { paddingBottom: insets.bottom } ]}>
       {/* Bottom Nav Items */}
       <View style={[styles.bottomNav, { backgroundColor: isDarkMode ? '#1c1c1c' : '#092338ff' }]}>
         {navItems.map((item, index) => (
