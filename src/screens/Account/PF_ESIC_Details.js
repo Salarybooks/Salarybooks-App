@@ -78,7 +78,7 @@ const PF_ESIC_Details = ({ route }) => {
             const emp_unapprove_pfesic_details =  route?.params?.emp_unapprove_pfesic_details;
             const data = route?.params?.employee_PF_ESIC_details;
             // console.log(emp_unapprove_pfesic_details,"emp_unapprove_pfesic_details");
-            console.log(data,"data");
+            // console.log(data,"data");
             
             setemployee_id(await AsyncStorage.getItem("employee_id"));
             SetEmpId(emp_id);
@@ -148,9 +148,14 @@ const PF_ESIC_Details = ({ route }) => {
     const onSubmit = async () => {
         try {
             const formData = new FormData();
+            const currentDate = new Date();
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
             formData.append('employee_id', employee_id);
             formData.append('emp_id', userData.emp_id);
             formData.append('personal_details_status', 'pending');
+            formData.append("wage_month", month);
+            formData.append("wage_year", year);
             // send switch value only if editable
             if (!pfesic) {
                 formData.append('pre_er_pf', form.pre_er_pf ? 'yes' : 'no');
@@ -227,7 +232,7 @@ const PF_ESIC_Details = ({ route }) => {
                     JSON.stringify(pfesicPayload)
                 );
             }
-            console.log(formData,"formDatanew");
+            // console.log(formData,"formDatanew");
             
             const response = await axios.post(
                 `${API_BASE_URL}employee/request-update-pfesic-details`,

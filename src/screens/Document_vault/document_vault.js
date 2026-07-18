@@ -251,7 +251,7 @@ const DocumentVaultScreen = () => {
         { headers: { "x-access-token": token } }
       );
 
-      console.log("Fetched Docs:", response.data);
+      // console.log("Fetched Docs:", response.data);
 
       if (response.data.success) {
 
@@ -419,14 +419,14 @@ const DocumentVaultScreen = () => {
 
   const renameFile = async () => {
     // if (!renameText.trim()) return;
-    console.log(renameText,"renameText");
+    // console.log(renameText,"renameText");
     
     try {
       const selectedArray = activeTab === "Personal" ? "documents" : "other_documents";
       const doc = uploadedFiles[selectedArray][renameIndex];
 
       const document_id = doc._id || doc.id;
-      console.log(document_id,"document_id");
+      // console.log(document_id,"document_id");
       if (!document_id) {
         showPopup("error", "Error", "Unable to rename: document id missing.");
         // alert("Unable to rename: document id missing.");
@@ -473,7 +473,7 @@ const DocumentVaultScreen = () => {
 
 
   const deleteDocument = async (docId, index, field) => {
-    console.log(docId, "docId", userData._id, "userData._id");
+    // console.log(docId, "docId", userData._id, "userData._id");
 
     try {
       const response = await axios.post(

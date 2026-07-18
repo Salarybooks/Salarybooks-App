@@ -72,13 +72,13 @@ const AddressForm = ({ route }) => {
       const emp_unapprove_address = route?.params?.emp_unapprove_address;
       const emp_unapprove_curr_address = route?.params?.emp_unapprove_curr_address;
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-      console.log(route.params, "route.params");
-      console.log(employee_address, "employee_address");
-      console.log(employee_curr_address, "employee_curr_address");
-      console.log(emp_unapprove_address, "emp_unapprove_address");
-      console.log(emp_unapprove_curr_address, "emp_unapprove_curr_address");
-      console.log(address, "address");
-      console.log(curaddress, "curaddress");
+      // console.log(route.params, "route.params");
+      // console.log(employee_address, "employee_address");
+      // console.log(employee_curr_address, "employee_curr_address");
+      // console.log(emp_unapprove_address, "emp_unapprove_address");
+      // console.log(emp_unapprove_curr_address, "emp_unapprove_curr_address");
+      // console.log(address, "address");
+      // console.log(curaddress, "curaddress");
 
       if (t) {
 
@@ -265,10 +265,13 @@ useEffect(() => {
   const onSubmit = async () => {
     try {
       const formData = new FormData();
-
+      const currentDate = new Date();
+      const month = currentDate.getMonth(); 
+      const year = currentDate.getFullYear();
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
-
+      formData.append("wage_month", month);
+      formData.append("wage_year", year);
       const empAddressPayload = {};
 
       ADDRESS_FIELDS.forEach(field => {
@@ -329,7 +332,7 @@ useEffect(() => {
         return;
       }
 
-      console.log(formData, "formatdata");
+      // console.log(formData, "formatdata");
 
       const response = await axios.post(
         `${API_BASE_URL}employee/request-update-employee-address-details`,

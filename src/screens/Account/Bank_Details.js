@@ -63,7 +63,7 @@ const BankDetailsForm = ({route}) => {
       const employee_vault = JSON.parse(await AsyncStorage.getItem("employee_vault"));
       const total_file_size = JSON.parse(await AsyncStorage.getItem("total_file_size"));
       setemployee_id(await AsyncStorage.getItem("employee_id"));
-      console.log(route,"employee_bank_details");
+      // console.log(route,"employee_bank_details");
       
       if (t) {
         setToken(t);
@@ -236,10 +236,14 @@ const BankDetailsForm = ({route}) => {
         return;
       }
       const formData = new FormData();
-
+      const currentDate = new Date();
+      const month = currentDate.getMonth(); 
+      const year = currentDate.getFullYear();
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
       formData.append('corporate_id', userData?.corporate_id);
+      formData.append("wage_month", month);
+      formData.append("wage_year", year);
       // formData.append('bank_details_status', 'pending');
       const bank_details = {};
       Bank_Fields.forEach(field => {
@@ -271,7 +275,7 @@ const BankDetailsForm = ({route}) => {
           type: file.type,
         });
       }
-      console.log(formData, "formData");
+      // console.log(formData, "formData");
 
       const response = await axios.post(
         `${API_BASE_URL}employee/request-update-employee-bank-details`,

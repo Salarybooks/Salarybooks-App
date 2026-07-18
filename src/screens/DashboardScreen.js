@@ -116,7 +116,7 @@ const Dashboard = () => {
       : null;
 
     setImageUrl(url);
-    console.log("urlurl",url);
+    // console.log("urlurl",url);
     
     await AsyncStorage.setItem("imageUrl", url);
   };
@@ -199,7 +199,8 @@ const Dashboard = () => {
         setUserData(userData);
         // console.log(userData, "userData1234", API_BASE_URL);
       } catch (error) {
-        console.log("Error loading userData:", error);
+          showPopup("error", "Error loading userData", error);
+        // console.log("Error loading userData:", error);
       }
     };
 

@@ -169,11 +169,11 @@ const PersonalDetails = ({ route }) => {
     
   }, []);
 
-  useEffect(() => {
-    console.log("EmployeeDet",EmployeeDet);
-    console.log("fetchDetails",fetchDetails);
+  // useEffect(() => {
+  //   console.log("EmployeeDet",EmployeeDet);
+  //   console.log("fetchDetails",fetchDetails);
     
-  }, [EmployeeDet,fetchDetails])
+  // }, [EmployeeDet,fetchDetails])
 
 
   useEffect(() => {
@@ -412,7 +412,7 @@ const PersonalDetails = ({ route }) => {
 
 
   const onSubmit = async () => {
-    console.log(alreadyUploadedSize, "alreadyUploadedSize")
+    // console.log(alreadyUploadedSize, "alreadyUploadedSize")
     try {
       //   const selectedFilesSizeKB = getSelectedFilesSizeKB();
       //    console.log(selectedFilesSizeKB,"selectedFilesSizeKB")
@@ -429,11 +429,16 @@ const PersonalDetails = ({ route }) => {
 
       // console.log(totalUsed,"totalUsed")
       const formData = new FormData();
+      const currentDate = new Date();
+
+      const month = currentDate.getMonth(); 
+      const year = currentDate.getFullYear();
       // formData.append("total_file_size", totalUsed);
       formData.append('employee_id', employee_id);
       formData.append('emp_id', userData.emp_id);
       formData.append('corporate_id', userData?.corporate_id);
-
+      formData.append('wage_month', month);
+      formData.append('wage_year', year);
       formData.append('personal_details_status', 'pending');
       formData.append('personal_details_submit_status', 'inactive');
 
@@ -471,7 +476,8 @@ const PersonalDetails = ({ route }) => {
           type: newImage.type,
         });
       });
-
+      console.log(formData,"formData")
+      console.log(API_BASE_URL,"API_BASE_URL")
 
       if (formData._parts.length <= 2) {
         // Alert.alert('No Changes', 'Nothing to update');
@@ -1238,7 +1244,7 @@ const openDocument = async (file) => {
       showOpenWithDialog: true,
     });
   } catch (error) {
-    console.log('File open error:', error);
+    // console.log('File open error:', error);
     // Alert.alert('Error', 'Unable to open this file');
     showPopup("error", "Error", "Unable to open this file");
 

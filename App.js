@@ -3,16 +3,13 @@ import { SafeAreaView, StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './src/screens/SignUpScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import Dashboard from './src/screens/DashboardScreen';
 import Payslips from './src/screens/Payslip/Payslips';
 import Expense from './src/screens/Expense';
 import Document_vault from './src/screens/Document_vault/document_vault';
-// import BankDetailsForm from './src/screens/BankDetailsForm';
-import Personal_Details from './src/screens/Personal_Details';
-import Address from './src/screens/Address';
 // import AttendanceScreen from './src/screens/AttendanceScreen';
 import Blank from './src/screens/AttendanceScreen/blank';
-import Leaves from './src/screens/Leaves';
 import Account from './src/screens/Account/Account';
 import { ThemeProvider } from './src/screens/ThemeContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -68,17 +65,14 @@ useEffect(() => {
         <NavigationContainer ref={navigationRef}>
           <Stack.Navigator initialRouteName="SignUpScreen" >
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ headerShown: false }} />
             {/* <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} options={{ headerShown: false }} /> */}
             <Stack.Screen name="Blank" component={Blank} options={{ headerShown: false }} />
-            {/* <Stack.Screen name="BankDetailsForm" component={BankDetailsForm} options={{ headerShown: false }} /> */}
-            <Stack.Screen name="Address" component={Address} options={{ headerShown: false }} />
-            {/* <Stack.Screen name="Personal_Details" component={Personal_Details} options={{ headerShown: false }} /> */}
             {/* <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} /> */}
             <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
             <Stack.Screen name="Payslips" component={Payslips} options={{ headerShown: false }} />
             <Stack.Screen name="Expense" component={Expense} options={{ headerShown: false }} />
             <Stack.Screen name="document_vault" component={Document_vault} options={{ headerShown: false }} />
-            <Stack.Screen name="Leaves" component={Leaves} options={{ headerShown: false }} />
             <Stack.Screen name="Account" component={Account} options={{ headerShown: false }} />
             <Stack.Screen name="PersonalDetails" component={PersonalDetails} options={{ headerShown: false }} />
             <Stack.Screen name="AddressDetails" component={AddressDetails} options={{ headerShown: false }} />

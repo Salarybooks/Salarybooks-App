@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Pressable,
   TextInput,
   ScrollView,
   Modal,
@@ -64,7 +65,6 @@ export default function LeaveManagementScreen() {
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [rights,setRights]=useState(false);
-
   // useEffect(() => {
   //   const loadToken = async () => {
   //     const t = await AsyncStorage.getItem("authToken");
@@ -87,7 +87,7 @@ export default function LeaveManagementScreen() {
         // console.log(employee_id,"employee_id");
       }
       setToken(t);
-      console.log("TOKEN LOADED:", t);
+      // console.log("TOKEN LOADED:", t);
       
       // fetch_applied_leave_data();
       // if (t) {
@@ -197,9 +197,12 @@ export default function LeaveManagementScreen() {
   }
 
   const formatDate = (date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    if (!date) return "Select Date";
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return "Select Date";
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
     return `${day}-${month}-${year}`;
   };
   // const handleSubmit = async () => {
@@ -282,7 +285,7 @@ export default function LeaveManagementScreen() {
       formData.append("emp_reason", reason);
       formData.append("available", selectedLeave.available);
       formData.append("leave_approval_status", "pending");
-      console.log(formData,"formData");
+      // console.log(formData,"formData");
       
       const response = await axios.post(
         `${API_BASE_URL}employee/employee-leave-request`,
@@ -302,7 +305,7 @@ export default function LeaveManagementScreen() {
         setModalVisible(false);
         fetch_applied_leave_data();
       } else {
-        console.log("true");
+        // console.log("true");
         
         showPopup("error", "Error", response.data.message);
         // Alert.alert("Error", response.data.message);
@@ -401,9 +404,9 @@ export default function LeaveManagementScreen() {
     );
 
     if (totalBalance === 0) return 0;
-    console.log(Math.round(
-      ((totalBalance - totalAvailable) / totalBalance) * 100
-    ), "total");
+    // console.log(Math.round(
+    //   ((totalBalance - totalAvailable) / totalBalance) * 100
+    // ), "total");
 
     return Math.round(
       ((totalBalance - totalAvailable) / totalBalance) * 100
@@ -487,7 +490,7 @@ return (
       end={{ x: 1, y: 1 }}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView nestedScrollEnabled contentContainerStyle={styles.scrollContainer}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -510,58 +513,109 @@ return (
           </TouchableOpacity>
         </View> */}
 
-        <View style={styles.dropdownRow}>
+        <View style={styles.filterContainer}>
+          <View style={styles.dropdownRow}>
 
-          {/* Month Dropdown */}
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => setShowMonthDropdown(!showMonthDropdown)}
-          >
-            <Text style={styles.dropdownText}>{months[selectedMonth]}</Text>
-            <Icon name="chevron-down" color="#fff" />
-          </TouchableOpacity>
+            {/* Month Dropdown */}
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => {
+                setShowMonthDropdown(!showMonthDropdown);
+                setShowYearDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownText}>{months[selectedMonth]}</Text>
+              <Icon name="chevron-down" color="#fff" />
+            </TouchableOpacity>
 
-          {/* Year Dropdown */}
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => setShowYearDropdown(!showYearDropdown)}
-          >
-            <Text style={styles.dropdownText}>{selectedYear}</Text>
-            <Icon name="chevron-down" color="#fff" />
-          </TouchableOpacity>
+            {/* Year Dropdown */}
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => {
+                setShowYearDropdown(!showYearDropdown);
+                setShowMonthDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownText}>{selectedYear}</Text>
+              <Icon name="chevron-down" color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
-        {showMonthDropdown && (
-          <View style={styles.dropdownBox}>
-            {months.map((month, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.dropdownRow}
-                onPress={() => {
-                  setSelectedMonth(index);
-                  setShowMonthDropdown(false);
-                }}
+
+        <Modal
+          transparent
+          visible={showMonthDropdown}
+          animationType="fade"
+          onRequestClose={() => setShowMonthDropdown(false)}
+        >
+          <View style={styles.monthDropdownModal}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.monthDropdownBackdrop}
+              onPress={() => setShowMonthDropdown(false)}
+            />
+            <View style={[styles.dropdownBox, styles.monthDropdownModalBox]}>
+              <ScrollView
+                persistentScrollbar
+                showsVerticalScrollIndicator
+                style={styles.monthDropdownScroll}
+                contentContainerStyle={styles.monthDropdownContent}
               >
-                <Text style={styles.dropdownText}>{month}</Text>
-              </TouchableOpacity>
-            ))}
+                {months.map((month, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.dropdownOption}
+                    onPress={() => {
+                      setSelectedMonth(index);
+                      setShowMonthDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownText}>{month}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
-        )}
-        {showYearDropdown && (
-          <View style={styles.dropdownBox}>
-            {[2023, 2024, 2025, 2026, 2027].map(year => (
-              <TouchableOpacity
-                key={year}
-                style={styles.dropdownRow}
-                onPress={() => {
-                  setSelectedYear(year);
-                  setShowYearDropdown(false);
-                }}
+        </Modal>
+
+        <Modal
+          transparent
+          visible={showYearDropdown}
+          animationType="fade"
+          onRequestClose={() => setShowYearDropdown(false)}
+        >
+          <View style={styles.monthDropdownModal}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.monthDropdownBackdrop}
+              onPress={() => setShowYearDropdown(false)}
+            />
+            <View style={[styles.dropdownBox, styles.yearDropdownModalBox]}>
+              <ScrollView
+                persistentScrollbar
+                showsVerticalScrollIndicator
+                style={styles.yearDropdownScroll}
+                contentContainerStyle={styles.monthDropdownContent}
               >
-                <Text style={styles.dropdownText}>{year}</Text>
-              </TouchableOpacity>
-            ))}
+                {Array.from(
+                  { length: 10 },
+                  (_, index) => new Date().getFullYear() - index
+                ).map(year => (
+                  <TouchableOpacity
+                    key={year}
+                    style={styles.dropdownOption}
+                    onPress={() => {
+                      setSelectedYear(year);
+                      setShowYearDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownText}>{year}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
-        )}
+        </Modal>
 
 
 
@@ -648,15 +702,25 @@ return (
                   </TouchableOpacity>
                 </View>
 
-                <ScrollView style={styles.formContainer}>
+                <ScrollView
+                  style={styles.formContainer}
+                  contentContainerStyle={styles.formContent}
+                  showsVerticalScrollIndicator={false}
+                >
 
 
-                  <View style={styles.rowContainer}>
+                  <View style={[styles.rowContainer, styles.leaveTypeWrapper]}>
                     <Text style={[GlobalFont.semiBold, styles.labelRow]}>Select Leave Type:</Text>
 
                     <TouchableOpacity
                       style={styles.customSelect}
-                      onPress={() => setDropdownOpen(prev => !prev)}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      onPress={() => {
+                        setDropdownOpen(prev => !prev);
+                        setOpenFromDate(false);
+                        setOpenToDate(false);
+                      }}
                     >
                       <Text style={[GlobalFont.CustomFont, styles.selectedText]}>
                         {selectedLeave?.abbreviation || "Select Leave Type"}
@@ -664,31 +728,41 @@ return (
                     </TouchableOpacity>
 
                     {dropdownOpen && (
-                      <View style={styles.dropdownBoxInline}>
-                        {LeaveList?.leave_type?.map((item) => (
-                          <TouchableOpacity
-                            key={item._id}
-                            style={styles.dropdownRow}
-                            // onPress={() => {
-                            //   setSelectedLeave(item);
-                            //   setLeaveType(item.leave_temp_head_id);
-                            //   setRemainingLeaves(item.available);
-                            //   setDropdownOpen(false);
-                            // }}
-                            onPress={() => {
-                              setSelectedLeave(item);
-                              setLeaveType(item.leave_temp_head_id);
-                              setRemainingLeaves(item.available);
-                              setDropdownOpen(false);
-                            }}
-
-                          >
-                            <Text style={[GlobalFont.CustomFont, styles.dropdownAbbr]}>{item.abbreviation}</Text>
-                            <Text style={[GlobalFont.CustomFont, styles.dropdownValue]}>
-                              {item.available}/{item.quota}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                      <View style={styles.leaveTypeDropdownContainerInline}>
+                        <ScrollView
+                          style={styles.leaveTypeDropdownScroll}
+                          persistentScrollbar
+                          showsVerticalScrollIndicator={true}
+                          nestedScrollEnabled={true}
+                          contentContainerStyle={styles.leaveTypeDropdownContent}
+                        >
+                          {LeaveList?.leave_type?.map((item) => (
+                            <TouchableOpacity
+                              key={item._id}
+                              style={styles.leaveTypeOption}
+                              activeOpacity={0.7}
+                              onPress={() => {
+                                setSelectedLeave(item);
+                                setLeaveType(item.leave_temp_head_id);
+                                setRemainingLeaves(item.available);
+                                setDropdownOpen(false);
+                                setOpenFromDate(false);
+                                setOpenToDate(false);
+                                if (!fromDate || isNaN(new Date(fromDate).getTime())) {
+                                  setFromDate(new Date());
+                                }
+                                if (!toDate || isNaN(new Date(toDate).getTime())) {
+                                  setToDate(new Date());
+                                }
+                              }}
+                            >
+                              <Text style={[GlobalFont.CustomFont, styles.dropdownAbbr]}>{item.abbreviation}</Text>
+                              <Text style={[GlobalFont.CustomFont, styles.dropdownValue]}>
+                                {item.available}/{item.quota}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
                       </View>
                     )}
                   </View>
@@ -701,7 +775,7 @@ return (
                         onPress={() => setOpenFromDate(true)}
                       >
                         <Text style={[GlobalFont.CustomFont, styles.dateTextDisplay]}>
-                          {formatDate(fromDate)}
+                          {fromDate ? formatDate(fromDate) : "Select Date"}
                         </Text>
                         <Text style={styles.calendarIcon}>📅</Text>
                       </TouchableOpacity>
@@ -714,7 +788,7 @@ return (
                         onPress={() => setOpenToDate(true)}
                       >
                         <Text style={[GlobalFont.CustomFont, styles.dateTextDisplay]}>
-                          {formatDate(toDate)}
+                          {toDate ? formatDate(toDate) : "Select Date"}
                         </Text>
                         <Text style={styles.calendarIcon}>📅</Text>
                       </TouchableOpacity>
@@ -1095,61 +1169,58 @@ const styles = StyleSheet.create({
   },
 
   upcomingCard_status: {
-    padding: 14,
-    paddingVertical: 8,
+    padding: 10,
     borderRadius: 15,
-    marginBottom: 10,
+    marginBottom: 8,
     backgroundColor: "#194a7ea2",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   upcomingCard: {
-    padding: 14,
-    paddingVertical: 8,
+    padding: 10,
     borderRadius: 15,
-    marginBottom: 10,
+    marginBottom: 8,
     backgroundColor: "#194a7ea2",
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
   status_card: {
-    width: width * 0.88,
+    width: "100%",
     backgroundColor: "#0b3863ff",
-    flexDirection: 'row',
-    gap: 13,
-    // justifyContent: 'space-between',
-    marginBottom: 0,
-    marginLeft: -5,
-    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 10,
     borderRadius: 12,
-    // paddingHorizontal: 10
+    marginLeft: 0,
   },
   upcomingDate: {
     color: "#fff",
-    fontSize: 14,
-    margin: "auto",
+    fontSize: 13,
+    flexShrink: 1,
+    marginRight: 8,
+    maxWidth: "52%",
+    textAlign: "left",
   },
   leave_head: {
     backgroundColor: "#2c4e64ff",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 8,
-    // marginLeft: 10,
-    margin:"auto",
-    width: 50
+    minWidth: 60,
+    justifyContent: "center",
+    alignItems: "center",
   },
   upcomingStatusBox: {
     backgroundColor: "#2c4f70ff",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    minHeight: 30,
+    minWidth: 80,
+    paddingHorizontal: 8,
     borderRadius: 8,
-    marginLeft: 10,
-    width: 100
+    justifyContent: "center",
+    alignItems: "center",
   },
   upcomingStatusText: {
     color: "#fff",
     fontWeight: "600",
-    textAlign: "center"
+    textAlign: "center",
+    textAlignVertical: "center",
   },
 
   historyCard: {
@@ -1173,20 +1244,19 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
-  formContainer: {
-    maxHeight: "75%",
-  },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 12,
   },
   modalContainer: {
-    width: "90%",
-    maxHeight: "85%",
+    width: "100%",
+    maxWidth: 420,
+    maxHeight: "88%",
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
   },
@@ -1200,9 +1270,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   modalTitle: {
+    flex: 1,
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+    marginRight: 12,
   },
   closeBtn: {
     color: "#FF4444",
@@ -1210,40 +1282,46 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   formContainer: {
+    flexGrow: 0,
+  },
+  formContent: {
     paddingTop: 5,
+    paddingBottom: 10,
   },
 
   rowContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     marginBottom: 15,
+    rowGap: 8,
   },
   labelRow: {
     color: "#fff",
     fontSize: 13,
     fontWeight: "500",
-    width: "40%",
+    width: "100%",
   },
   inputRow1: {
-    flex: 1,
+    width: "100%",
     backgroundColor: "#072c52ff",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
+    minHeight: 40,
     color: "#fff",
     fontSize: 13,
-    marginLeft: -35,
 
   },
   inputRow: {
-    flex: 1,
+    width: "100%",
     backgroundColor: "#072c52ff",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
-    // height: 25,
+    minHeight: 40,
     color: "#fff",
     fontSize: 13,
   },
@@ -1273,11 +1351,15 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
+    flexWrap: "wrap",
+    columnGap: 10,
+    rowGap: 12,
     marginBottom: 15,
   },
   dateInputContainer: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: "47%",
+    minWidth: 130,
   },
   dateInput: {
     flexDirection: "row",
@@ -1290,7 +1372,9 @@ const styles = StyleSheet.create({
     height: 40,
   },
   dateTextDisplay: {
-    color: "#fff"
+    flex: 1,
+    color: "#fff",
+    fontSize: 13,
   },
   dateText: {
     flex: 1,
@@ -1299,7 +1383,7 @@ const styles = StyleSheet.create({
   },
   calendarIcon: {
     fontSize: 16,
-    marginLeft: 25
+    marginLeft: 8,
   },
 
   reasonContainer: {
@@ -1337,16 +1421,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
     borderWidth: 1,
     borderColor: "#3b82f6",
     borderRadius: 8,
     padding: 12,
+    minHeight: 44,
   },
 
   selectedText: {
     color: "#fff",
     fontSize: 14,
-    // width:"100%"
+    flex: 1,
   },
 
   dropdownOverlay: {
@@ -1359,7 +1445,72 @@ const styles = StyleSheet.create({
   dropdownBox: {
     backgroundColor: "#0B1E3A",
     borderRadius: 10,
+    overflow: "hidden",
+    zIndex: 50,
+    elevation: 12,
+  },
+
+  filterContainer: {
+    position: "relative",
+    zIndex: 50,
+    elevation: 12,
+    marginBottom: 10,
+  },
+
+  monthDropdownBox: {
+    position: "absolute",
+    top: 48,
+    left: 0,
+    width: "48%",
+    height: 264,
+  },
+
+  monthDropdownModal: {
+    flex: 1,
+  },
+
+  monthDropdownBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  monthDropdownModalBox: {
+    position: "absolute",
+    top: 122,
+    left: 13,
+    width: "45%",
+    height: 264,
+  },
+
+  monthDropdownScroll: {
+    height: 264,
+  },
+
+  yearDropdownModalBox: {
+    position: "absolute",
+    top: 122,
+    right: 13,
+    width: "45%",
+    height: 264,
+  },
+
+  yearDropdownScroll: {
+    height: 264,
+  },
+
+  monthDropdownContent: {
+    paddingVertical: 6,
+  },
+
+  yearDropdownBox: {
+    position: "absolute",
+    top: 48,
+    right: 0,
+    width: "48%",
+  },
+
+  dropdownOption: {
     paddingVertical: 10,
+    paddingHorizontal: 12,
   },
 
   // dropdownRow: {
@@ -1389,22 +1540,63 @@ const styles = StyleSheet.create({
   },
   dropdownBoxInline: {
     position: "absolute",
-    top: 55,
-    left: 110,
+    top: 76,
+    left: 0,
     right: 0,
     backgroundColor: "#0B2A44",
     borderRadius: 10,
     paddingVertical: 6,
     zIndex: 999,
     elevation: 6,
-    width: "50%"
   },
 
   dropdownRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     // marginTop: 10,
-    marginBottom: 10
+    marginBottom: 0
+  },
+  leaveTypeDropdownBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  leaveTypeDropdownContainer: {
+    backgroundColor: "#0B2A44",
+    borderRadius: 12,
+    maxHeight: "60%",
+    paddingVertical: 8,
+    overflow: "hidden",
+  },
+  leaveTypeDropdownContainerInline: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    backgroundColor: "#0B2A44",
+    borderRadius: 12,
+    maxHeight: 240,
+    overflow: "hidden",
+    zIndex: 999,
+    elevation: 10,
+  },
+  leaveTypeDropdownScroll: {
+    maxHeight: 240,
+  },
+  leaveTypeDropdownContent: {
+    paddingVertical: 8,
+  },
+  leaveTypeOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.08)",
+  },
+  leaveTypeWrapper: {
+    position: "relative",
   },
   dropdown: {
     backgroundColor: "rgba(255,255,255,0.1)",
@@ -1597,9 +1789,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 4,
   },
-
-
-
-
 
 });
