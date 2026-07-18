@@ -591,7 +591,7 @@ const Account = ({ navigation }) => {
         <View style={styles.copyrightWrapper}>
           <Text style={styles.Copyright}>Powered by Vauras Biztech Payroll LLP</Text>
           <Text style={styles.Copyright}>Copyright © 2026 Salarybooks.com</Text>
-          <Text style={styles.Copyright}>Version 1.0.0</Text>
+          <Text style={styles.Copyright}>Version 1.0.1</Text>
         </View>
         <Modal
                   visible={termsAccepted}

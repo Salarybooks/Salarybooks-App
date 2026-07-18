@@ -3,6 +3,7 @@ import { SafeAreaView, StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './src/screens/SignUpScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import Dashboard from './src/screens/DashboardScreen';
 import Payslips from './src/screens/Payslip/Payslips';
 import Expense from './src/screens/Expense';
@@ -64,6 +65,7 @@ useEffect(() => {
         <NavigationContainer ref={navigationRef}>
           <Stack.Navigator initialRouteName="SignUpScreen" >
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ headerShown: false }} />
             {/* <Stack.Screen name="AttendanceScreen" component={AttendanceScreen} options={{ headerShown: false }} /> */}
             <Stack.Screen name="Blank" component={Blank} options={{ headerShown: false }} />
             {/* <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} /> */}
