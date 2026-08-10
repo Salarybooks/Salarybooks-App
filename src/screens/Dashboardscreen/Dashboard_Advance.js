@@ -28,13 +28,16 @@ const Advance = ({ rights }) => {
     const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
     // console.log("rights22", rights);
 
-    // if (!rights) return null;
-    const canApplyAttendance = rights?.apply?.includes("Attendance");
-    const canApplyleave = rights?.apply?.includes("leave");
-    const canApplyvault = rights?.apply?.includes("documents vault");
-    const canApplypayslip = rights?.view?.includes("payslip");
-    const canApplyadvance = rights?.apply?.includes("advance");
-    const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+    // if rights not loaded yet → allow (same as BottomNavigation)
+    const hasRights = rights && Object.keys(rights).length > 0;
+    const hasPerm = (list, name) =>
+      Array.isArray(list) && list.some((i) => String(i).toLowerCase() === String(name).toLowerCase());
+    const canApplyAttendance = hasRights ? hasPerm(rights?.apply, "Attendance") : true;
+    const canApplyleave = hasRights ? hasPerm(rights?.apply, "leave") : true;
+    const canApplyvault = hasRights ? hasPerm(rights?.apply, "documents vault") : true;
+    const canApplypayslip = hasRights ? hasPerm(rights?.view, "payslip") : true;
+    const canApplyadvance = hasRights ? hasPerm(rights?.apply, "advance") : true;
+    const canApplyreimburdement = hasRights ? hasPerm(rights?.apply, "reimbursement") : true;
     // console.log("canApplyAttendance", canApplyAttendance);
     useEffect(() => {
         const loadToken = async () => {

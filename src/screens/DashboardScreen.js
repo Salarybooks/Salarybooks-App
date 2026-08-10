@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,18 +17,18 @@ import Advance from "./Dashboardscreen/Dashboard_Advance";
 import { BackHandler, ToastAndroid } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatusPopup from "./StatusPopup/StatusPopup";
-// import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { API_BASE_URL } from "@env";
-import { useNavigation } from '@react-navigation/native';
 const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
 
 
 
 const Dashboard = () => {
   const navigation = useNavigation();
-  const [userData, setUserData] = useState(null);
-  const [token, setToken] = useState(null);
+  const route = useRoute();
+  const [userData, setUserData] = useState(route.params?.userData || null);
+  const [token, setToken] = useState(route.params?.token || null);
   const [empData, setEmpData] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [attendenceImageUrl, setAttendenceImageUrl] = useState(null);
@@ -37,14 +37,12 @@ const Dashboard = () => {
   const [absent, setAbsent] = useState(null);
   const [presentDates, setPresentDates] = useState([]);
   const [absentDates, setAbsentDates] = useState([]);
-  const canApplyAttendance = rights?.apply?.includes("Attendance");
+  // Same permission logic as BottomNavigation (footer bar)
+  const hasRights = rights && Object.keys(rights).length > 0;
+  const hasPerm = (list, name) =>
+    Array.isArray(list) && list.some((i) => String(i).toLowerCase() === String(name).toLowerCase());
+  const canApplyAttendance = hasRights ? hasPerm(rights?.apply, "Attendance") : true;
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
-  
-  const loadToken = async () => {
-    const t = await AsyncStorage.getItem("authToken");
-    setToken(t);
-    // console.log("TOKEN LOADED:", t);
-  };
 
   const showPopup = (type, title, message) => {
     setPopupConfig({
@@ -55,28 +53,40 @@ const Dashboard = () => {
     });
   };
 
-  const fetchemployeedata = async () => {
-    if (!token) return;
+  const saveImageUrl = async (profilePic) => {
+    const url = profilePic
+      ? `${API_BASE_URL}${profilePic.replace(/\\/g, "/")}`
+      : null;
+    setImageUrl(url);
+    if (url) await AsyncStorage.setItem("imageUrl", url);
+  };
+
+  const saveAttendenceImageUrl = async (profilePic) => {
+    const url = profilePic
+      ? `${API_BASE_URL}${profilePic.replace(/\\/g, "/")}`
+      : null;
+    setAttendenceImageUrl(url);
+    if (url) await AsyncStorage.setItem("attendenceimageUrl", url);
+  };
+
+  const fetchemployeedata = async (authToken) => {
+    if (!authToken) return null;
     try {
-      const payload = {
-        pageno: 1,
-      };
-      const res = await axios.post(`${API_BASE_URL}employee/get-account`,
-        payload,
+      const res = await axios.post(
+        `${API_BASE_URL}employee/get-account`,
+        { pageno: 1 },
         {
           headers: {
-            "x-access-token": token,
+            "x-access-token": authToken,
             "Content-Type": "application/json",
           },
-        });
+        }
+      );
 
       if (res.data?.status === "success") {
         const employeeData = res.data.employee_data;
-        // console.log("API_BASE_URL",API_BASE_URL);
-        // console.log("employeeData",employeeData[0].employee_details.employee_id,"API_BASE_URL",API_BASE_URL);
         await AsyncStorage.setItem("employee_id", employeeData[0].employee_details.employee_id);
         await AsyncStorage.setItem("employee_mongose_id", employeeData[0]._id);
-        // await AsyncStorage.setItem("employee_bank_details", employeeData[0]?.employee_details?.bank_details);
         const bankDetails = employeeData[0]?.employee_details?.bank_details;
 
         if (bankDetails) {
@@ -85,85 +95,85 @@ const Dashboard = () => {
             JSON.stringify(bankDetails)
           );
         }
-        // console.log("employeeData", employeeData, "API_BASE_URL", API_BASE_URL);
-        // console.log("bankDetails", bankDetails);
 
         setEmpData(employeeData);
+        saveImageUrl(employeeData?.[0]?.profile_pic);
+        saveAttendenceImageUrl(employeeData?.[0]?.attendence_pic);
 
-        const profilePic = employeeData?.[0]?.profile_pic;
-        // console.log("profilePic",profilePic);
-        
-        saveImageUrl(profilePic);
-        const attendencePic = employeeData?.[0]?.attendence_pic;
-        saveAttendenceImageUrl(attendencePic);
-        // console.log("employeeData",employeeData);
-        
         const rightsData = employeeData?.[0]?.employee_details?.employment_hr_details?.emp_role_data?.rights;
-        // console.log("rightsData", rightsData);
-
         setRights(rightsData);
-        AsyncStorage.setItem('rights',JSON.stringify(rightsData))
+        if (rightsData) {
+          AsyncStorage.setItem("rights", JSON.stringify(rightsData));
+        }
+        return employeeData;
       }
 
+      // console.log("get-account failed:", res.data?.status, res.data?.message);
     } catch (error) {
-      // console.log("Advance list error:", error);
+      // console.log("get-account error:", error?.response?.data || error?.message || error);
     }
+    return null;
   };
 
-  const saveImageUrl = async (profilePic) => {
-    const url = profilePic
-      ? `${API_BASE_URL}${profilePic.replace(/\\/g, "/")}`
-      : null;
-
-    setImageUrl(url);
-    // console.log("urlurl",url);
-    
-    await AsyncStorage.setItem("imageUrl", url);
-  };
-  const saveAttendenceImageUrl = async (profilePic) => {
-    const url = profilePic
-      ? `${API_BASE_URL}${profilePic.replace(/\\/g, "/")}`
-      : null;
-
-    setAttendenceImageUrl(url);
-    await AsyncStorage.setItem("attendenceimageUrl", url);
-  };
-
-  const fetchattendencedata = async () => {
-    if (!token) return;
+  const fetchattendencedata = async (authToken, currentUser, employeeData) => {
+    if (!authToken || !currentUser?.emp_id) return;
     const now = new Date();
     try {
       const payload = {
-        // pageno: 1,
-        sys_emp_id: userData.sys_emp_id,
-        emp_id: userData.emp_id,
+        sys_emp_id: currentUser.sys_emp_id,
+        emp_id: currentUser.emp_id,
         attendance_month: String(now.getMonth()),
         attendance_year: String(now.getFullYear()),
-        register_type: empData?.[0].employee_details?.template_data?.attendance_temp_data?.register_type,
+        register_type: employeeData?.[0]?.employee_details?.template_data?.attendance_temp_data?.register_type,
       };
-      // console.log("payload1234", payload);
 
-      const res = await axios.post(`${API_BASE_URL}employee/employee-get-attendance-mobile`,
+      const res = await axios.post(
+        `${API_BASE_URL}employee/employee-get-attendance-mobile`,
         payload,
         {
           headers: {
-            "x-access-token": token,
+            "x-access-token": authToken,
             "Content-Type": "application/json",
           },
-        });
+        }
+      );
       if (res.data?.status === "success") {
-        // console.log("res.data", res.data);
-
-        setPresent(res.data?.attendance_summary.present)
-        setAbsent(res.data?.attendance_summary.leave)
+        setPresent(res.data?.attendance_summary.present);
+        setAbsent(res.data?.attendance_summary.leave);
         setPresentDates(res.data?.attendance_summary.present_date || []);
         setAbsentDates(res.data?.attendance_summary.absent_date || []);
       }
-
     } catch (error) {
-      // console.log("Advance list error:", error);
-    }
+      // console.log("attendance error:", error?.response?.data || error?.message || error);
+          }
   };
+
+  const loadDashboardData = useCallback(async () => {
+    try {
+      // Prefer login params, fallback to AsyncStorage
+      let t = route.params?.token;
+      let u = route.params?.userData;
+
+      if (!t) t = await AsyncStorage.getItem("authToken");
+      if (!u) {
+        const raw = await AsyncStorage.getItem("userData");
+        u = raw ? JSON.parse(raw) : null;
+      }
+
+      setToken(t);
+      setUserData(u);
+
+      if (!t) {
+        // console.log("Dashboard: no token found");
+        return;
+      }
+
+      const employeeData = await fetchemployeedata(t);
+      await fetchattendencedata(t, u, employeeData);
+    } catch (error) {
+      // console.log("Dashboard load error:", error?.message || error);
+    }
+  }, [route.params?.token, route.params?.userData]);
 
   const getDaySetFromDates = (dates, year, month) => {
     return new Set(
@@ -182,55 +192,38 @@ const Dashboard = () => {
     );
   };
 
-  const screenAttendace=()=>{
-    // console.log("tree");
-    
+  const screenAttendace = () => {
     if (!canApplyAttendance) {
       showPopup("error", "Permission Denied", "you don't have This functionality");
       return;
     }
     navigation.navigate("Blank", { title: "Attendance" });
-  }
+  };
 
+  // Load once after mount (delay = after login animation)
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const userData = JSON.parse(await AsyncStorage.getItem("userData"));
-        setUserData(userData);
-        // console.log(userData, "userData1234", API_BASE_URL);
-      } catch (error) {
-          showPopup("error", "Error loading userData", error);
-        // console.log("Error loading userData:", error);
-      }
-    };
+    const timer = setTimeout(() => {
+      loadDashboardData();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [loadDashboardData]);
 
-    loadData();
-    loadToken();
+  // Reload when returning via footer home
+  useEffect(() => {
+    const unsub = navigation.addListener("focus", () => {
+      loadDashboardData();
+    });
+    return unsub;
+  }, [navigation, loadDashboardData]);
 
-    fetchemployeedata();
-    fetchattendencedata();
-  }, [token, imageUrl]);
-
-  // const attendancePercentage =
-  // present + absent === 0
-  //   ? 0
-  //   : Math.round((present / (present + absent)) * 100);
-
-
-
-const now = new Date();
-const year = now.getFullYear();
-const month = now.getMonth();
-
-const totalDays = new Date(year, month + 1, 0).getDate();
-
-const presentDaySet = getDaySetFromDates(presentDates, year, month);
-const presentCount = presentDaySet.size;
-
-const progressValue =
-  totalDays === 0 ? 0 : presentCount / totalDays;
-
-const attendancePercentage = Math.round(progressValue * 100);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const presentDaySet = getDaySetFromDates(presentDates, year, month);
+  const presentCount = presentDaySet.size;
+  const progressValue = totalDays === 0 ? 0 : presentCount / totalDays;
+  const attendancePercentage = Math.round(progressValue * 100);
   return (
 
     <LinearGradient
@@ -390,7 +383,7 @@ const attendancePercentage = Math.round(progressValue * 100);
             </View>
           </LinearGradient>
 
-          <Reimbursement />
+          <Reimbursement rights={rights} />
           <Advance rights={rights} />
           <StatusPopup
             visible={popupConfig.visible}

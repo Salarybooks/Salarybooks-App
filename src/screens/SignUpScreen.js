@@ -69,7 +69,10 @@ const SignUpScreen = () => {
           const user = await AsyncStorage.getItem('userData');
 
           if (token && user) {
-            navigation.replace('Dashboard');
+            navigation.replace('Dashboard', {
+              token,
+              userData: JSON.parse(user),
+            });
           }
         }
         else {
@@ -123,11 +126,11 @@ const SignUpScreen = () => {
         if (user) {
           setUserData(user);
         }
-        // Alert.alert("token", token );
-        // console.log('Token saved:', token);
-        // console.log('User saved:', user);
 
-        navigation.navigate('Dashboard');
+        navigation.replace('Dashboard', {
+          token,
+          userData: user,
+        });
       } else {
         showPopup("error", response.data.message, "Login failed");
         // Alert.alert(response.data.message || 'Login failed');

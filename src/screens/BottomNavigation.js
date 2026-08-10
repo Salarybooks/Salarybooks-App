@@ -25,10 +25,12 @@ const BottomNavigation = ({ rights }) => {
 
 
   const hasRights = rights && Object.keys(rights).length > 0;
-  const canApplyAttendance = hasRights ? rights?.apply?.includes("Attendance") : true;
-  const canApplyleave = hasRights ? rights?.apply?.includes("leave") : true;
-  const canApplypayslip = hasRights ? rights?.view?.includes("payslip") : true;
-  const canApplyreimburdement = hasRights ? rights?.apply?.includes("reimbursement") : true;
+  const hasPerm = (list, name) =>
+    Array.isArray(list) && list.some((i) => String(i).toLowerCase() === String(name).toLowerCase());
+  const canApplyAttendance = hasRights ? hasPerm(rights?.apply, "Attendance") : true;
+  const canApplyleave = hasRights ? hasPerm(rights?.apply, "leave") : true;
+  const canApplypayslip = hasRights ? hasPerm(rights?.view, "payslip") : true;
+  const canApplyreimburdement = hasRights ? hasPerm(rights?.apply, "reimbursement") : true;
 
   const handleHomePress = () => {
     navigation.navigate('Dashboard');

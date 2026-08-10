@@ -20,7 +20,7 @@ import axios from 'axios';
 import StatusPopup from "../StatusPopup/StatusPopup";
 const { width } = Dimensions.get("window");
 
-const Reimbursement = () => {
+const Reimbursement = ({ rights: rightsProp }) => {
     const navigation = useNavigation();
     const [token, setToken] = useState(null);
     const [claimsData, setClaimsData] = useState([]);
@@ -28,17 +28,28 @@ const Reimbursement = () => {
     const [pending, setPending] = useState(0);
     const [rejected, setRejected] = useState(0);
     const [latestClaim, setLatestClaim] = useState(null);
-    const [rights, setRights] = useState(null);
-    const canApplyleave = rights?.apply?.includes("leave");
+    const [rights, setRights] = useState(rightsProp || null);
     const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
-    const canApplyreimburdement = rights?.apply?.includes("reimbursement");
+
+    // if rights not loaded yet → allow (same as BottomNavigation)
+    const hasRights = rights && Object.keys(rights).length > 0;
+    const hasPerm = (list, name) =>
+      Array.isArray(list) && list.some((i) => String(i).toLowerCase() === String(name).toLowerCase());
+    const canApplyleave = hasRights ? hasPerm(rights?.apply, "leave") : true;
+    const canApplyreimburdement = hasRights ? hasPerm(rights?.apply, "reimbursement") : true;
+
+    useEffect(() => {
+        if (rightsProp) setRights(rightsProp);
+    }, [rightsProp]);
 
     useEffect(() => {
         const loadToken = async () => {
             const t = await AsyncStorage.getItem("authToken");
             setToken(t);
-            setRights(JSON.parse(await AsyncStorage.getItem("rights")))
-            // console.log("TOKEN LOADEDaa:", t);
+            const raw = await AsyncStorage.getItem("rights");
+            if (raw) {
+                try { setRights(JSON.parse(raw)); } catch (e) {}
+            }
         };
         loadToken();
     }, []);
