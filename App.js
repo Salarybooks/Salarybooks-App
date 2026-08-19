@@ -1,5 +1,5 @@
-import React from 'react';
-import { SafeAreaView, StatusBar, useColorScheme } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AppState, BackHandler, Linking, SafeAreaView, StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignUpScreen from './src/screens/SignUpScreen';
@@ -22,18 +22,63 @@ import AddressDetails from './src/screens/Account/Address_Details';
 import BankDetailsForm from './src/screens/Account/Bank_Details';
 import HR_Details from './src/screens/Account/HR_Details';
 import PFESICDetails from './src/screens/Account/PF_ESIC_Details'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import StatusPopup from './src/screens/StatusPopup/StatusPopup';
+import {
+  APP_VERSION,
+  PLAY_STORE_MARKET_URL,
+  PLAY_STORE_URL,
+  fetchServerAppVersion,
+  getServerVersion,
+  normalizeVersion,
+} from './src/config/appVersion';
 Ionicons.loadFont();
 const Stack = createNativeStackNavigator();
-import { BackHandler } from "react-native";
-import { useEffect } from "react";
 import { navigationRef } from "./NavigationRef";
 import "./src/theme/GlobalFont"
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const [updateRequired, setUpdateRequired] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState(
+    "A newer version of the app is available. Please update to continue."
+  );
+
+  const checkAppVersion = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const data = await fetchServerAppVersion(token);
+      const serverVersion = getServerVersion(data);
+      const currentVersion = normalizeVersion(APP_VERSION);
+
+
+      if (serverVersion && serverVersion !== currentVersion) {
+        setUpdateMessage(
+          `Your app version does not match the required version. Please update to continue.`
+        );
+        setUpdateRequired(true);
+      } else if (serverVersion) {
+        setUpdateRequired(false);
+      }
+    } catch (e) {
+    }
+  }, []);
+
+  const openPlayStore = async () => {
+    try {
+      await Linking.openURL(PLAY_STORE_MARKET_URL);
+    } catch (e) {
+      await Linking.openURL(PLAY_STORE_URL);
+    }
+  };
 
 useEffect(() => {
   const backAction = () => {
+    if (updateRequired) {
+      setUpdateRequired(false);
+      return true;
+    }
+
     const route = navigationRef.current?.getCurrentRoute();
 
     if (route?.name === "Dashboard") {
@@ -51,7 +96,19 @@ useEffect(() => {
   );
 
   return () => backHandler.remove();
-}, []);
+}, [updateRequired]);
+
+  useEffect(() => {
+    checkAppVersion();
+
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        checkAppVersion();
+      }
+    });
+
+    return () => sub.remove();
+  }, [checkAppVersion]);
 
 
   return (
@@ -62,7 +119,10 @@ useEffect(() => {
           backgroundColor={isDarkMode ? '#000' : '#fff'}
         />
         {/* <NavigationContainer> */}
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={checkAppVersion}
+        >
           <Stack.Navigator initialRouteName="SignUpScreen" >
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
             <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ headerShown: false }} />
@@ -86,6 +146,17 @@ useEffect(() => {
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaView>
+      <StatusPopup
+        visible={updateRequired}
+        type="update"
+        title="Update Required"
+        message={updateMessage}
+        buttonText="Update"
+        closable={true}
+        showCancel={true}
+        onCancel={() => setUpdateRequired(false)}
+        onClose={openPlayStore}
+      />
     </ThemeProvider>
   );
 }
