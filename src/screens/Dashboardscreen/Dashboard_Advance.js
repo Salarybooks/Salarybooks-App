@@ -145,38 +145,43 @@ const Advance = ({ rights }) => {
                     },
                 });
 
-            if (res.data?.status === "success") {
+                if (res.data?.status === "success") {
 
-                // setAdvanceList(res.data.advance_data.docs || []);
-                const docs = res.data.advance_data.docs || [];
-                setAdvanceList(docs);
-                const totalAdvance = docs.reduce(
-                    (sum, item) => sum + (Number(item.advance_amount) || 0),
-                    0
-                );
-                const totalOutstanding = docs.reduce(
-                    (sum, item) => sum + (Number(item.advance_outstanding) || 0),
-                    0
-                );
-
-                // setTotalAdvanceAmount(totalAdvance);
-                // setTotalOutstanding(totalOutstanding);
-                const percent =
-                    totalAdvance > 0
-                        ? Math.round((totalOutstanding / totalAdvance) * 100)
+                    const docs = res.data.advance_data.docs || [];
+                    setAdvanceList(docs);
+                
+                    const overview = docs.reduce(
+                        (acc, item) => {
+                            if (item.status === "active") {
+                                acc.totalAdvance += Number(item.advance_amount) || 0;
+                                acc.totalRecovered += Number(item.advance_recovered) || 0;
+                                acc.totalOutstanding += Number(item.advance_outstanding) || 0;
+                            }
+                            return acc;
+                        },
+                        {
+                            totalAdvance: 0,
+                            totalRecovered: 0,
+                            totalOutstanding: 0,
+                        }
+                    );
+                
+                    setTotalAdvanceAmount(overview.totalAdvance);
+                    setTotalOutstanding(overview.totalOutstanding);
+                
+                    const progressPercent = overview.totalAdvance
+                        ? (overview.totalRecovered / overview.totalAdvance) * 100
                         : 0;
-
-                const prog = percent / 100;
-
-                setPercentage(percent);
-                setProgress(prog);
-
-                await AsyncStorage.setItem("percentage", JSON.stringify(percent));
-                await AsyncStorage.setItem("progress", JSON.stringify(prog));
-                // console.log("res.data.advance_data.docs1", JSON.stringify(percent));
-                // console.log("res.data.advance_data.docs1", JSON.stringify(prog));
-
-            }
+                
+                    const percent = Math.round(progressPercent);
+                    const prog = progressPercent / 100;
+                
+                    setPercentage(percent);
+                    setProgress(prog);
+                
+                    await AsyncStorage.setItem("percentage", JSON.stringify(percent));
+                    await AsyncStorage.setItem("progress", JSON.stringify(prog));
+                }
         } catch (error) {
             console.log("Advance list error:", error);
         }
