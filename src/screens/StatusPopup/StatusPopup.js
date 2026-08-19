@@ -17,6 +17,8 @@ const StatusPopup = ({
   onClose,
   onCancel,
   showCancel = false,
+  buttonText = "OK",
+  closable = true,
 }) => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -42,10 +44,20 @@ const StatusPopup = ({
     success: { name: "checkmark-circle", color: "#22C55E" },
     error: { name: "close-circle", color: "#EF4444" },
     info: { name: "information-circle", color: "#3B82F6" },
+    update: { name: "cloud-download", color: "#F59E0B" },
   };
 
   return (
-    <Modal transparent visible={visible} animationType="none">
+    <Modal
+      transparent
+      visible={visible}
+      animationType="none"
+      onRequestClose={() => {
+        if (!closable) return;
+        if (onCancel) onCancel();
+        else onClose?.();
+      }}
+    >
       <View style={styles.overlay}>
         <Animated.View
           style={[
@@ -58,11 +70,11 @@ const StatusPopup = ({
         >
           <View  style={styles.close}>
           <Icon
-            name={iconConfig[type].name}
+            name={iconConfig[type]?.name || iconConfig.info.name}
             size={60}
-            color={iconConfig[type].color}
+            color={iconConfig[type]?.color || iconConfig.info.color}
           />
-          {showCancel && (
+          {showCancel && closable && (
             <TouchableOpacity
               onPress={onCancel}
             >
@@ -74,7 +86,7 @@ const StatusPopup = ({
           <Text style={styles.message}>{message}</Text>
           
           <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>OK</Text>
+            <Text style={styles.buttonText}>{buttonText}</Text>
           </TouchableOpacity>
           
         </Animated.View>
