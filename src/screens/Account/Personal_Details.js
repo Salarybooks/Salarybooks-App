@@ -614,7 +614,7 @@ const isAttendanceUploaded = !!EmployeeDet?.attendence_pic;
           editable={!isApproved('emp_first_name')}
         />
 
-        <Label text="Employee Last Name *" />
+        <Label text="Employee Last Name" />
         <Input
           value={form.emp_last_name}
           onChangeText={v => onChange('emp_last_name', v)}
