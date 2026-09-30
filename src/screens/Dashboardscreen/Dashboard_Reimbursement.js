@@ -6,6 +6,7 @@ import {
     Dimensions,
     TouchableOpacity,
     ScrollView,
+    Alert,
 } from "react-native";
 import LinearGradient from 'react-native-linear-gradient';
 import { BarChart } from "react-native-gifted-charts";
@@ -20,6 +21,38 @@ import axios from 'axios';
 import StatusPopup from "../StatusPopup/StatusPopup";
 const { width } = Dimensions.get("window");
 
+function getReimbursementHeadLabel(item, heads = []) {
+    if (!item) return "N/A";
+
+    const populatedName =
+        item.reimbursement_head?.head_name ||
+        item.temp_head?.head_name ||
+        item.head?.head_name ||
+        (item.head_id && typeof item.head_id === "object"
+            ? item.head_id.head_name
+            : null);
+
+    if (populatedName) return populatedName;
+
+    const headId =
+        (item.head_id && typeof item.head_id === "object"
+            ? item.head_id._id ?? item.head_id.id
+            : item.head_id) ||
+        item.reimbursement_head_id ||
+        item.reimbursement_head?._id ||
+        item.head?._id;
+
+    if (headId) {
+        const match = heads.find(
+            (h) => String(h._id) === String(headId) || String(h.id) === String(headId)
+        );
+        if (match?.head_name) return match.head_name;
+        return String(headId);
+    }
+
+    return "N/A";
+}
+
 const Reimbursement = ({ rights: rightsProp }) => {
     const navigation = useNavigation();
     const [token, setToken] = useState(null);
@@ -28,6 +61,7 @@ const Reimbursement = ({ rights: rightsProp }) => {
     const [pending, setPending] = useState(0);
     const [rejected, setRejected] = useState(0);
     const [latestClaim, setLatestClaim] = useState(null);
+    const [reimbursementHeads, setReimbursementHeads] = useState([]);
     const [rights, setRights] = useState(rightsProp || null);
     const [popupConfig, setPopupConfig] = useState({ visible: false, type: "success", title: "", message: "", });
 
@@ -58,6 +92,7 @@ const Reimbursement = ({ rights: rightsProp }) => {
         useCallback(() => {
             if (token) {
                 fetchClaimsData();
+                fetchReimbursementHeads();
             }
         }, [token])
     );
@@ -155,7 +190,34 @@ const Reimbursement = ({ rights: rightsProp }) => {
         }
     };
 
+    const fetchReimbursementHeads = async () => {
+        if (!token) return;
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}employee/get-reimbursement-head`,
+                {},
+                {
+                    headers: {
+                        "x-access-token": token,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
+            if (response.data.status === "success") {
+                const heads = Array.isArray(response.data.temp_head)
+                    ? response.data.temp_head
+                    : Array.isArray(response.data.data)
+                        ? response.data.data
+                        : Array.isArray(response.data.data?.temp_head)
+                            ? response.data.data.temp_head
+                            : [];
+                setReimbursementHeads(heads);
+            }
+        } catch (error) {
+            console.error("Reimbursement heads error:", error);
+        }
+    };
 
     // const approved = 5;
     // const pending = 2;
@@ -217,8 +279,10 @@ const Reimbursement = ({ rights: rightsProp }) => {
                         <Text style={styles.latestTitle}>Latest Claims</Text>
                         {latestClaim ? (
                             <View style={styles.claimRow}>
-                                <Text style={styles.claimType}>  {latestClaim?.head_id || "N/A"} </Text>
-                                <Text style={styles.claimAmount}>  ₹{latestClaim?.amount || 0}</Text>
+                                <Text style={styles.claimType} numberOfLines={1} ellipsizeMode="tail">
+                                    {getReimbursementHeadLabel(latestClaim, reimbursementHeads)}
+                                </Text>
+                                <Text style={styles.claimAmount}>₹{latestClaim?.amount || 0}</Text>
                             </View>
                         ) : (
                             <Text style={{ color: "#9AA5C4", fontSize: 11, textAlign: "center", fontFamily: "Outfit-Regular" }}>
@@ -339,21 +403,21 @@ const styles = StyleSheet.create({
     claimRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        // marginBottom:-5
-        margin: -4
+        alignItems: "center",
     },
     claimType: {
         color: "#9AA5C4",
         fontSize: 11,
-        marginLeft: 30,
-        fontFamily: "Outfit-Regular"
+        fontFamily: "Outfit-Regular",
+        flex: 1,
+        marginRight: 8,
     },
     claimAmount: {
         color: "#FFFFFF",
         fontSize: 11,
         fontWeight: "600",
-        marginRight: 29,
-        fontFamily: "Outfit-Regular"
+        fontFamily: "Outfit-Regular",
+        flexShrink: 0,
     },
     button: {
         backgroundColor: "#005C99",
