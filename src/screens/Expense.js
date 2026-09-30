@@ -27,7 +27,7 @@ import { NativeModules } from "react-native";
 import StatusPopup from "./StatusPopup/StatusPopup";
 import GlobalFont from "../theme/GlobalFont";
 const { PdfPicker } = NativeModules;
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const Expense = () => {
   const insets = useSafeAreaInsets();
   const [claimsData, setClaimsData] = useState([]);
@@ -46,6 +46,13 @@ const Expense = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [popupConfig, setPopupConfig] = useState({visible: false,type: "success", title: "",message: "",});
   const MAX_SINGLE_FILE_KB = 200;
+
+  // ---- Reimbursement heads ----
+  const [reimbursementHeadsMaster, setReimbursementHeadsMaster] = useState([]);
+  const [activeReimbursementHeads, setActiveReimbursementHeads] = useState([]);
+  const [headsLoading, setHeadsLoading] = useState(false);
+  const [headModalVisible, setHeadModalVisible] = useState(false);
+
   useEffect(() => {
     const loadToken = async () => {
       const t = await AsyncStorage.getItem("authToken");
@@ -122,15 +129,13 @@ const Expense = () => {
 
   useEffect(() => {
     fetchClaimsData();
+    fetchReimbursementHeads();
   }, [token]);
 
   const fetchClaimsData = async () => {
     // console.log("Expense", token)
     if (!token) return;
     try {
-      // const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjhhODBjZTVkN2M1ZDkwMDFiYWMzOWE0IiwidXNlcl9lbWFpbCI6IiIsImNvcnBvcmF0ZV9pZCI6IlZCTCIsInVzZXJpZCI6IlRFU1QwMjEiLCJmaXJzdF9uYW1lIjoiU3VqaXRhIiwibGFzdF9uYW1lIjoia3VtYXIgRGFzIiwidXNlcl90eXBlIjoiZW1wbG95ZWUiLCJpYXQiOjE3NjE4MDI5NzIsImV4cCI6MTc5MzMzODk3Mn0.SNqI6EjWD_yi9MRwaFsE1lfgRbsn_twKxW0cTw5rvsg";
-      // const token =  getToken();
-      // Alert.alert("token",token);
       const payload = {
         pageno: 1,
         type: 'reimbursement',
@@ -148,19 +153,17 @@ const Expense = () => {
 
       if (response.data.status === "success") {
         const docs = response.data.data.docs || [];
-        // Alert.alert("apisuccess");
-        // transform data to match your UI
-        // console.log("docsexpense",docs
-        // );
-        
         const formattedData = docs.map((item) => ({
           id: item._id,
           date: formatDate(item.created_at),
-          type: item.head_id || "N/A",
           amount: `${item.amount}`,
           status: capitalize(item.status),
-           wage_month: item.wage_month,
+          wage_month: item.wage_month,
           wage_year: item.wage_year,
+          reimbursement_head: item.reimbursement_head,
+          head_id: item.head_id,
+          temp_head: item.temp_head,
+          head: item.head,
         }));
 
         setClaimsData(formattedData);
@@ -177,6 +180,51 @@ const Expense = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ---- Fetch reimbursement heads (mirrors your Angular fetchReimbursementHeads) ----
+  const fetchReimbursementHeads = async () => {
+    if (!token) return;
+    setHeadsLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}employee/get-reimbursement-head`,
+        {},
+        {
+          headers: {
+            "x-access-token": token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        const heads = Array.isArray(response.data.temp_head)
+          ? response.data.temp_head
+          : Array.isArray(response.data.data)
+            ? response.data.data
+            : Array.isArray(response.data.data?.temp_head)
+              ? response.data.data.temp_head
+              : [];
+        setReimbursementHeadsMaster(heads);
+        const activeHeads = heads.filter(
+          (head) => String(head.status || "").toLowerCase() === "active"
+        );
+        setActiveReimbursementHeads(activeHeads.length ? activeHeads : heads);
+      } else {
+        showPopup("error", "Error", response.data.message || "Failed to load reimbursement heads");
+      }
+    } catch (error) {
+      if (error.response) {
+        showPopup("error", "Server Error", JSON.stringify(error.response.data));
+      } else if (error.request) {
+        showPopup("error", "Network Error", "No response from backend.");
+      } else {
+        showPopup("error", "Error", error.message);
+      }
+    } finally {
+      setHeadsLoading(false);
     }
   };
 
@@ -236,6 +284,9 @@ const Expense = () => {
       showPopup("error", "Upload Failed",  error.message);
     }
   };
+  const selectedHeadLabel =
+    activeReimbursementHeads.find((h) => String(h._id) === String(headId))?.head_name || "";
+
   const route = useRoute();
   const screenTitle = route.params?.title;
   const toggleExpand = (id) => {
@@ -258,58 +309,9 @@ const Expense = () => {
           <Navbar title={screenTitle} />
         </View>
 
-
-     
-
-   
-      {/* {activeTab === "previous" && (
-        <>
-
-          <View style={styles.sectionHeader}>
-            <Text style={[GlobalFont.semiBold,styles.sectionTitle]}>Previous Claims</Text>
-          
-            <TouchableOpacity
-              style={styles.newClaimBtn}
-              onPress={() => setModalVisible(true)}
-            >
-              <Text style={[GlobalFont.semiBold,styles.newClaimText]}>File New Claim</Text>
-            </TouchableOpacity>
-          </View>
-
-
-        
-          {loading ? (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Text style={[GlobalFont.CustomFont]}>Loading...</Text>
-            </View>
-          ) : claimsData.length === 0 ? (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Text style={[GlobalFont.CustomFont]}>No claims found</Text>
-            </View>
-          ) : (
-            <ScrollView style={styles.list}>
-              {claimsData.map((item) => (
-                <View key={item.id} style={styles.expenseCard}>
-                  <Text style={[GlobalFont.CustomFont,styles.expenseTitle]}>{item.type}</Text>
-
-                  <View style={styles.amountTag}>
-                    <Text style={[GlobalFont.semiBold,styles.amountText]}>₹ {item.amount}</Text>
-                  </View>
-
-               
-                </View>
-              ))}
-            </ScrollView>
-          )}
-        </>
-      )} */}
       {activeTab === "status" && (
         <>
           <View style={styles.sectionHeader}>
-            {/* <Text style={[GlobalFont.semiBold,styles.sectionTitle]}>Previous Claims</Text> */}
-            {/* <TouchableOpacity style={styles.newClaimBtn}>
-              <Text style={styles.newClaimText}>File New Claim</Text>
-            </TouchableOpacity> */}
             <TouchableOpacity
               style={styles.newClaimBtn}
               onPress={() => setModalVisible(true)}
@@ -318,22 +320,6 @@ const Expense = () => {
             </TouchableOpacity>
           </View>
            <View style={styles.tabContainer}>
-        {/* <TouchableOpacity
-          style={[styles.tab, activeTab === "previous" && styles.activeTab]}
-          onPress={() => setActiveTab("previous")}
-        >
-          <Text
-            style={
-              [GlobalFont.CustomFont,
-              activeTab === "previous"
-                ? styles.activeTabText
-                : styles.inactiveTabText
-            ]}
-          >
-            Previous Claims
-          </Text>
-        </TouchableOpacity> */}
-
         <TouchableOpacity
           style={[styles.tab, activeTab === "status" && styles.activeTab]}
           onPress={() => setActiveTab("status")}
@@ -351,26 +337,20 @@ const Expense = () => {
           </Text>
         </TouchableOpacity>
       </View>
-          {/* <ScrollView style={styles.list}>
-            {claimsData.map((item, index) => (
-              <View key={index} style={styles.expenseCard}>
-                <Text style={styles.expenseTitle}>{item.type}</Text>
-                <View style={styles.amountTag}>
-                  <Text style={styles.amountText}>₹ {item.amount}</Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView> */}
           {loading ? (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Text style={[GlobalFont.CustomFont]}>Loading...</Text>
+              <Text style={[GlobalFont.CustomFont, styles.emptyText]}>Loading...</Text>
             </View>
           ) : claimsData.length === 0 ? (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Text style={[GlobalFont.CustomFont]}>No claims found</Text>
+              <Text style={[GlobalFont.CustomFont, styles.emptyText]}>No claims found</Text>
             </View>
           ) : (
-            <ScrollView style={styles.list}>
+            <ScrollView
+              style={styles.list}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            >
                     {claimsData.map((item) => {
                       const isExpanded = expandedId === item.id;
 
@@ -382,11 +362,15 @@ const Expense = () => {
                             onPress={() => toggleExpand(item.id)}
                             activeOpacity={0.8}
                           >
-                            <Text style={[GlobalFont.semiBold, styles.idText]}>
-                              {item.type}
+                            <Text
+                              style={[GlobalFont.semiBold, styles.idText]}
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                            >
+                              {getReimbursementHeadLabel(item, reimbursementHeadsMaster)}
                             </Text>
                             <View style={styles.amountTag}>
-                            <Text style={styles.amountCenter}>
+                            <Text style={[GlobalFont.semiBold, styles.amountCenter]}>
                               ₹ {item.amount}
                             </Text>
                             </View>
@@ -394,6 +378,7 @@ const Expense = () => {
                               name={isExpanded ? "chevron-up" : "chevron-down"}
                               size={20}
                               color="#ccc"
+                              style={styles.chevronIcon}
                             />
                           </TouchableOpacity>
 
@@ -462,14 +447,101 @@ const Expense = () => {
               </View>
 
               <View style={styles.formContainer}>
-                
-                <TextInput
-                  placeholder="Head ID"
-                  value={headId}
-                  onChangeText={setHeadId}
-                  style={[GlobalFont.CustomFont,{ borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
-                  placeholderTextColor="#fff"
-                    />
+
+                {/* ---- Reimbursement Head dropdown (replaces free-text Head ID) ---- */}
+                {/* <Text style={[GlobalFont.CustomFont,styles.label]}>Head:</Text> */}
+                <TouchableOpacity
+                  style={styles.dropdownTrigger}
+                  activeOpacity={0.8}
+                  disabled={headsLoading}
+                  onPress={() => setHeadModalVisible(true)}
+                >
+                  <Text
+                    style={[
+                      GlobalFont.CustomFont,
+                      styles.dropdownTriggerText,
+                      !selectedHeadLabel && styles.dropdownPlaceholder,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {headsLoading
+                      ? "Loading..."
+                      : selectedHeadLabel || "Select Head"}
+                  </Text>
+                  <Icon name="chevron-down" size={18} color="#ccc" />
+                </TouchableOpacity>
+
+                <Modal
+                  visible={headModalVisible}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setHeadModalVisible(false)}
+                >
+                  <View style={styles.dropdownOverlay}>
+                    <LinearGradient
+                      colors={["#00213F", "#002C56"]}
+                      style={styles.dropdownModal}
+                    >
+                      <View style={styles.dropdownHeader}>
+                        <Text style={[GlobalFont.semiBold, styles.dropdownHeaderText]}>
+                          Select Head
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setHeadModalVisible(false)}
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                          <Icon name="close" size={22} color="#fff" />
+                        </TouchableOpacity>
+                      </View>
+
+                      <ScrollView
+                        style={styles.dropdownList}
+                        bounces={false}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                      >
+                        {activeReimbursementHeads.length === 0 ? (
+                          <Text style={[GlobalFont.CustomFont, styles.dropdownEmptyText]}>
+                            No heads available
+                          </Text>
+                        ) : (
+                          activeReimbursementHeads.map((head) => {
+                            const isSelected = String(head._id) === String(headId);
+                            return (
+                              <TouchableOpacity
+                                key={head._id}
+                                style={[
+                                  styles.dropdownItem,
+                                  isSelected && styles.dropdownItemSelected,
+                                ]}
+                                onPress={() => {
+                                  setHeadId(head._id);
+                                  setHeadModalVisible(false);
+                                }}
+                              >
+                                <Text
+                                  style={[
+                                    GlobalFont.CustomFont,
+                                    styles.dropdownItemText,
+                                    isSelected && styles.dropdownItemTextSelected,
+                                  ]}
+                                  numberOfLines={1}
+                                  ellipsizeMode="tail"
+                                >
+                                  {head.head_name}
+                                </Text>
+                                {isSelected && (
+                                  <Icon name="checkmark" size={18} color="#3B82F6" />
+                                )}
+                              </TouchableOpacity>
+                            );
+                          })
+                        )}
+                      </ScrollView>
+                    </LinearGradient>
+                  </View>
+                </Modal>
+
                     <TextInput
                       placeholder="Amount"
                       value={amount}
@@ -479,14 +551,14 @@ const Expense = () => {
                         setAmount(numericText);
                       }}
                       keyboardType="decimal-pad"
-                      style={[GlobalFont.CustomFont, { borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
+                      style={[GlobalFont.CustomFont, { borderWidth: 1, marginBottom: 10, paddingHorizontal: 12, paddingVertical: 12, color: "#fff", borderColor: "#fff" }]}
                       placeholderTextColor="#fff"
                 />
                 <TextInput
                   placeholder="Reason"
                   value={remark}
                   onChangeText={setRemark}
-                  style={[GlobalFont.CustomFont,{ borderWidth: 1, marginBottom: 10, padding: 8, color: "#fff", borderColor: "#fff" }]}
+                  style={[GlobalFont.CustomFont,{ borderWidth: 1, marginBottom: 10, paddingHorizontal: 12, paddingVertical: 12, color: "#fff", borderColor: "#fff" }]}
                   placeholderTextColor="#fff"
                 />
                 <View style={styles.row}>
@@ -533,16 +605,7 @@ const Expense = () => {
 
                 </View>
                 <Text style={[GlobalFont.semiBold,styles.label1]}>Upload Image:</Text>
-                
-                    {/* <View style={styles.imageUploadContainer}>
-                  <Text style={[GlobalFont.CustomFont,{ color: "#ccc", marginBottom: 10 }]}>
-                    {image ? image.name : "No file selected"}
-                  </Text>
 
-                  <TouchableOpacity style={styles.uploadBtn} onPress={pickDocument}>
-                    <Text style={[GlobalFont.bold,styles.uploadBtnText]}>Choose Image</Text>
-                  </TouchableOpacity>
-                </View> */}
                     <View style={styles.imageUploadContainer}>
                       {file ? (
                         <Image
@@ -582,6 +645,38 @@ const Expense = () => {
     </LinearGradient>
   );
 };
+function getReimbursementHeadLabel(item, heads = []) {
+  if (!item) return "N/A";
+
+  const populatedName =
+    item.reimbursement_head?.head_name ||
+    item.temp_head?.head_name ||
+    item.head?.head_name ||
+    (item.head_id && typeof item.head_id === "object"
+      ? item.head_id.head_name
+      : null);
+
+  if (populatedName) return populatedName;
+
+  const headId =
+    (item.head_id && typeof item.head_id === "object"
+      ? item.head_id._id ?? item.head_id.id
+      : item.head_id) ||
+    item.reimbursement_head_id ||
+    item.reimbursement_head?._id ||
+    item.head?._id;
+
+  if (headId) {
+    const match = heads.find(
+      (h) => String(h._id) === String(headId) || String(h.id) === String(headId)
+    );
+    if (match?.head_name) return match.head_name;
+    return String(headId);
+  }
+
+  return "N/A";
+}
+
 function monthName(monthNo) {
   const months = [
     "Jan","Feb","Mar","Apr","May","Jun",
@@ -594,219 +689,10 @@ function monthName(monthNo) {
 }
 export default Expense;
 
-// const styles = StyleSheet.create({
-//     container: {
-//     flex: 1,
-//     padding: 15,
-//   },
-//   header: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     // marginBottom: 10,
-//     marginLeft:-18
-//   },
-//   headerLeft: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   headerText: {
-//     color: "#fff",
-//     fontSize: 18,
-//     fontWeight: "600",
-//     marginLeft: 8,
-//   },
-//   headerRight: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   icon: {
-//     marginRight: 16,
-//   },
-//   notificationWrapper: {
-//     position: "relative",
-//   },
-//   notificationDot: {
-//     position: "absolute",
-//     top: -3,
-//     right: -3,
-//     width: 8,
-//     height: 8,
-//     backgroundColor: "red",
-//     borderRadius: 4,
-//   },
-//   tabContainer: {
-//     flexDirection: "row",
-//     marginTop: 25,
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     borderRadius: 15,
-//     padding: 4,
-//     width:340,
-//     marginLeft:-20
-//   },
-//   tab: {
-//     flex: 1,
-//     paddingVertical: 10,
-//     borderRadius: 12,
-//     alignItems: "center",
-//   },
-//   activeTab: {
-//     backgroundColor: "#0D213A",
-//   },
-//   activeTabText: {
-//     color: "#fff",
-//     fontWeight: "500",
-//   },
-//   inactiveTabText: {
-//     color: "#bbb",
-//   },
-//   sectionHeader: {
-//     marginTop: 25,
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//   },
-//   sectionTitle: {
-//     color: "#fff",
-//     fontSize: 15,
-//     fontWeight: "600",
-//     marginLeft:-10
-//   },
-//   newClaimBtn: {
-//     backgroundColor: "rgba(255,255,255,0.2)",
-//     borderRadius: 12,
-//     paddingHorizontal: 16,
-//     paddingVertical: 6,
-//     left:20
-//   },
-//   newClaimText: {
-//     color: "#fff",
-//     fontWeight: "500",
-//   },
-//   list: {
-//     marginTop: 15,
-//   },
-//   expenseCard: {
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     borderRadius: 14,
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     padding: 16,
-//     marginBottom: 10,
-//   },
-//   expenseTitle: {
-//     color: "#fff",
-//     fontSize: 15,
-//     fontWeight: "500",
-//   },
-//   amountTag: {
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     borderRadius: 8,
-//     paddingHorizontal: 12,
-//     paddingVertical: 4,
-//   },
-//   amountText: {
-//     color: "#fff",
-//     fontWeight: "600",
-//   },
-
-//   formContainer: {
-//     maxHeight: "75%",
-//   },
-//   overlay: {
-//     flex: 1,
-//     backgroundColor: "rgba(0,0,0,0.6)",
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   modalContainer: {
-//     width: "90%",
-//     borderRadius: 20,
-//     padding: 20,
-//     maxHeight: "85%",
-//   },
-//   modalHeader: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     // marginBottom: 10,
-//     borderBottomWidth: 1,
-//     borderBottomColor: "#fff",
-//     paddingBottom: 8,
-//   },
-//   modalTitle: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-//   closeBtn: {
-//     color: "red",
-//     fontSize: 20,
-//     fontWeight: "bold",
-//   },
-//   label: {
-//     color: "#fff",
-//     marginTop: 10,
-//     marginBottom: 4,
-//   },
-//   input: {
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     borderRadius: 10,
-//     padding: 10,
-//     color: "#fff",
-//     marginLeft: "-20px"
-//   },
-//   picker: {
-//     backgroundColor: "rgba(255,255,255,0.1)",
-//     color: "#fff",
-//     height: 50,
-//     // borderRadius: 10,
-//     // marginBottom: 10,
-//   },
-//   row: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//   },
-//   halfPicker: {
-//     flex: 0.48,
-//   },
-//   submitBtn: {
-//     backgroundColor: "#3B82F6",
-//     borderRadius: 10,
-//     paddingVertical: 10,
-//     marginTop: 20,
-//   },
-//   submitText: {
-//     color: "#fff",
-//     textAlign: "center",
-//     fontWeight: "bold",
-//   },
-
-//   imageUploadContainer: {
-//     alignItems: "center",
-//     marginVertical: 15,
-//   },
-
-//   uploadBtn: {
-//     backgroundColor: "#004B8D",
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     borderRadius: 10,
-//   },
-
-//   uploadBtnText: {
-//     color: "#fff",
-//     fontSize: 14,
-//     fontWeight: "bold",
-//   },
-
-
-// });
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding:7
-    // paddingHorizontal: 16,
   },
 
    header: {
@@ -858,7 +744,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    // margin:"auto"
   },
 
   sectionTitle: {
@@ -885,16 +770,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  // expenseCard: {
-  //   backgroundColor: "rgba(255,255,255,0.1)",
-  //   borderRadius: 14,
-  //   flexDirection: "row",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  //   padding: 14,
-  //   gap:7,
-  //   marginBottom: 10,
-  // },
+  listContent: {
+    paddingBottom: 110,
+  },
+
+  emptyText: {
+    color: "#fff",
+  },
 
   expenseTitle: {
     color: "#fff",
@@ -907,8 +789,10 @@ const styles = StyleSheet.create({
   amountTag: {
     backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 4,
+    flexShrink: 0,
+    marginRight: 8,
   },
 
   amountText: {
@@ -972,6 +856,7 @@ const styles = StyleSheet.create({
 
   formContainer: {
     flexGrow: 1,
+    padding:5,
   },
 
   label1: {
@@ -1026,7 +911,6 @@ const styles = StyleSheet.create({
   uploadBtnText: {
     color: "#fff",
     fontSize: 15,
-    // fontWeight: "bold",
   },
   expenseCard: {
   backgroundColor: "rgba(255,255,255,0.08)",
@@ -1039,22 +923,26 @@ const styles = StyleSheet.create({
 cardHeaderRow: {
   flexDirection: "row",
   alignItems: "center",
-  justifyContent: "space-between",
-  padding: 16,
+  paddingVertical: 14,
+  paddingHorizontal: 14,
 },
 
 idText: {
   color: "#fff",
   fontSize: 14,
   flex: 1,
+  marginRight: 8,
 },
 
 amountCenter: {
   color: "#fff",
-  fontSize: 14,
+  fontSize: 13,
   fontWeight: "600",
   textAlign: "center",
-  flex: 1,
+},
+
+chevronIcon: {
+  flexShrink: 0,
 },
 
 /* EXPAND SECTION */
@@ -1073,12 +961,106 @@ rowItem: {
 
 label: {
   color: "#aaa",
-  fontSize: 12,
+  fontSize: 13,
 },
 
 value: {
   color: "#fff",
   fontSize: 13,
   fontWeight: "500",
+},
+
+/* ---------- CUSTOM HEAD DROPDOWN ---------- */
+dropdownTrigger: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  borderWidth: 1,
+  borderColor: "#fff",
+  paddingHorizontal: 13,
+  paddingVertical: 13,
+  marginBottom: 20,
+},
+
+dropdownTriggerText: {
+  color: "#fff",
+  fontSize: 14,
+  flex: 1,
+  // marginRight: 8,
+},
+
+dropdownPlaceholder: {
+  color: "rgba(255,255,255,0.6)",
+},
+
+dropdownOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.6)",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+},
+
+dropdownModal: {
+  width: "100%",
+  maxHeight: "70%",
+  flexShrink: 1,
+  borderRadius: 16,
+  paddingVertical: 12,
+  overflow: "hidden",
+},
+
+dropdownHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingHorizontal: 18,
+  paddingBottom: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "rgba(255,255,255,0.15)",
+},
+
+dropdownHeaderText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "600",
+},
+
+dropdownList: {
+  maxHeight: height * 0.45,
+  paddingHorizontal: 8,
+},
+
+dropdownItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingVertical: 14,
+  paddingHorizontal: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "rgba(255,255,255,0.08)",
+},
+
+dropdownItemSelected: {
+  backgroundColor: "rgba(59,130,246,0.15)",
+  borderRadius: 8,
+},
+
+dropdownItemText: {
+  color: "#fff",
+  fontSize: 14,
+  flex: 1,
+  marginRight: 8,
+},
+
+dropdownItemTextSelected: {
+  color: "#3B82F6",
+  fontWeight: "600",
+},
+
+dropdownEmptyText: {
+  color: "#ccc",
+  textAlign: "center",
+  paddingVertical: 20,
 },
 });

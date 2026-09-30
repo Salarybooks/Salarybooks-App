@@ -41,7 +41,7 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [updateRequired, setUpdateRequired] = useState(false);
   const [updateMessage, setUpdateMessage] = useState(
-    "A newer version of the app is available. Please update to continue."
+    "A new version of the app is available. Please update to continue using the app."
   );
 
   const checkAppVersion = useCallback(async () => {
